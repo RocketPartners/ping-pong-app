@@ -1,0 +1,752 @@
+<div class="match-builder-container">
+  <mat-card class="match-builder-card">
+    <mat-card-header>
+      <mat-card-title>Create New Match</mat-card-title>
+      <mat-card-subtitle>Set up players and games for your ping pong match</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-stepper #stepper [linear]="true">
+        <!-- STEP 1: Match Configuration -->
+        <mat-step [stepControl]="matchConfigForm" label="Match Setup">
+          <form [formGroup]="matchConfigForm">
+            <h3>Match Configuration</h3>
+
+            <div class="config-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Match Type</mat-label>
+                <mat-select formControlName="matchType">
+                  <mat-option value="singles">Singles Match</mat-option>
+                  <mat-option value="doubles">Doubles Match</mat-option>
+                </mat-select>
+                <mat-error *ngIf="matchConfigForm.get('matchType')?.hasError('required')">
+                  Match type is required
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Match Mode</mat-label>
+                <mat-select formControlName="matchMode">
+                  <mat-option value="Ranked">Ranked</mat-option>
+                  <mat-option value="Normal">Normal</mat-option>
+                </mat-select>
+                <mat-error *ngIf="matchConfigForm.get('matchMode')?.hasError('required')">
+                  Match mode is required
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Best of Games</mat-label>
+                <mat-select formControlName="bestOf">
+                  <mat-option value="1">Single Game</mat-option>
+                  <mat-option value="3">Best of 3</mat-option>
+                  <mat-option value="5">Best of 5</mat-option>
+                  <mat-option value="7">Best of 7</mat-option>
+                  <mat-option value="infinite">Infinite Games</mat-option>
+                </mat-select>
+                <mat-hint *ngIf="matchConfigForm.get('bestOf')?.value === 'infinite'">
+                  Play as many games as you want
+                </mat-hint>
+              </mat-form-field>
+            </div>
+
+            <div class="match-config-summary">
+              <div *ngIf="matchConfigForm.valid" class="summary-box">
+                <div class="summary-title">Match Summary</div>
+                <div class="summary-content">
+                  <div class="summary-item">
+                    <mat-icon>sports_tennis</mat-icon>
+                    <span>{{ matchConfigForm.get('matchType')?.value === 'singles' ? 'Singles' : 'Doubles' }}
+                      Match</span>
+                  </div>
+                  <div class="summary-item">
+                    <mat-icon>emoji_events</mat-icon>
+                    <span>{{ matchConfigForm.get('matchMode')?.value }} Mode</span>
+                  </div>
+                  <div class="summary-item">
+                    <mat-icon>format_list_numbered</mat-icon>
+                    <span *ngIf="matchConfigForm.get('bestOf')?.value !== 'infinite'">
+                      Best of {{ matchConfigForm.get('bestOf')?.value }} {{ matchConfigForm.get('bestOf')?.value === '1' ? 'Game' : 'Games' }}
+                    </span>
+                    <span *ngIf="matchConfigForm.get('bestOf')?.value === 'infinite'">
+                      Unlimited Games
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button [disabled]="!matchConfigForm.valid" color="primary" mat-raised-button matStepperNext>
+                Next
+                <mat-icon>navigate_next</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- STEP 2: Player Selection -->
+        <mat-step [stepControl]="playerSelectForm" label="Select Players">
+          <form [formGroup]="playerSelectForm">
+            <!-- Tournament Header -->
+            <div class="tournament-header">
+              <div class="match-type-display">
+                <div class="match-type-badge">
+                  <mat-icon>{{ matchConfigForm.get('matchType')?.value === 'singles' ? 'person' : 'group' }}</mat-icon>
+                  <span>{{ matchConfigForm.get('matchType')?.value === 'singles' ? 'Singles' : 'Doubles' }}</span>
+                </div>
+                <div class="match-mode-badge">
+                  <mat-icon>{{ matchConfigForm.get('matchMode')?.value === 'Ranked' ? 'emoji_events' : 'sports_tennis' }}</mat-icon>
+                  <span>{{ matchConfigForm.get('matchMode')?.value }}</span>
+                </div>
+                <div class="best-of-badge">
+                  <mat-icon>format_list_numbered</mat-icon>
+                  <span *ngIf="matchConfigForm.get('bestOf')?.value !== 'infinite'">
+                    Best of {{ matchConfigForm.get('bestOf')?.value }}
+                  </span>
+                  <span *ngIf="matchConfigForm.get('bestOf')?.value === 'infinite'">
+                    Unlimited Games
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- SINGLES MATCH -->
+            <div *ngIf="matchConfigForm.get('matchType')?.value === 'singles'"
+                 class="tournament-bracket singles-bracket">
+              <!-- Left Player (You) -->
+              <div class="player-side player-side-left">
+                <div class="player-controls">
+                  <h3 class="player-side-title">YOU</h3>
+                </div>
+
+                <div class="search-box-spacer-doubles"></div>
+
+                <div class="player-card your-player">
+
+                  <div class="player-info">
+                    <div class="player-names">
+                      <h4 class="player-username">{{ currentPlayer.username }}</h4>
+                      <span class="player-fullname">{{ currentPlayer.firstName }} {{ currentPlayer.lastName }}</span>
+                    </div>
+                  </div>
+
+                  <div class="player-stats">
+                    <div class="stat-item">
+                      <span class="stat-value">{{ getSinglesRating(currentPlayer) }}</span>
+                      <span class="stat-label">RATING</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-value">{{ getSinglesWinRate(currentPlayer) }}%</span>
+                      <span class="stat-label">WIN RATE</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Center VS Section -->
+              <div class="versus-section">
+                <div class="versus-decoration">
+                  <div class="versus-line"></div>
+                  <div class="versus-circle">VS</div>
+                  <div class="versus-line"></div>
+                </div>
+
+                <div class="match-details">
+                  <div class="match-title">MATCH PREVIEW</div>
+                  <div class="match-date">{{ today | date:'longDate' }}</div>
+                </div>
+              </div>
+
+              <!-- Right Player (Opponent) -->
+              <div class="player-side player-side-right">
+                <div class="player-controls">
+                  <h3 class="player-side-title">OPPONENT</h3>
+                  <div class="search-field-container">
+                    <mat-form-field appearance="outline" class="player-select">
+                      <mat-label>Select Opponent</mat-label>
+                      <input [matAutocomplete]="auto1" formControlName="player1" matInput
+                             placeholder="Search players..." type="text">
+                      <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="playerSelected($event, 'player1')">
+                        @for (option of filteredOptions1 | async; track option) {
+                          <mat-option [value]="option">{{ option }}</mat-option>
+                        }
+                      </mat-autocomplete>
+                      <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+
+                <div *ngIf="selectedPlayers.player1" class="player-card opponent-player">
+
+                  <div class="player-info">
+                    <div class="player-names">
+                      <h4 class="player-username">{{ selectedPlayers.player1.username }}</h4>
+                      <span
+                        class="player-fullname">{{ selectedPlayers.player1.firstName }} {{ selectedPlayers.player1.lastName }}</span>
+                    </div>
+                  </div>
+
+                  <div class="player-stats">
+                    <div class="stat-item">
+                      <span class="stat-value">{{ getSinglesRating(selectedPlayers.player1) }}</span>
+                      <span class="stat-label">RATING</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-value">{{ getSinglesWinRate(selectedPlayers.player1) }}%</span>
+                      <span class="stat-label">WIN RATE</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="!selectedPlayers.player1" class="empty-player-card">
+                  <div class="empty-player-icon">
+                    <mat-icon>person_add</mat-icon>
+                  </div>
+                  <div class="empty-player-label">Select an opponent</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DOUBLES MATCH -->
+            <div *ngIf="matchConfigForm.get('matchType')?.value === 'doubles'"
+                 class="tournament-bracket doubles-bracket">
+              <!-- Left Team -->
+              <div class="player-side player-side-left">
+                <div class="player-controls">
+                  <h3 class="player-side-title">TEAM 1</h3>
+                  <div class="search-field-container">
+                    <mat-form-field appearance="outline" class="player-select">
+                      <mat-label>Select Teammate</mat-label>
+                      <input [matAutocomplete]="auto1" formControlName="player1" matInput
+                             placeholder="Search players..." type="text">
+                      <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="playerSelected($event, 'player1')">
+                        <mat-option *ngFor="let option of filteredOptions1 | async" [value]="option">
+                          {{ option }}
+                        </mat-option>
+                      </mat-autocomplete>
+                      <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+                  </div>
+                  <!-- Spacer div to match the height of the second search box on Team 2 -->
+                  <div class="search-box-spacer-doubles"></div>
+                </div>
+
+                <div class="team-cards">
+                  <!-- You -->
+                  <div class="player-card your-player">
+                    <div class="player-badge">You</div>
+                    <div class="player-info">
+
+                      <div class="player-names">
+                        <h4 class="player-username">{{ currentPlayer.username }}</h4>
+                        <span class="player-fullname">{{ currentPlayer.firstName }} {{ currentPlayer.lastName }}</span>
+                      </div>
+                    </div>
+
+                    <div class="player-stats">
+                      <div class="stat-item">
+                        <span class="stat-value">{{ getDoublesRating(currentPlayer) }}</span>
+                        <span class="stat-label">RATING</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Teammate -->
+                  <div class="team-connector-line"></div>
+
+                  <div *ngIf="selectedPlayers.player1" class="player-card your-team">
+                    <div class="player-info">
+                      <div class="player-names">
+                        <h4 class="player-username">{{ selectedPlayers.player1.username }}</h4>
+                        <span
+                          class="player-fullname">{{ selectedPlayers.player1.firstName }} {{ selectedPlayers.player1.lastName }}</span>
+                      </div>
+                    </div>
+
+                    <div class="player-stats">
+                      <div class="stat-item">
+                        <span class="stat-value">{{ getDoublesRating(selectedPlayers.player1) }}</span>
+                        <span class="stat-label">RATING</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="!selectedPlayers.player1" class="empty-player-card">
+                    <div class="empty-player-icon">
+                      <mat-icon>person_add</mat-icon>
+                    </div>
+                    <div class="empty-player-label">Select a teammate</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Center VS Section -->
+              <div class="versus-section">
+                <div class="versus-decoration">
+                  <div class="versus-line"></div>
+                  <div class="versus-circle">VS</div>
+                  <div class="versus-line"></div>
+                </div>
+
+                <div class="match-details">
+                  <div class="match-title">DOUBLES MATCH</div>
+                  <div class="match-date">{{ today | date:'longDate' }}</div>
+                </div>
+              </div>
+
+              <!-- Right Team -->
+              <div class="player-side player-side-right">
+                <div class="player-controls">
+                  <h3 class="player-side-title">TEAM 2</h3>
+                  <div class="doubles-selects">
+                    <div class="search-field-container">
+                      <mat-form-field appearance="outline" class="player-select">
+                        <mat-label>Select Player 1</mat-label>
+                        <input [matAutocomplete]="auto2" formControlName="player2" matInput
+                               placeholder="Search players..." type="text">
+                        <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="playerSelected($event, 'player2')">
+                          @for (option of filteredOptions2 | async; track option) {
+                            <mat-option [value]="option">{{ option }}</mat-option>
+                          }
+                        </mat-autocomplete>
+                        <mat-icon matSuffix>search</mat-icon>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="search-field-container">
+                      <mat-form-field appearance="outline" class="player-select">
+                        <mat-label>Select Player 2</mat-label>
+                        <input [matAutocomplete]="auto3" formControlName="player3" matInput
+                               placeholder="Search players..." type="text">
+                        <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="playerSelected($event, 'player3')">
+                          @for (option of filteredOptions3 | async; track option) {
+                            <mat-option [value]="option">{{ option }}</mat-option>
+                          }
+                        </mat-autocomplete>
+                        <mat-icon matSuffix>search</mat-icon>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="team-cards">
+                  <!-- Opponent 1 -->
+                  <div *ngIf="selectedPlayers.player2" class="player-card opponent-player">
+                    <div class="player-info">
+                      <div class="player-names">
+                        <h4 class="player-username">{{ selectedPlayers.player2.username }}</h4>
+                        <span
+                          class="player-fullname">{{ selectedPlayers.player2.firstName }} {{ selectedPlayers.player2.lastName }}</span>
+                      </div>
+                    </div>
+
+                    <div class="player-stats">
+                      <div class="stat-item">
+                        <span class="stat-value">{{ getDoublesRating(selectedPlayers.player2) }}</span>
+                        <span class="stat-label">RATING</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="!selectedPlayers.player2" class="empty-player-card">
+                    <div class="empty-player-icon">
+                      <mat-icon>person_add</mat-icon>
+                    </div>
+                    <div class="empty-player-label">Select opponent 1</div>
+                  </div>
+
+                  <!-- Connector -->
+                  <div class="team-connector-line"></div>
+
+                  <!-- Opponent 2 -->
+                  <div *ngIf="selectedPlayers.player3" class="player-card opponent-player">
+                    <div class="player-info">
+                      <div class="player-names">
+                        <h4 class="player-username">{{ selectedPlayers.player3.username }}</h4>
+                        <span
+                          class="player-fullname">{{ selectedPlayers.player3.firstName }} {{ selectedPlayers.player3.lastName }}</span>
+                      </div>
+                    </div>
+
+                    <div class="player-stats">
+                      <div class="stat-item">
+                        <span class="stat-value">{{ getDoublesRating(selectedPlayers.player3) }}</span>
+                        <span class="stat-label">RATING</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="!selectedPlayers.player3" class="empty-player-card">
+                    <div class="empty-player-icon">
+                      <mat-icon>person_add</mat-icon>
+                    </div>
+                    <div class="empty-player-label">Select opponent 2</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview Button and Navigation -->
+            <div *ngIf="isMatchupComplete()" class="matchup-prediction">
+              <div class="prediction-label">MATCHUP PREDICTION</div>
+              <div class="prediction-meter">
+                <div class="prediction-bar-container">
+                  <div [style.width.%]="getLeftTeamPrediction()" class="prediction-bar left-team"></div>
+                  <div [style.width.%]="getRightTeamPrediction()" class="prediction-bar right-team"></div>
+                </div>
+                <div class="prediction-labels">
+                  <div class="prediction-value">{{ getLeftTeamPrediction() }}%</div>
+                  <div class="prediction-value">{{ getRightTeamPrediction() }}%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>navigate_before</mat-icon>
+                Back
+              </button>
+              <button [disabled]="!isPlayerSelectionValid()" color="primary" mat-raised-button
+                      matStepperNext>
+                <span>Continue to Game Setup</span>
+                <mat-icon>navigate_next</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- STEP 3: Games -->
+        <mat-step label="Match Games">
+          <h3>Match Games</h3>
+
+          <div class="match-progress-indicator" *ngIf="(bestOfEnabled() || isInfiniteGamesEnabled()) && games.length > 0">
+            <div class="match-progress-label">
+              <span *ngIf="bestOfEnabled()">Match Progress:</span>
+              <span *ngIf="isInfiniteGamesEnabled()">Game Series:</span>
+            </div>
+            <div class="match-progress-badges">
+              <ng-container *ngFor="let game of getProgressBadges(); let i = index">
+                <div [ngClass]="['progress-badge', 
+                               game.status === 'pending' ? 'pending' : '',
+                               game.status === 'team1' ? 'team1-win' : '',
+                               game.status === 'team2' ? 'team2-win' : '']">
+                  {{ i + 1 }}
+                </div>
+              </ng-container>
+              <div *ngIf="isInfiniteGamesEnabled()" class="progress-badge infinite-badge" matTooltip="Add more games as needed">
+                <mat-icon>add</mat-icon>
+              </div>
+            </div>
+            <div class="match-progress-summary" *ngIf="concludedGames.length > 0">
+              <div class="team1-summary" [class.leading]="getTeam1Wins() > getTeam2Wins()">
+                {{ getTeam1Name() }}: {{ getTeam1Wins() }}
+              </div>
+              <div class="separator">-</div>
+              <div class="team2-summary" [class.leading]="getTeam2Wins() > getTeam1Wins()">
+                {{ getTeam2Wins() }}: {{ getTeam2Name() }}
+              </div>
+            </div>
+          </div>
+
+          <div class="games-container">
+            <div class="games-header">
+              <h4>{{ getMatchTypeLabel() }}</h4>
+              <div class="games-actions">
+                <button (click)="addGame()" [disabled]="!canAddMoreGames()" color="primary" mat-raised-button>
+                  <mat-icon>add</mat-icon>
+                  Add Game
+                </button>
+                <span *ngIf="bestOfEnabled()" class="games-counter">
+                  {{ concludedGames.length }} of {{ getMaxGames() }} games
+                </span>
+                <span *ngIf="isInfiniteGamesEnabled()" class="games-counter">
+                  {{ concludedGames.length }} games played
+                </span>
+              </div>
+            </div>
+
+            <div *ngIf="games.length === 0" class="no-games-message">
+              <mat-icon>sports_tennis</mat-icon>
+              <p>No games added yet. Click "Add Game" to start the match.</p>
+            </div>
+
+            <div *ngIf="games.length > 0" class="games-list">
+              <div *ngFor="let game of games; let i = index" [class.concluded]="game.concluded" class="game-card">
+                <div class="game-header">
+                  <span class="game-number">Game {{ i + 1 }}</span>
+                  <span *ngIf="game.concluded" class="game-status">
+                    <mat-icon class="status-icon">check_circle</mat-icon> Concluded
+                  </span>
+                </div>
+
+                <div class="game-content">
+                  <!-- Singles Game -->
+                  <div *ngIf="isSinglesMatch()" class="game-teams singles-game">
+                    <div class="team team1">
+                      <div class="team-name">{{ currentPlayer.username }}</div>
+                      <div class="score-input">
+                        <div [class.winner]="isWinner(game, 'team1')" class="score">{{ game.team1Score }}</div>
+                        <div *ngIf="!game.concluded" class="score-buttons">
+                          <div class="score-number-buttons">
+                            <ng-container *ngFor="let num of scoreButtons">
+                              <button (click)="setScore(game, 'team1', num)" 
+                                     [class.active]="game.team1Score === num"
+                                     [disabled]="game.concluded"
+                                     class="score-number-btn" mat-mini-fab color="primary">
+                                {{ num }}
+                              </button>
+                            </ng-container>
+                            <button (click)="openWinByTwoDialog(game, 'team1')" 
+                                   [disabled]="game.concluded"
+                                   class="win-by-two-btn" mat-mini-fab color="accent" matTooltip="Win by 2 (13-11)">
+                              <span class="win-by-two-label">13-11</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="vs-indicator">vs</div>
+
+                    <div class="team team2">
+                      <div class="team-name">{{ selectedPlayers.player1?.username }}</div>
+                      <div class="score-input">
+                        <div [class.winner]="isWinner(game, 'team2')" class="score">{{ game.team2Score }}</div>
+                        <div *ngIf="!game.concluded" class="score-buttons">
+                          <div class="score-number-buttons">
+                            <ng-container *ngFor="let num of scoreButtons">
+                              <button (click)="setScore(game, 'team2', num)" 
+                                     [class.active]="game.team2Score === num"
+                                     [disabled]="game.concluded"
+                                     class="score-number-btn" mat-mini-fab color="primary">
+                                {{ num }}
+                              </button>
+                            </ng-container>
+                            <button (click)="openWinByTwoDialog(game, 'team2')" 
+                                   [disabled]="game.concluded"
+                                   class="win-by-two-btn" mat-mini-fab color="accent" matTooltip="Win by 2 (13-11)">
+                              <span class="win-by-two-label">13-11</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Doubles Game -->
+                  <div *ngIf="isDoublesMatch()" class="game-teams doubles-game">
+                    <div class="team team1">
+                      <div class="team-name">{{ currentPlayer.username }}& {{ selectedPlayers.player1?.username }}
+                      </div>
+                      <div class="score-input">
+                        <div [class.winner]="isWinner(game, 'team1')" class="score">{{ game.team1Score }}</div>
+                        <div *ngIf="!game.concluded" class="score-buttons">
+                          <div class="score-number-buttons">
+                            <ng-container *ngFor="let num of scoreButtons">
+                              <button (click)="setScore(game, 'team1', num)" 
+                                     [class.active]="game.team1Score === num"
+                                     [disabled]="game.concluded"
+                                     class="score-number-btn" mat-mini-fab color="primary">
+                                {{ num }}
+                              </button>
+                            </ng-container>
+                            <button (click)="openWinByTwoDialog(game, 'team1')" 
+                                   [disabled]="game.concluded"
+                                   class="win-by-two-btn" mat-mini-fab color="accent" matTooltip="Win by 2 (13-11)">
+                              <span class="win-by-two-label">13-11</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="vs-indicator">vs</div>
+
+                    <div class="team team2">
+                      <div class="team-name">{{ selectedPlayers.player2?.username }}
+                        & {{ selectedPlayers.player3?.username }}
+                      </div>
+                      <div class="score-input">
+                        <div [class.winner]="isWinner(game, 'team2')" class="score">{{ game.team2Score }}</div>
+                        <div *ngIf="!game.concluded" class="score-buttons">
+                          <div class="score-number-buttons">
+                            <ng-container *ngFor="let num of scoreButtons">
+                              <button (click)="setScore(game, 'team2', num)" 
+                                     [class.active]="game.team2Score === num"
+                                     [disabled]="game.concluded"
+                                     class="score-number-btn" mat-mini-fab color="primary">
+                                {{ num }}
+                              </button>
+                            </ng-container>
+                            <button (click)="openWinByTwoDialog(game, 'team2')" 
+                                   [disabled]="game.concluded"
+                                   class="win-by-two-btn" mat-mini-fab color="accent" matTooltip="Win by 2 (13-11)">
+                              <span class="win-by-two-label">13-11</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="game-actions">
+                  <button (click)="concludeGame(game)" *ngIf="!game.concluded" [disabled]="!canConcludeGame(game)"
+                          color="primary" mat-stroked-button>
+                    <mat-icon>check_circle</mat-icon>
+                    Conclude Game
+                  </button>
+                  <button (click)="deleteGame(game.id)" *ngIf="!game.concluded" color="warn" mat-stroked-button>
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
+                  <button (click)="reopenGame(game)" *ngIf="game.concluded" color="accent" mat-stroked-button>
+                    <mat-icon>edit</mat-icon>
+                    Edit Score
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match Results Summary (when all games are concluded) -->
+            <div *ngIf="areAllGamesConcluded() && games.length > 0" class="match-summary">
+              <h3>Match Results</h3>
+              <div class="match-results">
+                <div [class.match-winner]="getTeam1Wins() > getTeam2Wins()" class="team-result">
+                  <div class="team-name">{{ getTeam1Name() }}</div>
+                  <div class="team-score">{{ getTeam1Wins() }}</div>
+                </div>
+                <div class="result-separator">-</div>
+                <div [class.match-winner]="getTeam2Wins() > getTeam1Wins()" class="team-result">
+                  <div class="team-score">{{ getTeam2Wins() }}</div>
+                  <div class="team-name">{{ getTeam2Name() }}</div>
+                </div>
+              </div>
+              <div *ngIf="getTeam1Wins() !== getTeam2Wins()" class="match-winner-message">
+                <mat-icon>emoji_events</mat-icon>
+                <span>{{ getTeam1Wins() > getTeam2Wins() ? getTeam1Name() : getTeam2Name() }} wins the match!</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>navigate_before</mat-icon>
+              Back
+            </button>
+            <button [disabled]="games.length === 0 || !areAllGamesConcluded()" color="primary" mat-raised-button
+                    matStepperNext>
+              Review & Save
+              <mat-icon>navigate_next</mat-icon>
+            </button>
+          </div>
+        </mat-step>
+
+        <!-- STEP 4: Review & Save -->
+        <mat-step label="Review & Save">
+          <h3>Review and Save Match</h3>
+
+          <div class="match-review">
+            <div class="review-section">
+              <h4>Match Configuration</h4>
+              <div class="review-details">
+                <div class="review-item">
+                  <span class="review-label">Type:</span>
+                  <span class="review-value">{{ isSinglesMatch() ? 'Singles' : 'Doubles' }}</span>
+                </div>
+                <div class="review-item">
+                  <span class="review-label">Mode:</span>
+                  <span class="review-value">{{ matchConfigForm.get('matchMode')?.value }}</span>
+                </div>
+                <div class="review-item">
+                  <span class="review-label">Format:</span>
+                  <span class="review-value">Best of {{ matchConfigForm.get('bestOf')?.value }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-section">
+              <h4>Players</h4>
+              <div class="review-details">
+                <!-- Singles Match -->
+                <div *ngIf="isSinglesMatch()" class="review-players singles">
+                  <div class="review-player">
+                    <span class="review-label">You:</span>
+                    <span class="review-value">{{ currentPlayer.username }}</span>
+                  </div>
+                  <div class="review-player">
+                    <span class="review-label">Opponent:</span>
+                    <span class="review-value">{{ selectedPlayers.player1?.username }}</span>
+                  </div>
+                </div>
+
+                <!-- Doubles Match -->
+                <div *ngIf="isDoublesMatch()" class="review-players doubles">
+                  <div class="review-team">
+                    <span class="review-label">Team 1:</span>
+                    <span class="review-value">{{ currentPlayer.username }}
+                      & {{ selectedPlayers.player1?.username }}</span>
+                  </div>
+                  <div class="review-team">
+                    <span class="review-label">Team 2:</span>
+                    <span class="review-value">{{ selectedPlayers.player2?.username }}
+                      & {{ selectedPlayers.player3?.username }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-section">
+              <h4>Game Results</h4>
+              <div class="review-games">
+                <table class="games-table">
+                  <thead>
+                  <tr>
+                    <th>Game</th>
+                    <th>{{ getTeam1Name() }}</th>
+                    <th>{{ getTeam2Name() }}</th>
+                    <th>Winner</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr *ngFor="let game of games; let i = index">
+                    <td>Game {{ i + 1 }}</td>
+                    <td>{{ game.team1Score }}</td>
+                    <td>{{ game.team2Score }}</td>
+                    <td>{{ getGameWinnerName(game) }}</td>
+                  </tr>
+                  </tbody>
+                  <tfoot>
+                  <tr>
+                    <td><strong>Final</strong></td>
+                    <td><strong>{{ getTeam1Wins() }}</strong></td>
+                    <td><strong>{{ getTeam2Wins() }}</strong></td>
+                    <td><strong>{{ getMatchWinnerName() }}</strong></td>
+                  </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions final-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>navigate_before</mat-icon>
+              Back
+            </button>
+            <button (click)="resetMatch()" mat-button>
+              <mat-icon>refresh</mat-icon>
+              Reset
+            </button>
+            <button (click)="saveMatch()" [disabled]="saving" color="primary" mat-raised-button>
+              <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+              <span *ngIf="!saving"><mat-icon>save</mat-icon> Save Match</span>
+            </button>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,64 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: pingpongdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pingpongdb"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pingpongdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: devpass
+      SPRING_PROFILES_ACTIVE: docker
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-development_secret_key_change_in_production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      
+      # Email Configuration
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-ping.pong.elo.rocket@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-change_this_in_production}
+      
+      # Application Config
+      APP_EMAIL_FROM: ${APP_EMAIL_FROM:-noreply@pingpongelo.com}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:4200}
+      
+      # Domain restriction
+      APP_REGISTRATION_DOMAIN_RESTRICTION_ENABLED: ${DOMAIN_RESTRICTION_ENABLED:-false}
+      APP_REGISTRATION_ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-rocketpartners.io,example.com}
+      
+      # Elo configuration
+      ELO_CURVE_ENABLED: ${ELO_CURVE_ENABLED:-true}
+      ELO_CURVE_UPPER_THRESHOLD: ${ELO_CURVE_UPPER_THRESHOLD:-1600}
+      ELO_CURVE_LOWER_THRESHOLD: ${ELO_CURVE_LOWER_THRESHOLD:-800}
+      ELO_CURVE_GAIN_BOOST_FACTOR: ${ELO_CURVE_GAIN_BOOST_FACTOR:-1.2}
+      ELO_CURVE_LOSS_REDUCTION_FACTOR: ${ELO_CURVE_LOSS_REDUCTION_FACTOR:-0.8}
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  postgres_data:

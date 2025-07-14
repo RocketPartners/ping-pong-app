@@ -1,0 +1,354 @@
+.slack-integration-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+
+    h1 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 2.5rem;
+      font-weight: 300;
+      margin: 0 0 8px 0;
+      
+      mat-icon {
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        color: #4a154b; // Slack brand color
+      }
+    }
+
+    .subtitle {
+      color: var(--mdc-theme-on-surface-variant);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+  }
+
+  .tab-content {
+    padding: 24px 0;
+  }
+
+  .config-card {
+    margin-bottom: 24px;
+
+    mat-card-header {
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+    }
+
+    .form-section {
+      margin-bottom: 24px;
+
+      .help-text {
+        font-size: 0.9rem;
+        color: var(--mdc-theme-on-surface-variant);
+        margin: 8px 0 0 0;
+      }
+    }
+
+    .form-row {
+      margin-bottom: 16px;
+
+      .full-width {
+        width: 100%;
+      }
+    }
+
+    .notifications-section {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--mdc-theme-outline-variant);
+
+      h3 {
+        margin-bottom: 16px;
+        font-size: 1.2rem;
+        font-weight: 500;
+      }
+
+      .notification-toggles {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+    }
+
+    mat-card-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .test-result {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &.test-success,
+      .test-success {
+        background: #e8f5e8;
+        color: #2e7d32;
+        border: 1px solid #4caf50;
+
+        mat-icon {
+          color: #4caf50;
+        }
+      }
+
+      &.test-error,
+      .test-error {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #f44336;
+
+        mat-icon {
+          color: #f44336;
+        }
+      }
+    }
+  }
+
+  .instructions-card {
+    .setup-steps {
+      padding-left: 20px;
+      line-height: 1.6;
+
+      li {
+        margin-bottom: 12px;
+
+        strong {
+          color: var(--mdc-theme-primary);
+        }
+
+        code {
+          background: var(--mdc-theme-surface-variant);
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-family: 'Courier New', monospace;
+          font-size: 0.9rem;
+        }
+
+        a {
+          color: var(--mdc-theme-primary);
+          text-decoration: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+
+    mat-icon {
+      font-size: 4rem;
+      width: 4rem;
+      height: 4rem;
+      color: var(--mdc-theme-on-surface-variant);
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      color: var(--mdc-theme-on-surface-variant);
+    }
+
+    p {
+      color: var(--mdc-theme-on-surface-variant);
+      margin: 0;
+    }
+  }
+
+  .commands-list {
+    .command-item {
+      margin-bottom: 24px;
+      padding: 16px;
+      border: 1px solid var(--mdc-theme-outline-variant);
+      border-radius: 8px;
+      background: var(--mdc-theme-surface-variant);
+
+      .command-header {
+        margin-bottom: 8px;
+
+        .command-text {
+          background: #1e1e1e;
+          color: #00ff00;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-family: 'Courier New', monospace;
+          font-size: 0.9rem;
+          display: inline-block;
+        }
+      }
+
+      .command-description {
+        margin-bottom: 8px;
+        font-size: 1rem;
+        line-height: 1.4;
+      }
+
+      .command-example {
+        font-size: 0.9rem;
+        color: var(--mdc-theme-on-surface-variant);
+
+        code {
+          background: var(--mdc-theme-surface);
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-family: 'Courier New', monospace;
+        }
+      }
+    }
+  }
+
+  .quick-actions-card {
+    margin-top: 24px;
+
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      button {
+        mat-icon {
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+
+  .slack-preview {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    .slack-message {
+      background: white;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+      .slack-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+
+        .timestamp {
+          color: #616061;
+          font-size: 0.8rem;
+        }
+      }
+
+      .slack-attachment {
+        border-left: 4px solid #36c5f0;
+        background: #f1f2f6;
+        padding: 12px;
+        border-radius: 0 6px 6px 0;
+        margin-top: 8px;
+
+        &.match-result {
+          border-left-color: #2eb886;
+        }
+
+        &.challenge {
+          border-left-color: #ecb22e;
+        }
+
+        &.achievement {
+          border-left-color: #e01e5a;
+        }
+
+        .attachment-header {
+          font-weight: bold;
+          margin-bottom: 8px;
+          font-size: 1rem;
+        }
+
+        .attachment-body {
+          font-size: 0.9rem;
+          line-height: 1.4;
+
+          .attachment-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+
+            .field {
+              font-size: 0.85rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Animation for spinning refresh icon
+  .spinning {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Dark mode specific styles
+:host-context(.dark-mode) {
+  .slack-integration-container {
+    .config-card {
+      .test-result {
+        &.test-success,
+        .test-success {
+          background: rgba(76, 175, 80, 0.1);
+          color: #4caf50;
+        }
+
+        &.test-error,
+        .test-error {
+          background: rgba(244, 67, 54, 0.1);
+          color: #f44336;
+        }
+      }
+    }
+
+    .commands-list .command-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .slack-preview {
+      background: rgba(0, 0, 0, 0.2);
+
+      .slack-message {
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+
+        .slack-attachment {
+          background: rgba(255, 255, 255, 0.03);
+        }
+      }
+    }
+  }
+}

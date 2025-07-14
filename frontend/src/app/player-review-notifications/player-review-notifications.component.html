@@ -1,0 +1,74 @@
+<button
+  [matBadgeHidden]="!(hasUnseenReviews$ | async)"
+  [matBadge]="(reviewNotifications$ | async)?.length || 0"
+  [matMenuTriggerFor]="reviewMenu"
+  aria-label="Review notifications"
+  class="notification-button"
+  mat-icon-button
+  matBadgeColor="accent">
+  <mat-icon>rate_review</mat-icon>
+</button>
+
+<!-- Reviews Dropdown Menu -->
+<mat-menu #reviewMenu="matMenu" class="review-notifications-menu" xPosition="before">
+  <div class="menu-header">
+    <h3 class="menu-title">Player Reviews</h3>
+  </div>
+
+  <div class="menu-content">
+    <!-- Loading indicator -->
+    <div *ngIf="loading" class="notification-loading">
+      <mat-spinner diameter="30"></mat-spinner>
+    </div>
+
+    <!-- No notifications message -->
+    <ng-container *ngIf="reviewNotifications$ | async as reviews; else loadingBlock">
+      <div *ngIf="reviews.length === 0 && !loading" class="no-notifications">
+        <mat-icon>check_circle</mat-icon>
+        <span>No new reviews</span>
+      </div>
+
+      <!-- Notification items -->
+      <div class="notification-list">
+        <div *ngFor="let review of reviews" class="notification-item">
+          <div class="notification-content">
+            <div class="notification-header">
+              <span class="notification-source">{{ review.reviewerUsername || 'Anonymous' }}</span>
+              <span class="notification-time">{{ review.reviewDate | date:'shortDate' }}</span>
+            </div>
+
+            <div class="notification-details">
+              <div class="chip-container">
+                <span *ngFor="let strength of review.strengths.slice(0, 2)" class="mini-chip primary">
+                  {{ formatStyleName(strength) }}
+                </span>
+                <span *ngIf="review.strengths.length > 2" class="more-chip">+{{ review.strengths.length - 2 }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notification-actions">
+            <button (click)="dismissReview(review, $event)" mat-icon-button matTooltip="Dismiss">
+              <mat-icon>close</mat-icon>
+            </button>
+            <button (click)="respondToReview(review, $event)" color="primary" mat-icon-button matTooltip="Respond">
+              <mat-icon>check</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer with view all link -->
+      <div *ngIf="reviews.length > 0" class="menu-footer">
+        <a [routerLink]="['/player-reviews']" class="view-all-button" mat-button>View All Reviews</a>
+      </div>
+    </ng-container>
+
+    <ng-template #loadingBlock>
+      <div *ngIf="!loading" class="no-notifications">
+        <mat-icon>check_circle</mat-icon>
+        <span>No new reviews</span>
+      </div>
+    </ng-template>
+  </div>
+</mat-menu>

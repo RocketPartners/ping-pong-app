@@ -1,0 +1,44 @@
+<mat-card (click)="openDetails()"
+          [ngClass]="[categoryClass, sizeClass, isAchieved ? 'achieved' : 'locked']"
+          class="achievement-card">
+
+  <div class="achievement-icon">
+    <mat-icon>{{ getIconName() }}</mat-icon>
+  </div>
+
+  <mat-card-header>
+    <mat-card-title>{{ achievementData.achievement.name }}</mat-card-title>
+    <mat-card-subtitle *ngIf="showDetails">
+      {{ formatPoints() }}
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content *ngIf="showDetails">
+    <p class="achievement-description">{{ achievementData.achievement.description }}</p>
+
+    <div *ngIf="showProgress" class="achievement-progress">
+      <mat-progress-bar
+        [mode]="isAchieved ? 'determinate' : 'determinate'"
+        [value]="achievementData.percentComplete">
+      </mat-progress-bar>
+
+      <div class="progress-text">
+        <span *ngIf="isAchieved">Complete</span>
+        <span *ngIf="!isAchieved">{{ achievementData.percentComplete | number:'1.0-0' }}% Complete</span>
+      </div>
+    </div>
+
+    <div *ngIf="isAchieved && achievementData.playerProgress.dateEarned" class="achievement-date">
+      Earned: {{ achievementData.playerProgress.dateEarned | date:'mediumDate' }}
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions *ngIf="showDetails && size !== 'small'">
+    <button (click)="openDetails($event)"
+            [matTooltip]="isAchieved ? 'View Achievement Details' : 'Keep Playing to Unlock'"
+            color="primary"
+            mat-button>
+      {{ isAchieved ? 'DETAILS' : 'LOCKED' }}
+    </button>
+  </mat-card-actions>
+</mat-card>

@@ -1,0 +1,233 @@
+<div class="container">
+  <div class="profile-settings-container">
+    <mat-card class="profile-card">
+      <mat-card-header>
+        <mat-card-title>Profile Settings</mat-card-title>
+        <mat-card-subtitle>Update your personal information</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="profile-image-section">
+          <div class="profile-image-container">
+            <!-- Display selected icon with color -->
+            <div *ngIf="selectedIcon && selectedColor" [style.background-color]="selectedColor" class="profile-icon">
+              <mat-icon>{{ selectedIcon }}</mat-icon>
+            </div>
+            <!-- Display initials if no icon is selected -->
+            <div *ngIf="!selectedIcon || !selectedColor" class="profile-initials">
+              {{ player?.firstName?.charAt(0) }}{{ player?.lastName?.charAt(0) }}
+            </div>
+          </div>
+
+          <div class="profile-image-controls">
+            <button (click)="toggleIconPicker()" color="primary" mat-raised-button type="button">
+              <mat-icon>emoji_emotions</mat-icon>
+              Choose Profile Icon
+            </button>
+            <button (click)="clearProfileSelection()" *ngIf="selectedIcon" color="warn" mat-button type="button">
+              <mat-icon>delete</mat-icon>
+              Remove
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="showIconPicker" class="icon-picker-container">
+          <h3>Select an icon</h3>
+          <div class="icon-grid">
+            <div (click)="selectIcon(icon)"
+                 *ngFor="let icon of profileIcons"
+                 [class.selected]="selectedIcon === icon"
+                 class="icon-option">
+              <mat-icon>{{ icon }}</mat-icon>
+            </div>
+          </div>
+
+          <h3>Select a color</h3>
+          <div class="color-grid">
+            <div (click)="selectColor(color)"
+                 *ngFor="let color of colorOptions"
+                 [class.selected]="selectedColor === color"
+                 [style.background-color]="color"
+                 class="color-option">
+            </div>
+          </div>
+
+          <h3>Preview</h3>
+          <div class="preview-container">
+            <div *ngIf="selectedIcon && selectedColor" [style.background-color]="selectedColor"
+                 class="profile-icon-preview">
+              <mat-icon>{{ selectedIcon }}</mat-icon>
+            </div>
+            <p *ngIf="!selectedIcon || !selectedColor" class="no-selection">
+              Please select both an icon and a color
+            </p>
+          </div>
+
+          <div class="icon-picker-actions">
+            <button (click)="toggleIconPicker()" mat-button>
+              <mat-icon>close</mat-icon>
+              Cancel
+            </button>
+            <button (click)="toggleIconPicker()" [disabled]="!selectedIcon || !selectedColor" color="primary"
+                    mat-raised-button>
+              <mat-icon>check</mat-icon>
+              Use This Icon
+            </button>
+          </div>
+
+          <mat-checkbox (change)="toggleUseColorAsTheme()" [checked]="useColorAsTheme" class="theme-option">
+            Use my profile color throughout the site
+          </mat-checkbox>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" *ngIf="player" [formGroup]="form">
+          <!-- Personal Information Section -->
+          <div class="section-heading">
+            <mat-icon>person</mat-icon>
+            <span>Personal Information</span>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>First Name</mat-label>
+              <input formControlName="firstName" matInput>
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error *ngIf="submitted && f.firstName.errors">
+                <span *ngIf="f.firstName.errors.required">First name is required</span>
+                <span *ngIf="f.firstName.errors.minlength">First name must be at least 2 characters</span>
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Last Name</mat-label>
+              <input formControlName="lastName" matInput>
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error *ngIf="submitted && f.lastName.errors">
+                <span *ngIf="f.lastName.errors.required">Last name is required</span>
+                <span *ngIf="f.lastName.errors.minlength">Last name must be at least 2 characters</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Birthday</mat-label>
+              <input [matDatepicker]="picker" formControlName="birthday" matInput>
+              <mat-datepicker-toggle [for]="picker" matSuffix></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="submitted && f.birthday.errors">
+                <span *ngIf="f.birthday.errors.required">Birth date is required</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Account Information Section -->
+          <div class="section-heading">
+            <mat-icon>account_circle</mat-icon>
+            <span>Account Information</span>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Username</mat-label>
+              <input formControlName="username" matInput>
+              <mat-icon matSuffix>alternate_email</mat-icon>
+              <mat-hint>Only letters, numbers, dots, underscores and hyphens</mat-hint>
+              <mat-error *ngIf="submitted && f.username.errors">
+                <span *ngIf="f.username.errors.required">Username is required</span>
+                <span *ngIf="f.username.errors.minlength">Username must be at least 4 characters</span>
+                <span *ngIf="f.username.errors.pattern">Username can only contain letters, numbers, and ._-</span>
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input formControlName="email" matInput type="email">
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="submitted && f.email.errors">
+                <span *ngIf="f.email.errors.required">Email is required</span>
+                <span *ngIf="f.email.errors.email">Please enter a valid email address</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Password Section - Add a separate button that redirects to password reset page -->
+          <div class="section-heading">
+            <mat-icon>lock</mat-icon>
+            <span>Password</span>
+          </div>
+
+          <div class="password-section">
+            <p class="password-hint">To change your password, use the password reset functionality</p>
+            <button color="primary" mat-stroked-button routerLink="/forgot-password" type="button">
+              <mat-icon>key</mat-icon>
+              Reset Password
+            </button>
+          </div>
+
+          <!-- Game Statistics Section (Read Only) -->
+          <div class="section-heading">
+            <mat-icon>sports_tennis</mat-icon>
+            <span>Game Statistics</span>
+            <span class="read-only-badge">Read Only</span>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stats-item">
+              <div class="stats-label">Singles Ranked Rating</div>
+              <div class="stats-value">{{ player.singlesRankedRating }}</div>
+            </div>
+            <div class="stats-item">
+              <div class="stats-label">Doubles Ranked Rating</div>
+              <div class="stats-value">{{ player.doublesRankedRating }}</div>
+            </div>
+            <div class="stats-item">
+              <div class="stats-label">Singles Normal Rating</div>
+              <div class="stats-value">{{ player.singlesNormalRating }}</div>
+            </div>
+            <div class="stats-item">
+              <div class="stats-label">Doubles Normal Rating</div>
+              <div class="stats-value">{{ player.doublesNormalRating }}</div>
+            </div>
+
+            <div class="stats-item">
+              <div class="stats-label">Singles Ranked Win Rate</div>
+              <div class="stats-value">{{ player.singlesRankedWinRate }}%</div>
+            </div>
+            <div class="stats-item">
+              <div class="stats-label">Doubles Ranked Win Rate</div>
+              <div class="stats-value">{{ player.doublesRankedWinRate }}%</div>
+            </div>
+            <div class="stats-item">
+              <div class="stats-label">Singles Normal Win Rate</div>
+              <div class="stats-value">{{ player.singlesNormalWinRate }}%</div>
+            </div>
+            <div class="stats-item">
+              <div class="stats-label">Doubles Normal Win Rate</div>
+              <div class="stats-value">{{ player.doublesNormalWinRate }}%</div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="form-actions">
+            <button mat-button routerLink="/" type="button">
+              <mat-icon>cancel</mat-icon>
+              Cancel
+            </button>
+
+            <button [disabled]="loading" color="primary" mat-raised-button type="submit">
+              <mat-icon>save</mat-icon>
+              <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+              Save Changes
+            </button>
+          </div>
+        </form>
+
+        <div *ngIf="!player" class="loading-message">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading your profile information...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

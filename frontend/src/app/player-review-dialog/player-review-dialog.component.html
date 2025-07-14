@@ -1,0 +1,107 @@
+<h2 mat-dialog-title>{{ dialogTitle }}</h2>
+
+<mat-dialog-content class="review-dialog-content">
+  <div *ngIf="!reviewForm">Loading...</div>
+  <ng-container *ngIf="reviewForm">
+    <div *ngIf="playerReviews.length > 0" class="review-intro">
+      <p *ngIf="!data.isResponse">
+        Help your fellow players improve by providing feedback on their performance.
+      </p>
+      <p *ngIf="data.isResponse && data.parentReview">
+        Respond to the feedback provided by {{ data.parentReview.reviewerUsername || 'your partner' }}.
+        Select <strong>{{ requiredSelectionCount }} strengths</strong> and <strong>{{ requiredSelectionCount }} areas to
+        improve</strong> based on the match.
+      </p>
+      <p *ngIf="!data.isResponse"> For each player, select <strong>{{ requiredSelectionCount }} strengths</strong> and
+        <strong>{{ requiredSelectionCount }} areas to improve</strong>.
+      </p>
+    </div>
+
+    <div *ngIf="playerReviews.length === 0 && reviewForm" class="no-players-message">
+      <mat-icon>info_outline</mat-icon>
+      <p>No other players from the match available to review.</p>
+    </div>
+
+    <div *ngIf="playerReviews.length > 0" class="player-stepper">
+      <div class="step-indicator">
+        <div class="step-counter">
+          Player {{ currentStep + 1 }} of {{ playerReviews.length }}
+        </div>
+        <div class="step-dots">
+          <span
+            *ngFor="let review of playerReviews.controls; let i = index"
+            [class.active]="i === currentStep"
+            [class.completed]="getPlayerForm(i).valid"
+            [class.error]="getPlayerForm(i).invalid && getPlayerForm(i).touched"
+            class="step-dot"
+            matTooltip="Player {{ i + 1 }}: {{ getPlayerForm(i).get('username')?.value }}">
+             </span>
+        </div>
+      </div>
+
+      <form [formGroup]="reviewForm">
+        <div formArrayName="playerReviews">
+          <div [ngSwitch]="currentStep">
+            <div *ngFor="let playerReview of playerReviews.controls; let i = index">
+              <div *ngSwitchCase="i" [formGroupName]="i" class="player-review-form">
+                <div class="selection-section">
+                  <h4>Player Strengths <span>(Select {{ requiredSelectionCount }})</span></h4>
+                  <mat-chip-listbox aria-label="Strengths selection" class="style-chip-list" formControlName="strengths"
+                                    multiple>
+                    <mat-chip-option *ngFor="let style of playerStyles"
+                                     [color]="isStyleSelected(playerReview.get('strengths'), style) ? 'primary' : undefined"
+                                     [disabled]="isSelectedInImprovements(style)"
+                                     [matTooltip]="getStyleDescription(style)"
+                                     [value]="style"
+                                     class="style-chip">
+                      {{ getStyleName(style) }}
+                    </mat-chip-option>
+                  </mat-chip-listbox>
+                </div>
+                <div class="selection-section">
+                  <h4>Areas to Improve <span>(Select {{ requiredSelectionCount }})</span></h4>
+                  <mat-chip-listbox aria-label="Improvements selection" class="style-chip-list"
+                                    formControlName="improvements" multiple>
+                    <mat-chip-option *ngFor="let style of playerStyles"
+                                     [color]="isStyleSelected(playerReview.get('improvements'), style) ? 'accent' : undefined"
+                                     [disabled]="isSelectedInStrengths(style)"
+                                     [matTooltip]="getStyleDescription(style)"
+                                     [value]="style"
+                                     class="style-chip">
+                      {{ getStyleName(style) }}
+                    </mat-chip-option>
+                  </mat-chip-listbox>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <ng-container *ngIf="reviewForm && playerReviews.length > 0">
+    <div class="navigation-buttons">
+      <button (click)="previousPlayer()" [disabled]="isFirstPlayer()" mat-stroked-button>
+        <mat-icon>arrow_back</mat-icon>
+        Previous
+      </button>
+
+      <button (click)="nextPlayer()" *ngIf="!isLastPlayer()" [disabled]="!isCurrentFormValid()" color="primary"
+              mat-stroked-button>
+        Next
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+
+      <button (click)="submit()" *ngIf="isLastPlayer()" [disabled]="!isFormValid()" color="primary" mat-raised-button>
+        Submit Reviews
+      </button>
+    </div>
+  </ng-container>
+
+  <button (click)="cancel()" mat-button>
+    {{ playerReviews.length > 0 ? 'Skip All' : 'Close' }}
+  </button>
+</mat-dialog-actions>

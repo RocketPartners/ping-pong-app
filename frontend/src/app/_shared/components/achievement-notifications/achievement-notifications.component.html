@@ -1,0 +1,55 @@
+<div class="notification-wrapper">
+  <button (menuOpened)="markAsSeen()" [matBadge]="hasUnseen ? '!' : ''"
+          [matMenuTriggerFor]="notificationsMenu" mat-icon-button matBadgeColor="accent"
+          matBadgeSize="small"
+          matTooltip="Achievement Notifications">
+    <mat-icon>emoji_events</mat-icon>
+  </button>
+
+  <mat-menu #notificationsMenu="matMenu" class="notifications-menu">
+    <div class="menu-header">
+      <h3>Achievements</h3>
+      <button (click)="clearNotifications()" *ngIf="notifications.length > 0"
+              mat-icon-button
+              matTooltip="Clear All Notifications">
+        <mat-icon>clear_all</mat-icon>
+      </button>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div *ngIf="notifications.length > 0; else noNotifications" class="notifications-list">
+      <div *ngFor="let notification of notifications" class="notification-item">
+        <div class="notification-icon">
+          <mat-icon>{{ notification.achievement.icon || 'emoji_events' }}</mat-icon>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">
+            {{ notification.achievement.name }}
+          </div>
+          <div class="notification-description">
+            {{ notification.achievement.description }}
+          </div>
+          <div class="notification-timestamp">
+            {{ formatTimestamp(notification.timestamp) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="menu-footer">
+      <a color="primary" mat-button routerLink="/achievements">
+        View All Achievements
+      </a>
+    </div>
+  </mat-menu>
+</div>
+
+<ng-template #noNotifications>
+  <div class="empty-notifications">
+    <mat-icon>trophy</mat-icon>
+    <p>No new achievements</p>
+  </div>
+</ng-template>

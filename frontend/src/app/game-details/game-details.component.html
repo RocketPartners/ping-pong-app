@@ -1,0 +1,328 @@
+<div class="game-details-container">
+  <!-- Loading and error states -->
+  <app-loading-spinner *ngIf="loading" [diameter]="48" [message]="'Loading match details...'"></app-loading-spinner>
+  <app-error-message *ngIf="error" [message]="error"></app-error-message>
+
+  <div *ngIf="game && !loading" class="game-content">
+    <!-- Game Header -->
+    <div class="game-header">
+      <div class="header-content">
+        <div class="header-left">
+          <span class="game-id">Match #{{ game.gameId || 'Unknown' }}</span>
+          <h1 class="game-title">{{ getGameType() }} Match</h1>
+          <p *ngIf="game.datePlayed" class="game-date">
+            <mat-icon>event</mat-icon>
+            {{ game.datePlayed | date:'EEEE, MMMM d, y' }}
+          </p>
+        </div>
+        <div class="header-right">
+          <div [ngClass]="{'ranked-badge': game.ratedGame, 'normal-badge': !game.ratedGame}"
+               class="game-type-badge">
+            {{ game.ratedGame ? 'RANKED' : 'Normals' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Match Result Card -->
+    <mat-card class="match-result-card">
+      <div class="match-info">
+        <div class="match-type">
+          <span>{{ getGameType() }}</span>
+          <span *ngIf="game.datePlayed" class="match-time">{{ game.datePlayed | date:'shortTime' }}</span>
+        </div>
+      </div>
+
+      <div class="score-container">
+        <!-- Challenger Side -->
+        <div [ngClass]="{'winner': game.challengerWin || game.challengerTeamWin}"
+             class="team-container challenger-side">
+          <div class="team-header">
+            <div class="team-label">
+              {{ game.singlesGame ? 'Challenger' : 'Challenger Team' }}
+              <mat-icon *ngIf="game.challengerWin || game.challengerTeamWin" class="winner-icon">emoji_events</mat-icon>
+            </div>
+          </div>
+
+          <div class="team-avatars">
+            <ng-container *ngIf="game.singlesGame && challenger">
+              <div (click)="navigateToPlayer(challenger.playerId)"
+                   class="player-avatar-wrapper">
+                <app-profile-avatar [player]="challenger" size="lg"></app-profile-avatar>
+                <div class="player-name">{{ challenger.username }}</div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="!game.singlesGame">
+              <div (click)="navigateToPlayer(p.playerId)"
+                   *ngFor="let p of challengerTeam"
+                   class="player-avatar-wrapper">
+                <app-profile-avatar [player]="p" size="md"></app-profile-avatar>
+                <div class="player-name">{{ p.username }}</div>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="team-score">{{ game.challengerTeamScore }}</div>
+        </div>
+
+        <div class="score-divider">
+          <div class="versus-label">VS</div>
+          <div class="result-indicator">
+            {{ game.challengerWin || game.challengerTeamWin ? 'Challenger Wins' : 'Opponent Wins' }}
+          </div>
+        </div>
+
+        <!-- Opponent Side -->
+        <div [ngClass]="{'winner': game.opponentWin || game.opponentTeamWin}"
+             class="team-container opponent-side">
+          <div class="team-header">
+            <div class="team-label">
+              {{ game.singlesGame ? 'Opponent' : 'Opponent Team' }}
+              <mat-icon *ngIf="game.opponentWin || game.opponentTeamWin" class="winner-icon">emoji_events</mat-icon>
+            </div>
+          </div>
+
+          <div class="team-avatars">
+            <ng-container *ngIf="game.singlesGame && opponent">
+              <div (click)="navigateToPlayer(opponent.playerId)"
+                   class="player-avatar-wrapper">
+                <app-profile-avatar [player]="opponent" size="lg"></app-profile-avatar>
+                <div class="player-name">{{ opponent.username }}</div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="!game.singlesGame">
+              <div (click)="navigateToPlayer(p.playerId)"
+                   *ngFor="let p of opponentTeam"
+                   class="player-avatar-wrapper">
+                <app-profile-avatar [player]="p" size="md"></app-profile-avatar>
+                <div class="player-name">{{ p.username }}</div>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="team-score">{{ game.opponentTeamScore }}</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Match Details Section -->
+    <div class="details-section">
+      <div class="details-grid">
+        <!-- Match Stats Card -->
+        <mat-card class="match-stats-card">
+          <mat-card-header>
+            <div class="card-header-icon">
+              <mat-icon>analytics</mat-icon>
+            </div>
+            <mat-card-title>Match Statistics</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-label">Match Type</div>
+                <div class="stat-value">{{ game.singlesGame ? 'Singles' : 'Doubles' }}</div>
+              </div>
+
+              <div class="stat-item">
+                <div class="stat-label">Match Mode</div>
+                <div [ngClass]="{'ranked-text': game.ratedGame, 'normal-text': !game.ratedGame}"
+                     class="stat-value mode-value">
+                  {{ game.ratedGame ? 'Ranked' : 'Normals' }}
+                </div>
+              </div>
+
+              <div class="stat-item">
+                <div class="stat-label">Final Score</div>
+                <div class="stat-value score-value">
+                  <span class="challenger-score">{{ game.challengerTeamScore }}</span>
+                  <span class="score-separator">-</span>
+                  <span class="opponent-score">{{ game.opponentTeamScore }}</span>
+                </div>
+              </div>
+
+              <div class="stat-item">
+                <div class="stat-label">Point Difference</div>
+                <div class="stat-value">
+                  {{ Math.abs(game.challengerTeamScore - game.opponentTeamScore) }}
+                </div>
+              </div>
+
+              <div class="stat-item full-width">
+                <div class="stat-label">Match Date</div>
+                <div class="stat-value">
+                  {{ game.datePlayed | date:'full' }}
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Players Card -->
+        <div class="players-section">
+          <div class="section-header">
+            <mat-icon>people</mat-icon>
+            <h2>Player Details</h2>
+          </div>
+
+          <!-- Singles Match -->
+          <div *ngIf="game.singlesGame" class="singles-players-container">
+            <div *ngIf="challenger" class="player-detail-card challenger-player">
+              <div class="player-detail-header">
+                <app-profile-avatar [player]="challenger" size="md"></app-profile-avatar>
+                <div class="player-meta">
+                  <div class="player-username">{{ challenger.username }}</div>
+                  <div class="player-ratings">
+                    <app-rating-badge [rating]="challenger.singlesRankedRating"></app-rating-badge>
+                  </div>
+                </div>
+              </div>
+
+              <div class="player-stats">
+                <div class="player-stat">
+                  <div class="stat-name">Win Rate</div>
+                  <div [ngClass]="getWinRateClass(calculateWinRate(challenger))" class="stat-figure">
+                    {{ calculateWinRate(challenger) }}%
+                  </div>
+                </div>
+                <div class="player-stat">
+                  <div class="stat-name">Record</div>
+                  <div class="stat-figure">
+                    <span class="wins">{{ challenger.singlesRankedWins }}W</span> /
+                    <span class="losses">{{ challenger.singlesRankedLoses }}L</span>
+                  </div>
+                </div>
+              </div>
+
+              <button (click)="navigateToPlayer(challenger.playerId)" color="primary" mat-stroked-button>
+                View Profile
+              </button>
+            </div>
+
+            <div class="versus-indicator">VS</div>
+
+            <div *ngIf="opponent" class="player-detail-card opponent-player">
+              <div class="player-detail-header">
+                <app-profile-avatar [player]="opponent" size="md"></app-profile-avatar>
+                <div class="player-meta">
+                  <div class="player-username">{{ opponent.username }}</div>
+                  <div class="player-ratings">
+                    <app-rating-badge [rating]="opponent.singlesRankedRating"></app-rating-badge>
+                  </div>
+                </div>
+              </div>
+
+              <div class="player-stats">
+                <div class="player-stat">
+                  <div class="stat-name">Win Rate</div>
+                  <div [ngClass]="getWinRateClass(calculateWinRate(opponent))" class="stat-figure">
+                    {{ calculateWinRate(opponent) }}%
+                  </div>
+                </div>
+                <div class="player-stat">
+                  <div class="stat-name">Record</div>
+                  <div class="stat-figure">
+                    <span class="wins">{{ opponent.singlesRankedWins }}W</span> /
+                    <span class="losses">{{ opponent.singlesRankedLoses }}L</span>
+                  </div>
+                </div>
+              </div>
+
+              <button (click)="navigateToPlayer(opponent.playerId)" color="primary" mat-stroked-button>
+                View Profile
+              </button>
+            </div>
+          </div>
+
+          <!-- Doubles Match -->
+          <div *ngIf="!game.singlesGame" class="doubles-players-container">
+            <div class="team-column challenger-team">
+              <h3 class="team-title">Challenger Team</h3>
+              <div *ngFor="let p of challengerTeam" class="player-detail-card">
+                <div class="player-detail-header">
+                  <app-profile-avatar [player]="p" size="md"></app-profile-avatar>
+                  <div class="player-meta">
+                    <div class="player-username">{{ p.username }}</div>
+                    <div class="player-ratings">
+                      <app-rating-badge [rating]="p.doublesRankedRating"></app-rating-badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="player-stats">
+                  <div class="player-stat">
+                    <div class="stat-name">Win Rate</div>
+                    <div [ngClass]="getWinRateClass(calculateDoublesWinRate(p))" class="stat-figure">
+                      {{ calculateDoublesWinRate(p) }}%
+                    </div>
+                  </div>
+                  <div class="player-stat">
+                    <div class="stat-name">Doubles Record</div>
+                    <div class="stat-figure">
+                      <span class="wins">{{ p.doublesRankedWins }}W</span> /
+                      <span class="losses">{{ p.doublesRankedLoses }}L</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button (click)="navigateToPlayer(p.playerId)" color="primary" mat-stroked-button>
+                  View Profile
+                </button>
+              </div>
+            </div>
+
+            <div class="team-column opponent-team">
+              <h3 class="team-title">Opponent Team</h3>
+              <div *ngFor="let p of opponentTeam" class="player-detail-card">
+                <div class="player-detail-header">
+                  <app-profile-avatar [player]="p" size="md"></app-profile-avatar>
+                  <div class="player-meta">
+                    <div class="player-username">{{ p.username }}</div>
+                    <div class="player-ratings">
+                      <app-rating-badge [rating]="p.doublesRankedRating"></app-rating-badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="player-stats">
+                  <div class="player-stat">
+                    <div class="stat-name">Win Rate</div>
+                    <div [ngClass]="getWinRateClass(calculateDoublesWinRate(p))" class="stat-figure">
+                      {{ calculateDoublesWinRate(p) }}%
+                    </div>
+                  </div>
+                  <div class="player-stat">
+                    <div class="stat-name">Doubles Record</div>
+                    <div class="stat-figure">
+                      <span class="wins">{{ p.doublesRankedWins }}W</span> /
+                      <span class="losses">{{ p.doublesRankedLoses }}L</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button (click)="navigateToPlayer(p.playerId)" color="primary" mat-stroked-button>
+                  View Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation actions -->
+    <div class="action-buttons">
+      <button (click)="router.navigate(['/'])" color="primary" mat-stroked-button>
+        <mat-icon>home</mat-icon>
+        Back to Dashboard
+      </button>
+
+      <button color="accent" mat-raised-button routerLink="/match-builder">
+        <mat-icon>add</mat-icon>
+        Record New Match
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+// src/styles/components/_player-styles.scss
+@use '../abstracts/tokens';
+@use '../abstracts/mixins';
+
+/* Base style badge classes */
+.style-badge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.style-badge-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style badge for each style type */
+.style-spin {
+  background-color: #2196f3;
+}
+
+.style-power {
+  background-color: #f44336;
+}
+
+.style-creative {
+  background-color: #9c27b0;
+}
+
+.style-aggressive {
+  background-color: #ff5722;
+}
+
+.style-resilient {
+  background-color: #4caf50;
+}
+
+.style-ace_master, .style-ace {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.style-rally_king, .style-rally {
+  background-color: #795548;
+}
+
+.style-tactician {
+  background-color: #607d8b;
+}

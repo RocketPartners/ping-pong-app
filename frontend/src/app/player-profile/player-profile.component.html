@@ -1,0 +1,132 @@
+<div class="profile-container">
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+  <div *ngIf="error" class="error-message mat-elevation-z2">
+    <mat-icon>error</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <div *ngIf="player && !loading" class="player-profile">
+    <!-- Profile Header -->
+    <div class="profile-header mat-elevation-z2">
+      <div class="profile-avatar">
+        {{ player.firstName.charAt(0) }}{{ player.lastName.charAt(0) }}
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name">{{ player.firstName }} {{ player.lastName }}</h1>
+        <p class="profile-username">{{ '@' + player.username }}</p>
+        <p class="profile-since">Member since {{ player.created | date:'mediumDate' }}</p>
+
+        <div class="player-styles">
+          <span *ngFor="let style of player.playerStyles" class="style-chip">
+            {{ getStyleName(style) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating Cards -->
+    <div class="rating-grid">
+      <mat-card class="rating-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Singles Ranked</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-value">{{ player.singlesRankedRating }}</div>
+          <div class="win-loss-record">
+            <span class="wins">{{ player.singlesRankedWins }}W</span> /
+            <span class="losses">{{ player.singlesRankedLoses }}L</span>
+            <span class="win-rate">({{ singleRankedWinRate }}%)</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="rating-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Doubles Ranked</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-value">{{ player.doublesRankedRating }}</div>
+          <div class="win-loss-record">
+            <span class="wins">{{ player.doublesRankedWins }}W</span> /
+            <span class="losses">{{ player.doublesRankedLoses }}L</span>
+            <span class="win-rate">({{ doublesRankedWinRate }}%)</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="rating-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Singles Normal</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-value">{{ player.singlesNormalRating }}</div>
+          <div class="win-loss-record">
+            <span class="wins">{{ player.singlesNormalWins }}W</span> /
+            <span class="losses">{{ player.singlesNormalLoses }}L</span>
+            <span class="win-rate">({{ singlesNormalWinRate }}%)</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="rating-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Doubles Normal</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-value">{{ player.doublesNormalRating }}</div>
+          <div class="win-loss-record">
+            <span class="wins">{{ player.doublesNormalWins }}W</span> /
+            <span class="losses">{{ player.doublesNormalLoses }}L</span>
+            <span class="win-rate">({{ doublesRankedWinRate }}%)</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Games -->
+    <div class="recent-games-section">
+      <h2>Recent Games ({{ recentGames.length }})</h2>
+
+      <div *ngIf="recentGames.length === 0" class="no-games-message">
+        <mat-icon>info</mat-icon>
+        <span>No games found for this player</span>
+      </div>
+
+      <div *ngIf="recentGames.length > 0" class="games-list">
+        <mat-card *ngFor="let game of recentGames"
+                  [ngClass]="isWin(game) ? 'win-game' : 'loss-game'"
+                  class="game-card mat-elevation-z1">
+          <div class="game-header">
+            <span class="game-type">
+              {{ game.singlesGame ? 'Singles' : 'Doubles' }}
+              {{ game.ratedGame ? 'Ranked' : 'Normal' }}
+            </span>
+            <span class="game-result">{{ getGameResult(game) }}</span>
+          </div>
+
+          <div class="game-content">
+            <div class="score-display">
+              <span class="challenger-score">{{ game.challengerTeamScore }}</span>
+              <span class="score-separator">-</span>
+              <span class="opponent-score">{{ game.opponentTeamScore }}</span>
+            </div>
+
+            <div class="game-details">
+              <span
+                *ngIf="game.singlesGame">vs Player #{{ game.challengerId === player.playerId ? game.opponentId : game.challengerId }}</span>
+              <span *ngIf="!game.singlesGame">Team Game</span>
+            </div>
+          </div>
+
+          <div class="game-footer">
+            <a [routerLink]="['/game', game.gameId]" class="view-details-link">
+              View Details
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

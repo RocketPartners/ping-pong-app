@@ -1,0 +1,330 @@
+// src/styles/components/_badges.scss
+@use '../abstracts/tokens';
+@use '../abstracts/mixins';
+
+//----------------------------------------------
+// Base Badge Styles
+//----------------------------------------------
+.badge {
+  @include mixins.badge-base;
+
+  // Size variations
+  &.badge-sm {
+    font-size: var(--font-size-xs);
+    padding: 2px 6px;
+  }
+
+  &.badge-lg {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
+//----------------------------------------------
+// Color Variants
+//----------------------------------------------
+.badge-primary {
+  @include mixins.badge-primary;
+}
+
+.badge-secondary {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.badge-success {
+  @include mixins.badge-success;
+}
+
+.badge-warning {
+  @include mixins.badge-warning;
+}
+
+.badge-info {
+  @include mixins.badge-info;
+}
+
+.badge-neutral {
+  @include mixins.badge-neutral;
+}
+
+//----------------------------------------------
+// Outline Variants
+//----------------------------------------------
+.badge-outline-primary {
+  @include mixins.badge-base;
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.badge-outline-secondary {
+  @include mixins.badge-base;
+  background-color: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+}
+
+.badge-outline-success {
+  @include mixins.badge-base;
+  background-color: transparent;
+  border: 1px solid var(--success-color);
+  color: var(--success-color);
+}
+
+.badge-outline-warning {
+  @include mixins.badge-base;
+  background-color: transparent;
+  border: 1px solid var(--warning-color);
+  color: var(--warning-color);
+}
+
+.badge-outline-info {
+  @include mixins.badge-base;
+  background-color: transparent;
+  border: 1px solid var(--info-color);
+  color: var(--info-color);
+}
+
+//----------------------------------------------
+// Light Variants
+//----------------------------------------------
+.badge-light-primary {
+  @include mixins.badge-base;
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  color: var(--primary-color);
+}
+
+.badge-light-secondary {
+  @include mixins.badge-base;
+  background-color: rgba(var(--accent-color-rgb), 0.1);
+  color: var(--accent-color);
+}
+
+.badge-light-success {
+  @include mixins.badge-base;
+  background-color: rgba(var(--success-color-rgb), 0.1);
+  color: var(--success-color);
+}
+
+.badge-light-warning {
+  @include mixins.badge-base;
+  background-color: rgba(var(--warning-color-rgb), 0.1);
+  color: var(--warning-color);
+}
+
+.badge-light-info {
+  @include mixins.badge-base;
+  background-color: rgba(var(--info-color-rgb), 0.1);
+  color: var(--info-color);
+}
+
+//----------------------------------------------
+// Player Style Badges
+//----------------------------------------------
+.style-badge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.style-badge-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Style badge colors
+.style-spin {
+  background-color: var(--style-spin);
+}
+
+.style-power {
+  background-color: var(--style-power);
+}
+
+.style-creative {
+  background-color: var(--style-creative);
+}
+
+.style-aggressive {
+  background-color: var(--style-aggressive);
+}
+
+.style-resilient {
+  background-color: var(--style-resilient);
+}
+
+.style-ace_master, .style-ace {
+  background-color: var(--style-ace);
+  color: #333;
+}
+
+.style-rally_king, .style-rally {
+  background-color: var(--style-rally);
+}
+
+.style-tactician {
+  background-color: var(--style-tactician);
+}
+
+.style-sportsmanship {
+  background-color: var(--style-sportsmanship);
+}
+
+.style-aura {
+  background-color: var(--style-aura);
+}
+
+//----------------------------------------------
+// Status Badges
+//----------------------------------------------
+.status-badge {
+  @include mixins.badge-base;
+  font-weight: var(--font-weight-medium);
+
+  &.status-created {
+    background-color: var(--gray-500);
+    color: white;
+  }
+
+  &.status-in-progress {
+    background-color: var(--info-color);
+    color: white;
+  }
+
+  &.status-completed {
+    background-color: var(--success-color);
+    color: white;
+  }
+
+  &.status-cancelled {
+    background-color: var(--warning-color);
+    color: white;
+  }
+}
+
+//----------------------------------------------
+// Rating Badges
+//----------------------------------------------
+.rating-badge {
+  @include mixins.badge-base;
+  font-weight: var(--font-weight-medium);
+
+  &.rating-beginner {
+    background-color: var(--rating-beginner);
+    color: white;
+  }
+
+  &.rating-novice {
+    background-color: var(--rating-novice);
+    color: white;
+  }
+
+  &.rating-intermediate {
+    background-color: var(--rating-intermediate);
+    color: white;
+  }
+
+  &.rating-advanced {
+    background-color: var(--rating-advanced);
+    color: white;
+  }
+
+  &.rating-expert {
+    background-color: var(--rating-expert);
+    color: white;
+  }
+}
+
+//----------------------------------------------
+// Win Rate Badges
+//----------------------------------------------
+.win-rate-badge {
+  @include mixins.badge-base;
+  font-weight: var(--font-weight-medium);
+
+  &.win-rate-struggling {
+    background-color: var(--win-rate-struggling);
+    color: white;
+  }
+
+  &.win-rate-poor {
+    background-color: var(--win-rate-poor);
+    color: white;
+  }
+
+  &.win-rate-average {
+    background-color: var(--win-rate-average);
+    color: #333;
+  }
+
+  &.win-rate-good {
+    background-color: var(--win-rate-good);
+    color: white;
+  }
+
+  &.win-rate-excellent {
+    background-color: var(--win-rate-excellent);
+    color: white;
+  }
+}
+
+//----------------------------------------------
+// Notification Badge
+//----------------------------------------------
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 10px;
+  background-color: var(--warning-color);
+  color: white;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  // Positioned on a button or icon
+  .position-relative & {
+    position: absolute;
+  }
+}
+
+//----------------------------------------------
+// Avatar with Badge
+//----------------------------------------------
+.avatar-with-badge {
+  position: relative;
+
+  .avatar-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--success-color);
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  }
+}

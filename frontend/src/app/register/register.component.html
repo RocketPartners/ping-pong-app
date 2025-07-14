@@ -1,0 +1,180 @@
+<div class="container">
+  <div class="form-container">
+    <mat-card class="card">
+      <mat-card-header>
+        <mat-card-title>Create Your Account</mat-card-title>
+        <mat-card-subtitle>Join our gaming community</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form (ngSubmit)="onSubmit()" [formGroup]="form">
+          <!-- Personal Information Section -->
+          <div class="section-heading">
+            <mat-icon>person</mat-icon>
+            <span>Personal Information</span>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>First Name</mat-label>
+              <input formControlName="firstName" matInput>
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error *ngIf="submitted && f.firstName.errors">
+                <span *ngIf="f.firstName.errors.required">First name is required</span>
+                <span *ngIf="f.firstName.errors.minlength">First name must be at least 2 characters</span>
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Last Name</mat-label>
+              <input formControlName="lastName" matInput>
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error *ngIf="submitted && f.lastName.errors">
+                <span *ngIf="f.lastName.errors.required">Last name is required</span>
+                <span *ngIf="f.lastName.errors.minlength">Last name must be at least 2 characters</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Birthday</mat-label>
+              <input [matDatepicker]="picker" formControlName="birthday" matInput>
+              <mat-datepicker-toggle [for]="picker" matSuffix></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="submitted && f.birthday.errors">
+                <span *ngIf="f.birthday.errors.required">Birth date is required</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Account Information Section -->
+          <div class="section-heading">
+            <mat-icon>account_circle</mat-icon>
+            <span>Account Information</span>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Username</mat-label>
+              <input formControlName="username" matInput>
+              <mat-icon matSuffix>alternate_email</mat-icon>
+              <mat-hint>Only letters, numbers, dots, underscores and hyphens</mat-hint>
+              <mat-error *ngIf="submitted && f.username.errors">
+                <span *ngIf="f.username.errors.required">Username is required</span>
+                <span *ngIf="f.username.errors.minlength">Username must be at least 4 characters</span>
+                <span *ngIf="f.username.errors.pattern">Username can only contain letters, numbers, and ._-</span>
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input formControlName="email" matInput type="email">
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="submitted && f.email.errors">
+                <span *ngIf="f.email.errors.required">Email is required</span>
+                <span *ngIf="f.email.errors.email">Please enter a valid email address</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Password Section -->
+          <div class="section-heading">
+            <mat-icon>lock</mat-icon>
+            <span>Secure Your Account</span>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Password</mat-label>
+              <input
+                [type]="hidePassword ? 'password' : 'text'"
+                formControlName="password"
+                matInput
+              >
+              <button
+                (click)="hidePassword = !hidePassword"
+                [attr.aria-label]="'Hide password'"
+                [attr.aria-pressed]="hidePassword"
+                mat-icon-button
+                matSuffix
+                type="button"
+              >
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-error *ngIf="submitted && f.password.errors">
+                <span *ngIf="f.password.errors.required">Password is required</span>
+                <span *ngIf="f.password.errors.minlength">Password must be at least 6 characters</span>
+                <span *ngIf="f.password.errors.pattern">Password must include uppercase, lowercase, number and special character</span>
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Confirm Password</mat-label>
+              <input
+                [type]="hideRepeatPassword ? 'password' : 'text'"
+                formControlName="repeatPassword"
+                matInput
+              >
+              <button
+                (click)="hideRepeatPassword = !hideRepeatPassword"
+                [attr.aria-label]="'Hide password'"
+                [attr.aria-pressed]="hideRepeatPassword"
+                mat-icon-button
+                matSuffix
+                type="button"
+              >
+                <mat-icon>{{ hideRepeatPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-error *ngIf="submitted && f.repeatPassword.errors">
+                <span *ngIf="f.repeatPassword.errors.required">Please confirm your password</span>
+                <span *ngIf="f.repeatPassword.errors.passwordMismatch">Passwords do not match</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Password Strength Indicator -->
+          <div *ngIf="form.get('password')?.value" class="password-strength-container">
+            <div class="password-strength-label">Password Strength:</div>
+            <div class="password-strength-meter">
+              <div
+                [ngClass]="{
+                  'weak': passwordStrength <= 25,
+                  'fair': passwordStrength > 25 && passwordStrength <= 50,
+                  'good': passwordStrength > 50 && passwordStrength <= 75,
+                  'strong': passwordStrength > 75
+                }"
+                [style.width.%]="passwordStrength"
+                class="password-strength-meter-fill"
+              ></div>
+            </div>
+            <div class="password-feedback">{{ passwordFeedback }}</div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="form-actions">
+            <button
+              color="accent"
+              mat-button
+              routerLink="../login"
+              type="button"
+            >
+              Already have an account?
+            </button>
+
+            <button
+              [disabled]="loading"
+              color="primary"
+              mat-raised-button
+              type="submit"
+            >
+              <mat-icon>how_to_reg</mat-icon>
+              <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+              Register
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

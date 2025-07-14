@@ -1,0 +1,147 @@
+<div class="achievement-container dark-mode-container">
+  <div class="player-search-container">
+    <form (ngSubmit)="searchPlayer()">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search Player</mat-label>
+        <input [formControl]="searchControl"
+               [matAutocomplete]="auto"
+               matInput
+               placeholder="Enter username"
+               type="text">
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option *ngFor="let username of filteredUsernames | async" [value]="username">
+            {{ username }}
+          </mat-option>
+        </mat-autocomplete>
+        <button mat-icon-button matSuffix type="submit">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <div *ngIf="username" class="player-view-header">
+    <div class="header-content">
+      <div class="viewing-info">
+        <span class="view-label">Viewing achievements for:</span>
+        <span class="player-name">{{ username }}</span>
+      </div>
+      <button (click)="backToMyAchievements()" color="primary" mat-stroked-button>
+        <mat-icon>arrow_back</mat-icon>
+        Return to Your Achievements
+      </button>
+    </div>
+  </div>
+  <app-section-title>Achievements</app-section-title>
+
+  <div class="achievement-toolbar">
+    <div class="filters">
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <mat-select [(ngModel)]="selectedCategory">
+          <mat-option value="ALL">All Categories</mat-option>
+          <mat-option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Sort By</mat-label>
+        <mat-select [(ngModel)]="selectedSort">
+          <mat-option *ngFor="let option of sortOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="view-options">
+      <mat-button-toggle-group [(ngModel)]="selectedView">
+        <mat-button-toggle *ngFor="let view of viewOptions" [matTooltip]="view.label"
+                           [value]="view.value">
+          <mat-icon>{{ view.icon }}</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+  </div>
+
+  <mat-card class="achievement-summary-card">
+    <mat-card-content>
+      <div *ngIf="allAchievements$ | async as achievements" class="summary-content">
+        <div class="summary-stats">
+          <div class="stat-item">
+            <div class="stat-value">{{ getCompletionStats(achievements).earned }}</div>
+            <div class="stat-label">Achievements Earned</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ getTotalPoints(achievements) }}</div>
+            <div class="stat-label">Total Points</div>
+          </div>
+          <div class="stat-item progress-item">
+            <div class="progress-header">
+              <div class="stat-value">{{ getCompletionStats(achievements).percent }}%</div>
+              <div class="stat-label">Completion</div>
+            </div>
+            <mat-progress-bar [value]="getCompletionStats(achievements).percent"
+                              color="primary"
+                              mode="determinate"></mat-progress-bar>
+            <div class="progress-text">
+              {{ getCompletionStats(achievements).earned }}/{{ getCompletionStats(achievements).total }} Achievements
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-tab-group (selectedTabChange)="onTabChange($event)">
+    <mat-tab label="All Achievements">
+      <ng-container *ngIf="allAchievements$ | async as achievements; else loading">
+        <div *ngIf="achievements.length > 0; else noAchievements"
+             [ngClass]="selectedView === 'grid' ? 'achievement-grid' : 'achievement-list'">
+          <app-achievement-card
+            *ngFor="let achievement of sortAchievements(filterByCategory(achievements))"
+            [achievementData]="achievement"
+            [size]="selectedView === 'grid' ? 'medium' : 'small'">
+          </app-achievement-card>
+        </div>
+      </ng-container>
+    </mat-tab>
+
+    <mat-tab label="Earned Achievements">
+      <ng-container *ngIf="earnedAchievements$ | async as achievements; else loading">
+        <div *ngIf="achievements.length > 0; else noEarnedAchievements"
+             [ngClass]="selectedView === 'grid' ? 'achievement-grid' : 'achievement-list'">
+          <app-achievement-card
+            *ngFor="let achievement of sortAchievements(filterByCategory(achievements))"
+            [achievementData]="achievement"
+            [size]="selectedView === 'grid' ? 'medium' : 'small'">
+          </app-achievement-card>
+        </div>
+      </ng-container>
+    </mat-tab>
+  </mat-tab-group>
+
+  <ng-template #loading>
+    <div class="loading-container">
+      <app-loading-spinner [message]="'Loading achievements...'"></app-loading-spinner>
+    </div>
+  </ng-template>
+
+  <ng-template #noAchievements>
+    <div class="empty-state">
+      <mat-icon>emoji_events</mat-icon>
+      <h3>No Achievements Available</h3>
+      <p>Achievements will appear here once they are configured in the system.</p>
+    </div>
+  </ng-template>
+
+  <ng-template #noEarnedAchievements>
+    <div class="empty-state">
+      <mat-icon>sports_tennis</mat-icon>
+      <h3>No Achievements Earned Yet</h3>
+      <p>Keep playing ping pong matches to earn achievements!</p>
+    </div>
+  </ng-template>
+</div>

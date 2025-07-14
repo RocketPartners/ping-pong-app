@@ -1,0 +1,36 @@
+// src/app/_shared/components/profile-avatar/profile-avatar.component.scss
+@use '../../../../styles/abstracts/tokens';
+@use '../../../../styles/abstracts/mixins';
+
+// We can significantly simplify this since we've moved most styles
+// to our component library
+.profile-avatar {
+  // The base styles are now in components/_avatars.scss
+  // We only need component-specific overrides here
+  &.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  // Animations for smoother appearance
+  transition: background-color 0.3s ease;
+  
+  // Make sure material icons scale properly and stay centered
+  mat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  // Handle text overflow in larger sizes
+  .initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,235 @@
+<div class="live-matches-container">
+  <div class="header">
+    <h1>
+      <mat-icon>live_tv</mat-icon>
+      Live Matches
+    </h1>
+    <p class="subtitle">Watch ping pong matches happening right now</p>
+  </div>
+
+  <div class="matches-grid">
+    <!-- Live Matches List -->
+    <div class="matches-list">
+      <h2>
+        <mat-icon>sports_tennis</mat-icon>
+        Active Matches
+        <mat-chip-set>
+          <mat-chip [highlighted]="true">{{liveMatches.length}} Live</mat-chip>
+        </mat-chip-set>
+      </h2>
+      
+      <div class="match-cards">
+        <mat-card 
+          *ngFor="let match of liveMatches" 
+          class="match-card"
+          [class.selected]="selectedMatch?.id === match.id"
+          (click)="selectMatch(match)">
+          
+          <mat-card-header>
+            <div class="match-status">
+              <mat-icon [style.color]="getStatusColor(match.status)">fiber_manual_record</mat-icon>
+              <span>{{match.status | titlecase}}</span>
+              <mat-chip class="duration-chip">{{getMatchDuration(match.startTime)}}</mat-chip>
+            </div>
+            <div class="spectators">
+              <mat-icon matBadge="{{match.spectatorCount}}" matBadgeColor="accent">visibility</mat-icon>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="match-info">
+              <div class="game-type">
+                <mat-chip>{{getGameTypeDisplay(match.gameType)}}</mat-chip>
+                <span class="best-of">Best of {{match.bestOf}}</span>
+              </div>
+              
+              <div class="teams">
+                <div class="team">
+                  <div class="team-name">{{getTeamNames(match).team1}}</div>
+                  <div class="team-rating">{{getTeamRating(match, 'team1')}}</div>
+                </div>
+                
+                <div class="score">
+                  <span class="score-number">{{match.currentScore.team1}}</span>
+                  <span class="vs">-</span>
+                  <span class="score-number">{{match.currentScore.team2}}</span>
+                </div>
+                
+                <div class="team">
+                  <div class="team-name">{{getTeamNames(match).team2}}</div>
+                  <div class="team-rating">{{getTeamRating(match, 'team2')}}</div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Match Details and Commentary -->
+    <div class="match-details" *ngIf="selectedMatch">
+      <mat-card class="selected-match-card">
+        <mat-card-header>
+          <mat-card-title>
+            <div class="match-title">
+              <mat-icon class="live-icon" color="accent">live_tv</mat-icon>
+              {{getTeamNames(selectedMatch).team1}} vs {{getTeamNames(selectedMatch).team2}}
+            </div>
+          </mat-card-title>
+          <mat-card-subtitle>
+            {{getGameTypeDisplay(selectedMatch.gameType)}} • Game {{selectedMatch.currentGame}} of {{selectedMatch.bestOf}}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="live-score">
+            <div class="team-score">
+              <div class="team-info">
+                <h3>{{getTeamNames(selectedMatch).team1}}</h3>
+                <div class="rating">{{getTeamRating(selectedMatch, 'team1')}}</div>
+              </div>
+              <div class="score-large">{{selectedMatch.currentScore.team1}}</div>
+            </div>
+            
+            <div class="vs-separator">
+              <mat-icon>sports_tennis</mat-icon>
+            </div>
+            
+            <div class="team-score">
+              <div class="team-info">
+                <h3>{{getTeamNames(selectedMatch).team2}}</h3>
+                <div class="rating">{{getTeamRating(selectedMatch, 'team2')}}</div>
+              </div>
+              <div class="score-large">{{selectedMatch.currentScore.team2}}</div>
+            </div>
+          </div>
+
+          <div class="match-stats">
+            <div class="stat">
+              <mat-icon>timer</mat-icon>
+              <span>{{getMatchDuration(selectedMatch.startTime)}}</span>
+            </div>
+            <div class="stat">
+              <mat-icon>visibility</mat-icon>
+              <span>{{selectedMatch.spectatorCount}} watching</span>
+            </div>
+            <div class="stat">
+              <mat-icon>play_circle</mat-icon>
+              <span>Game {{selectedMatch.currentGame}}/{{selectedMatch.bestOf}}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Commentary and Events Tabs -->
+      <mat-card class="commentary-card">
+        <mat-tab-group [(selectedIndex)]="selectedTabIndex">
+          <mat-tab label="Live Commentary">
+            <div class="commentary-section">
+              <div class="comments-list">
+                <div 
+                  *ngFor="let comment of comments" 
+                  class="comment"
+                  [class.recent]="getTimeAgo(comment.timestamp) === 'Just now'">
+                  
+                  <div class="comment-header">
+                    <strong>{{comment.username}}</strong>
+                    <span class="timestamp">{{getTimeAgo(comment.timestamp)}}</span>
+                  </div>
+                  
+                  <div class="comment-message">{{comment.message}}</div>
+                  
+                  <div class="comment-reactions">
+                    <button 
+                      mat-button 
+                      class="reaction-btn"
+                      *ngFor="let emoji of ['🔥', '👏', '💯', '😮']"
+                      (click)="addReaction(comment.id, emoji)">
+                      {{emoji}} {{getReactionCount(comment, emoji) || ''}}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="comment-input">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Add a comment...</mat-label>
+                  <input 
+                    matInput 
+                    [(ngModel)]="newComment"
+                    (keyup.enter)="sendComment()"
+                    placeholder="Share your thoughts on the match">
+                  <button 
+                    mat-icon-button 
+                    matSuffix 
+                    (click)="sendComment()"
+                    [disabled]="!newComment.trim()">
+                    <mat-icon>send</mat-icon>
+                  </button>
+                </mat-form-field>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Match Events">
+            <div class="events-section">
+              <div class="events-list">
+                <div 
+                  *ngFor="let event of matchEvents" 
+                  class="event-item"
+                  [class.score-event]="event.type === 'score-update'">
+                  
+                  <mat-icon class="event-icon">{{getEventIcon(event.type)}}</mat-icon>
+                  <div class="event-content">
+                    <div class="event-message">{{getEventMessage(event)}}</div>
+                    <div class="event-time">{{getTimeAgo(event.timestamp)}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Predictions">
+            <div class="predictions-section">
+              <div class="prediction-prompt">
+                <h3>Who will win this match?</h3>
+                <div class="prediction-options">
+                  <button mat-raised-button color="primary" class="prediction-btn">
+                    {{getTeamNames(selectedMatch).team1}}
+                    <span class="prediction-odds">65%</span>
+                  </button>
+                  <button mat-raised-button color="accent" class="prediction-btn">
+                    {{getTeamNames(selectedMatch).team2}}
+                    <span class="prediction-odds">35%</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="prediction-stats">
+                <h4>Community Predictions</h4>
+                <div class="prediction-bar">
+                  <div class="bar-segment team1" style="width: 65%"></div>
+                  <div class="bar-segment team2" style="width: 35%"></div>
+                </div>
+                <div class="prediction-labels">
+                  <span>Team 1: 65%</span>
+                  <span>Team 2: 35%</span>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="liveMatches.length === 0" class="empty-state">
+    <mat-icon>sports_tennis</mat-icon>
+    <h2>No Live Matches</h2>
+    <p>Check back later for live ping pong action!</p>
+    <button mat-raised-button color="primary" routerLink="/match-builder">
+      Start a New Match
+    </button>
+  </div>
+</div>

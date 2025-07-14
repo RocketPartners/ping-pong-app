@@ -1,0 +1,65 @@
+// Force white headers for leaderboard tables - ONLY in dark mode
+.dark-theme {
+  .leaderboard-container {
+    // Search field text needs to be white
+    .search-field {
+      .mat-mdc-input-element, 
+      .mat-mdc-form-field-label,
+      input,
+      mat-label {
+        color: white !important;
+      }
+      
+      ::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+      
+      // Icons in search field
+      .mat-icon {
+        color: white !important;
+      }
+    }
+    
+    // Target Angular Material sort headers specifically
+    .mat-sort-header {
+      color: white !important;
+    }
+    
+    .mat-sort-header-container {
+      color: white !important;
+    }
+    
+    .mat-sort-header-content {
+      color: white !important;
+    }
+    
+    // Target tab labels
+    .mat-tab-label {
+      color: white !important;
+      
+      .mat-tab-label-content {
+        color: white !important;
+      }
+    }
+    
+    // Active tab indicator
+    .mat-ink-bar {
+      background-color: white !important;
+    }
+    
+    // Table headers
+    .mat-header-cell {
+      color: white !important;
+    }
+    
+    // Table cells
+    .mat-cell {
+      color: white !important;
+    }
+    
+    // Section title
+    .section-title {
+      color: white !important;
+    }
+  }
+}

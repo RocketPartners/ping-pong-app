@@ -1,0 +1,368 @@
+<div class="home-dashboard">
+  <div class="dashboard-header">
+    <h1 class="welcome-title">Welcome to {{ 'Ping Pong Elo Rating System' }}</h1>
+    <p *ngIf="player" class="welcome-subtitle">Hello, {{ player.firstName || 'Player' }}!</p>
+  </div>
+
+  <app-loading-spinner *ngIf="loading" [diameter]="40" [message]="'Loading dashboard data...'"></app-loading-spinner>
+
+  <app-error-message *ngIf="error" [message]="error"></app-error-message>
+
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <div class="quick-actions-section">
+      <mat-card class="action-card mat-elevation-z2">
+        <mat-card-content>
+          <div class="action-buttons">
+            <button (click)="navigateToCreateMatch()" class="create-match-btn" color="primary" mat-raised-button>
+              <mat-icon>sports_tennis</mat-icon>
+              <span>Create Match</span>
+            </button>
+            <button (click)="navigateToStats()" class="view-stats-btn" color="accent" mat-raised-button>
+              <mat-icon>bar_chart</mat-icon>
+              <span>My Stats</span>
+            </button>
+            <button [routerLink]="['/leaderboard']" class="view-leaderboard-btn" color="primary" mat-raised-button>
+              <mat-icon>leaderboard</mat-icon>
+              <span>Leaderboard</span>
+            </button>
+            <button [routerLink]="['/tournaments']" class="view-tournaments-btn" color="primary" mat-raised-button>
+              <mat-icon>emoji_events</mat-icon>
+              <span>Tournaments</span>
+            </button>
+            <button [routerLink]="['/achievements']" class="view-achievements-btn" color="primary" mat-raised-button>
+              <mat-icon>stars</mat-icon>
+              <span>Achievements</span>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div *ngIf="systemStats" class="system-stats-section">
+      <app-section-title>System Overview</app-section-title>
+
+      <div class="stats-cards">
+        <mat-card class="stat-card players-card mat-elevation-z2">
+          <mat-card-title-group>
+            <mat-card-title>{{ systemStats.totalPlayers }}</mat-card-title>
+            <mat-card-subtitle>Players</mat-card-subtitle>
+            <mat-icon mat-card-sm-image>people</mat-icon>
+          </mat-card-title-group>
+          <mat-card-content>
+            <p>{{ systemStats.averageGamesPerPlayer.toFixed(1) }} games per player</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card games-card mat-elevation-z2">
+          <mat-card-title-group>
+            <mat-card-title>{{ systemStats.totalGames }}</mat-card-title>
+            <mat-card-subtitle>Games Played</mat-card-subtitle>
+            <mat-icon mat-card-sm-image>sports_tennis</mat-icon>
+          </mat-card-title-group>
+          <mat-card-content>
+            <p>{{ systemStats.totalPointsScored }} total points</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card score-card mat-elevation-z2">
+          <mat-card-title-group>
+            <mat-card-title>{{ systemStats.averageScore.toFixed(1) }}</mat-card-title>
+            <mat-card-subtitle>Avg. Score Per Game</mat-card-subtitle>
+            <mat-icon mat-card-sm-image>scoreboard</mat-icon>
+          </mat-card-title-group>
+        </mat-card>
+
+        <mat-card class="stat-card achievements-card mat-elevation-z2">
+          <mat-card-title-group>
+            <mat-card-title>{{ systemStats.totalAchievementsEarned }}</mat-card-title>
+            <mat-card-subtitle>Achievements Earned</mat-card-subtitle>
+            <mat-icon mat-card-sm-image>stars</mat-icon>
+          </mat-card-title-group>
+          <mat-card-content>
+            <p>{{ systemStats.cumulativeAchievementScore }} achievement points</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div *ngIf="systemStats" class="games-sections">
+      <div class="games-row">
+        <div class="recent-games-section">
+          <app-section-title>Recent Games</app-section-title>
+
+          <div *ngIf="recentGames.length === 0" class="no-games-message">
+            <mat-icon>sports_tennis</mat-icon>
+            <span>No recent games found. Start playing to see your history!</span>
+          </div>
+
+          <div *ngIf="recentGames.length > 0" class="games-list">
+            <mat-card (click)="navigateToGame(game.gameId || '')"
+                      *ngFor="let game of recentGames"
+                      class="game-card mat-elevation-z2">
+              <div class="game-header">
+                <div class="game-type">
+                  {{ game.singlesGame ? 'Singles' : 'Doubles' }}
+                  {{ game.ratedGame ? 'Ranked' : 'Normal' }}
+                </div>
+                <div *ngIf="game.datePlayed" class="game-date">
+                  {{ game.datePlayed | date:'shortDate' }}
+                </div>
+              </div>
+
+              <div class="game-players">
+                <ng-container *ngIf="game.singlesGame">
+                  <div class="player-vs-player">
+                    <div [class.winner]="game.challengerWin" class="player challenger">
+                      <div class="player-name">{{ getPlayerName(game.challengerId) }}</div>
+                      <div class="score">{{ game.challengerTeamScore }}</div>
+                    </div>
+                    <div class="vs-separator">vs</div>
+                    <div [class.winner]="game.opponentWin" class="player opponent">
+                      <div class="player-name">{{ getPlayerName(game.opponentId) }}</div>
+                      <div class="score">{{ game.opponentTeamScore }}</div>
+                    </div>
+                  </div>
+                </ng-container>
+
+                <ng-container *ngIf="game.doublesGame">
+                  <div class="team-vs-team">
+                    <div [class.winner]="game.challengerTeamWin" class="team challenger-team">
+                      <div *ngFor="let playerId of game.challengerTeam" class="team-player">
+                        {{ getPlayerName(playerId) }}
+                      </div>
+                      <div class="score">{{ game.challengerTeamScore }}</div>
+                    </div>
+                    <div class="vs-separator">vs</div>
+                    <div [class.winner]="game.opponentTeamWin" class="team opponent-team">
+                      <div *ngFor="let playerId of game.opponentTeam" class="team-player">
+                        {{ getPlayerName(playerId) }}
+                      </div>
+                      <div class="score">{{ game.opponentTeamScore }}</div>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+
+              <div class="game-footer">
+                <mat-icon *ngIf="player && game.ratedGame">emoji_events</mat-icon>
+                <mat-icon *ngIf="player && !game.ratedGame">weekend</mat-icon>
+              </div>
+            </mat-card>
+          </div>
+        </div>
+
+        <div *ngIf="systemStats && systemStats.gamesByType" class="game-types-section">
+          <app-section-title>Games by Type</app-section-title>
+
+          <mat-card class="distribution-card mat-elevation-z2">
+            <mat-card-content>
+              <div class="chart-container">
+                <div class="donut-chart">
+                  <div class="chart-center">
+                    <span class="chart-value">{{ systemStats.totalGames }}</span>
+                    <span class="chart-label">Games</span>
+                  </div>
+                  <div class="chart-segments">
+                    <ng-container
+                      *ngFor="let item of objectToArray(systemStats.gamesByType); let i = index; let count = count">
+                      <div *ngIf="item.value > 0" [style.background-color]="getGameTypeColor(item.name)"
+                           [style.clip-path]="'polygon(0 0, 100% 0, 100% ' + calculatePercentage(item.value, systemStats.totalGames) + '%, 0 ' + calculatePercentage(item.value, systemStats.totalGames) + '%)'"
+                           [style.transform]="'rotate(' + (i * 360 / count) + 'deg)'"
+                           class="chart-segment">
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <div class="chart-legend">
+                  <div *ngFor="let item of objectToArray(systemStats.gamesByType)" class="legend-item">
+                    <div [style.background-color]="getGameTypeColor(item.name)" class="legend-color"></div>
+                    <div class="legend-label">{{ item.name }}</div>
+                    <div class="legend-value">{{ item.value }}</div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="systemStats && systemStats.recentPlayers && systemStats.recentPlayers.length > 0"
+         class="player-spotlight-section">
+      <app-section-title>Player Spotlights</app-section-title>
+
+      <div class="spotlight-row">
+        <div class="recent-players-card">
+          <mat-card class="mat-elevation-z2">
+            <mat-card-header>
+              <mat-card-title>Recent Players</mat-card-title>
+              <mat-card-subtitle>Players who joined recently</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="player-list">
+                <div (click)="navigateToPlayer(player.username)" *ngFor="let player of systemStats.recentPlayers"
+                     class="player-item">
+                  <app-profile-avatar [player]="player" size="md"></app-profile-avatar>
+                  <div class="player-details">
+                    <div class="player-name">{{ player.firstName }} {{ player.lastName }}</div>
+                    <div class="player-username">{{ '@' + player.username }}</div>
+                    <div class="player-stats">
+                      <span [ngClass]="getWinRateClass(calculatePlayerWinRate(player))" class="stat-item win-rate">
+                        {{ calculatePlayerWinRate(player).toFixed(0) }}% Win
+                      </span>
+                      <span class="stat-item">SR: {{ player.singlesRankedRating }}</span>
+                      <span class="stat-item">DR: {{ player.doublesRankedRating }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div *ngIf="systemStats.topRatedPlayers" class="top-players-card">
+          <mat-card class="mat-elevation-z2">
+            <mat-card-header>
+              <mat-card-title>Top Rated Players</mat-card-title>
+              <mat-card-subtitle>Highest rated in each category</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="top-players-grid">
+                <div class="top-player-card singles-ranked">
+                  <div class="category-label">Singles Ranked</div>
+                  <div (click)="navigateToPlayer(systemStats.topRatedPlayers['Singles Ranked'].username)"
+                       class="player-content">
+                    <app-profile-avatar [player]="systemStats.topRatedPlayers['Singles Ranked']"
+                                        size="md"></app-profile-avatar>
+                    <div class="player-info">
+                      <div class="player-name">
+                        {{ systemStats.topRatedPlayers['Singles Ranked'].firstName }}
+                        {{ systemStats.topRatedPlayers['Singles Ranked'].lastName }}
+                      </div>
+                      <div class="player-rating">
+                        {{ systemStats.topRatedPlayers['Singles Ranked'].singlesRankedRating }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="top-player-card doubles-ranked">
+                  <div class="category-label">Doubles Ranked</div>
+                  <div (click)="navigateToPlayer(systemStats.topRatedPlayers['Doubles Ranked'].username)"
+                       class="player-content">
+                    <app-profile-avatar [player]="systemStats.topRatedPlayers['Doubles Ranked']"
+                                        size="md"></app-profile-avatar>
+                    <div class="player-info">
+                      <div class="player-name">
+                        {{ systemStats.topRatedPlayers['Doubles Ranked'].firstName }}
+                        {{ systemStats.topRatedPlayers['Doubles Ranked'].lastName }}
+                      </div>
+                      <div class="player-rating">
+                        {{ systemStats.topRatedPlayers['Doubles Ranked'].doublesRankedRating }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="top-player-card singles-normal">
+                  <div class="category-label">Singles Normal</div>
+                  <div (click)="navigateToPlayer(systemStats.topRatedPlayers['Singles Normal'].username)"
+                       class="player-content">
+                    <app-profile-avatar [player]="systemStats.topRatedPlayers['Singles Normal']"
+                                        size="md"></app-profile-avatar>
+                    <div class="player-info">
+                      <div class="player-name">
+                        {{ systemStats.topRatedPlayers['Singles Normal'].firstName }}
+                        {{ systemStats.topRatedPlayers['Singles Normal'].lastName }}
+                      </div>
+                      <div class="player-rating">
+                        {{ systemStats.topRatedPlayers['Singles Normal'].singlesNormalRating }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="top-player-card doubles-normal">
+                  <div class="category-label">Doubles Normal</div>
+                  <div (click)="navigateToPlayer(systemStats.topRatedPlayers['Doubles Normal'].username)"
+                       class="player-content">
+                    <app-profile-avatar [player]="systemStats.topRatedPlayers['Doubles Normal']"
+                                        size="md"></app-profile-avatar>
+                    <div class="player-info">
+                      <div class="player-name">
+                        {{ systemStats.topRatedPlayers['Doubles Normal'].firstName }}
+                        {{ systemStats.topRatedPlayers['Doubles Normal'].lastName }}
+                      </div>
+                      <div class="player-rating">
+                        {{ systemStats.topRatedPlayers['Doubles Normal'].doublesNormalRating }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="systemStats" class="analytics-section">
+      <div class="analytics-row">
+        <div *ngIf="systemStats.winDistribution" class="win-distribution-section">
+          <app-section-title>Win Distribution</app-section-title>
+
+          <mat-card class="analytics-card mat-elevation-z2">
+            <mat-card-content>
+              <div class="bar-chart-container">
+                <div *ngFor="let item of objectToArray(systemStats.winDistribution)" class="bar-chart-item">
+                  <div class="bar-label">{{ item.name }}</div>
+                  <div class="bar-container">
+                    <div [style.background-color]="getWinDistributionColor(item.name)"
+                         [style.width.%]="(item.value / systemStats.totalPlayers) * 100"
+                         class="bar">
+                      <span class="bar-value">{{ item.value }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div *ngIf="systemStats.topAchievements" class="top-achievements-section">
+          <app-section-title>Top Achievements</app-section-title>
+
+          <mat-card class="analytics-card mat-elevation-z2">
+            <mat-card-content>
+              <div class="achievements-container">
+                <div *ngFor="let achievement of objectToArray(systemStats.topAchievements); let i = index"
+                     class="achievement-item">
+                  <div [style.background-color]="getAchievementColor(i)" class="achievement-icon">
+                    <mat-icon>emoji_events</mat-icon>
+                  </div>
+                  <div class="achievement-details">
+                    <div class="achievement-name">{{ achievement.name }}</div>
+                    <div class="achievement-count">{{ achievement.value }} players</div>
+                  </div>
+                  <div class="achievement-progress">
+                    <mat-progress-bar [color]="i < 3 ? 'primary' : 'accent'"
+                                      [value]="(achievement.value / systemStats.totalPlayers) * 100"
+                                      mode="determinate">
+                    </mat-progress-bar>
+                    <div class="progress-percentage">
+                      {{ ((achievement.value / systemStats.totalPlayers) * 100).toFixed(0) }}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <button [routerLink]="['/achievements']" color="primary" mat-button>VIEW ALL ACHIEVEMENTS</button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

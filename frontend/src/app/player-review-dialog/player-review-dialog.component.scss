@@ -1,0 +1,250 @@
+// Import Angular Material theming functions if you need access to palette colors directly
+// @use '@angular/material' as mat;
+
+// Define constants for reuse
+$required-count-error-color: #f44336; // Material's default red
+$disabled-opacity: 0.5;
+$stepper-dot-inactive: rgba(0, 0, 0, 0.15);
+$stepper-dot-active: #1976d2; // Primary color reference
+$stepper-dot-completed: #4caf50; // Success color reference
+$stepper-dot-error: $required-count-error-color;
+
+.review-dialog-content {
+  min-height: 420px; // Ensure sufficient space
+  max-height: 75vh; // Adjusted from 80vh for better spacing with actions
+  width: 600px;
+  max-width: 100%;
+  overflow-y: auto;
+  padding: 20px 24px; // Consistent padding
+}
+
+.review-intro {
+  margin-bottom: 24px;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 15px; // Slightly larger base font for intro
+
+  strong {
+    color: rgba(0, 0, 0, 0.87);
+    font-weight: 600; // Slightly bolder
+  }
+}
+
+.no-players-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px; // Ensure it takes some space
+  padding: 40px 0;
+  color: rgba(0, 0, 0, 0.6);
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    color: rgba(0, 0, 0, 0.4); // Softer icon color
+  }
+}
+
+.player-stepper {
+  position: relative;
+}
+
+.step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px; // Increased spacing
+
+  .step-counter {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 10px; // Increased spacing
+  }
+
+  .step-dots {
+    display: flex;
+    gap: 10px; // Slightly wider gap
+
+    .step-dot {
+      width: 12px; // Slightly larger dots
+      height: 12px;
+      border-radius: 50%;
+      background-color: $stepper-dot-inactive;
+      transition: background-color 0.3s ease, transform 0.2s ease; // Smooth transitions
+      cursor: default; // Indicate non-interactive unless you add click handlers
+
+      &.completed {
+        background-color: $stepper-dot-completed;
+      }
+
+      &.active {
+        background-color: $stepper-dot-active;
+        transform: scale(1.2); // Enlarge active dot
+      }
+
+      &.error {
+        background-color: $stepper-dot-error; // Indicate errors on touched invalid steps
+      }
+    }
+  }
+}
+
+.player-review-form {
+  // Using a simple fade-in, keep as is or remove if not desired
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    // transform: translateY(10px); // Subtle slide-in
+  }
+  to {
+    opacity: 1;
+    // transform: translateY(0);
+  }
+}
+
+.player-info {
+  text-align: center;
+  margin-bottom: 24px; // Increased spacing
+
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 22px; // Larger player name
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 14px;
+  }
+}
+
+.selection-section {
+  margin-bottom: 28px; // Increased spacing
+
+  h4 {
+    margin: 0 0 16px; // Increased spacing
+    font-weight: 500;
+    font-size: 16px; // Slightly larger section titles
+    display: flex;
+    justify-content: space-between; // Align title and count requirement
+    align-items: baseline;
+
+    span {
+      font-size: 13px; // Smaller helper text
+      color: rgba(0, 0, 0, 0.6);
+      font-weight: normal;
+    }
+  }
+}
+
+.styles-grid {
+  margin-bottom: 10px; // Increased spacing
+
+  .style-chip-list {
+    width: 100%;
+
+    // Target the chip container within the listbox
+    :host ::ng-deep .mat-mdc-chip-set {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px; // Increased gap between chips
+    }
+
+    .style-chip {
+      // Default chip styling if needed
+      transition: background-color 0.2s ease, opacity 0.2s ease; // Smooth transitions
+
+      // Refined disabled state styling for chips within the listbox
+      &.mat-mdc-chip-disabled, // Standard Angular Material disabled class
+      &[disabled] { // Attribute selector as fallback/alternative
+        opacity: $disabled-opacity;
+        cursor: not-allowed;
+
+        // Avoid line-through as it can be hard to read
+        // text-decoration: line-through;
+
+        // Use a subtle background change instead of an overlay
+        // Ensure this doesn't conflict too much with selected styles
+        &:not(.mdc-chip--selected) { // Only apply to non-selected disabled chips
+          background-color: rgba(0, 0, 0, 0.08); // Subtle grey background
+        }
+
+        // Ensure text color is also slightly faded
+        :host ::ng-deep .mdc-chip__text {
+          color: rgba(0, 0, 0, 0.4);
+        }
+      }
+    }
+  }
+}
+
+.selection-count {
+  text-align: right;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 8px; // Add space above count
+  min-height: 20px; // Ensure consistent height even if error text appears
+
+  &.error {
+    color: $required-count-error-color;
+    font-weight: 500; // Make error count slightly bolder
+  }
+
+  .error-text {
+    margin-left: 4px;
+    font-size: 12px;
+    font-weight: normal; // Keep error text normal weight
+  }
+}
+
+// Ensure dialog actions have enough space and proper alignment
+:host {
+  ::ng-deep .mat-dialog-actions {
+    padding: 16px 24px !important; // Ensure padding overrides defaults if necessary
+    justify-content: space-between; // Push navigation left, skip/close right
+  }
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: 12px; // Increased gap
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .review-dialog-content {
+    width: 100%;
+    max-height: 70vh; // Adjust for smaller screens
+  }
+
+  // Stack buttons vertically on small screens if needed
+  // :host ::ng-deep .mat-dialog-actions {
+  //   flex-direction: column-reverse; // Example: stack actions
+  //   align-items: flex-end;
+  // }
+}
+
+@media (max-width: 480px) {
+  .styles-grid {
+    :host ::ng-deep .mat-mdc-chip-set {
+      justify-content: center; // Center chips on very small screens
+      gap: 8px; // Reduce gap slightly
+    }
+  }
+
+  .player-info h3 {
+    font-size: 20px; // Slightly smaller name on mobile
+  }
+
+  .selection-section h4 {
+    font-size: 15px; // Smaller section titles
+  }
+}

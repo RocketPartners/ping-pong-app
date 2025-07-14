@@ -1,0 +1,379 @@
+// src/styles/utilities/_colors.scss
+
+// Text color utilities
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.text-primary-light {
+  color: var(--primary-color-light) !important;
+}
+
+.text-primary-dark {
+  color: var(--primary-color-dark) !important;
+}
+
+.text-accent {
+  color: var(--accent-color) !important;
+}
+
+.text-accent-light {
+  color: var(--accent-color-light) !important;
+}
+
+.text-accent-dark {
+  color: var(--accent-color-dark) !important;
+}
+
+.text-success {
+  color: var(--success-color) !important;
+}
+
+.text-success-light {
+  color: var(--success-color-light) !important;
+}
+
+.text-success-dark {
+  color: var(--success-color-dark) !important;
+}
+
+.text-warning {
+  color: var(--warning-color) !important;
+}
+
+.text-warning-light {
+  color: var(--warning-color-light) !important;
+}
+
+.text-warning-dark {
+  color: var(--warning-color-dark) !important;
+}
+
+.text-info {
+  color: var(--info-color) !important;
+}
+
+.text-info-light {
+  color: var(--info-color-light) !important;
+}
+
+.text-info-dark {
+  color: var(--info-color-dark) !important;
+}
+
+.text-neutral {
+  color: var(--neutral-color) !important;
+}
+
+.text-neutral-light {
+  color: var(--neutral-color-light) !important;
+}
+
+.text-neutral-dark {
+  color: var(--neutral-color-dark) !important;
+}
+
+// Text utilities for common UI text
+.text-default {
+  color: var(--text-primary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-muted {
+  color: var(--gray-600) !important;
+}
+
+.text-white {
+  color: white !important;
+}
+
+// Gray text utilities
+.text-gray-50 {
+  color: var(--gray-50) !important;
+}
+
+.text-gray-100 {
+  color: var(--gray-100) !important;
+}
+
+.text-gray-200 {
+  color: var(--gray-200) !important;
+}
+
+.text-gray-300 {
+  color: var(--gray-300) !important;
+}
+
+.text-gray-400 {
+  color: var(--gray-400) !important;
+}
+
+.text-gray-500 {
+  color: var(--gray-500) !important;
+}
+
+.text-gray-600 {
+  color: var(--gray-600) !important;
+}
+
+.text-gray-700 {
+  color: var(--gray-700) !important;
+}
+
+.text-gray-800 {
+  color: var(--gray-800) !important;
+}
+
+.text-gray-900 {
+  color: var(--gray-900) !important;
+}
+
+// Background color utilities
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.bg-primary-light {
+  background-color: var(--primary-color-light) !important;
+}
+
+.bg-primary-dark {
+  background-color: var(--primary-color-dark) !important;
+}
+
+.bg-accent {
+  background-color: var(--accent-color) !important;
+}
+
+.bg-accent-light {
+  background-color: var(--accent-color-light) !important;
+}
+
+.bg-accent-dark {
+  background-color: var(--accent-color-dark) !important;
+}
+
+.bg-success {
+  background-color: var(--success-color) !important;
+}
+
+.bg-success-light {
+  background-color: var(--success-color-light) !important;
+}
+
+.bg-success-dark {
+  background-color: var(--success-color-dark) !important;
+}
+
+.bg-warning {
+  background-color: var(--warning-color) !important;
+}
+
+.bg-warning-light {
+  background-color: var(--warning-color-light) !important;
+}
+
+.bg-warning-dark {
+  background-color: var(--warning-color-dark) !important;
+}
+
+.bg-info {
+  background-color: var(--info-color) !important;
+}
+
+.bg-info-light {
+  background-color: var(--info-color-light) !important;
+}
+
+.bg-info-dark {
+  background-color: var(--info-color-dark) !important;
+}
+
+.bg-neutral {
+  background-color: var(--neutral-color) !important;
+}
+
+.bg-neutral-light {
+  background-color: var(--neutral-color-light) !important;
+}
+
+.bg-neutral-dark {
+  background-color: var(--neutral-color-dark) !important;
+}
+
+// Background utilities for common UI backgrounds
+.bg-default {
+  background-color: var(--background-color) !important;
+}
+
+.bg-card {
+  background-color: var(--card-background) !important;
+}
+
+.bg-white {
+  background-color: white !important;
+}
+
+.bg-transparent {
+  background-color: transparent !important;
+}
+
+// Gray background utilities
+.bg-gray-50 {
+  background-color: var(--gray-50) !important;
+}
+
+.bg-gray-100 {
+  background-color: var(--gray-100) !important;
+}
+
+.bg-gray-200 {
+  background-color: var(--gray-200) !important;
+}
+
+.bg-gray-300 {
+  background-color: var(--gray-300) !important;
+}
+
+.bg-gray-400 {
+  background-color: var(--gray-400) !important;
+}
+
+.bg-gray-500 {
+  background-color: var(--gray-500) !important;
+}
+
+.bg-gray-600 {
+  background-color: var(--gray-600) !important;
+}
+
+.bg-gray-700 {
+  background-color: var(--gray-700) !important;
+}
+
+.bg-gray-800 {
+  background-color: var(--gray-800) !important;
+}
+
+.bg-gray-900 {
+  background-color: var(--gray-900) !important;
+}
+
+// Opacity utilities for backgrounds with alpha
+.bg-primary-10 {
+  background-color: rgba(var(--primary-color-rgb), 0.1) !important;
+}
+
+.bg-primary-20 {
+  background-color: rgba(var(--primary-color-rgb), 0.2) !important;
+}
+
+.bg-primary-30 {
+  background-color: rgba(var(--primary-color-rgb), 0.3) !important;
+}
+
+.bg-success-10 {
+  background-color: rgba(var(--success-color-rgb), 0.1) !important;
+}
+
+.bg-warning-10 {
+  background-color: rgba(var(--warning-color-rgb), 0.1) !important;
+}
+
+.bg-info-10 {
+  background-color: rgba(var(--info-color-rgb), 0.1) !important;
+}
+
+// Border color utilities
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+.border-accent {
+  border-color: var(--accent-color) !important;
+}
+
+.border-success {
+  border-color: var(--success-color) !important;
+}
+
+.border-warning {
+  border-color: var(--warning-color) !important;
+}
+
+.border-info {
+  border-color: var(--info-color) !important;
+}
+
+.border-neutral {
+  border-color: var(--neutral-color) !important;
+}
+
+.border-default {
+  border-color: var(--border-color) !important;
+}
+
+// Border utilities
+.border {
+  border: 1px solid var(--border-color) !important;
+}
+
+.border-top {
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.border-right {
+  border-right: 1px solid var(--border-color) !important;
+}
+
+.border-bottom {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.border-left {
+  border-left: 1px solid var(--border-color) !important;
+}
+
+.border-0 {
+  border: 0 !important;
+}
+
+.border-top-0 {
+  border-top: 0 !important;
+}
+
+.border-right-0 {
+  border-right: 0 !important;
+}
+
+.border-bottom-0 {
+  border-bottom: 0 !important;
+}
+
+.border-left-0 {
+  border-left: 0 !important;
+}
+
+// Border radius utilities
+.rounded-none {
+  border-radius: 0 !important;
+}
+
+.rounded-sm {
+  border-radius: var(--border-radius-sm) !important;
+}
+
+.rounded-md {
+  border-radius: var(--border-radius-md) !important;
+}
+
+.rounded-lg {
+  border-radius: var(--border-radius-lg) !important;
+}
+
+.rounded-full {
+  border-radius: 50% !important;
+}

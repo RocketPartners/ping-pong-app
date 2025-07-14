@@ -1,0 +1,72 @@
+version: '3.8'
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      
+      # Database configuration (will be overridden by AWS ECS task definition)
+      SPRING_DATASOURCE_URL: ${DATABASE_URL:-jdbc:postgresql://localhost:5432/pingpongdb}
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD:-password}
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      
+      # Email Configuration
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      
+      # Application Config
+      APP_EMAIL_FROM: ${APP_EMAIL_FROM:-noreply@pingpongelo.com}
+      APP_BASE_URL: ${APP_BASE_URL:-https://pingpongelo.com}
+      
+      # Domain restriction
+      APP_REGISTRATION_DOMAIN_RESTRICTION_ENABLED: ${DOMAIN_RESTRICTION_ENABLED:-true}
+      APP_REGISTRATION_ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-rocketpartners.io}
+      APP_REGISTRATION_INVITATION_CODE_EXPIRY_DAYS: ${INVITATION_CODE_EXPIRY_DAYS:-30}
+      APP_REGISTRATION_REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-true}
+      
+      # Email verification
+      APP_EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS: ${EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS:-24}
+      
+      # Password reset
+      APP_RESET_TOKEN_EXPIRY_MINUTES: ${RESET_TOKEN_EXPIRY_MINUTES:-30}
+      
+      # Elo configuration
+      ELO_CURVE_ENABLED: ${ELO_CURVE_ENABLED:-true}
+      ELO_CURVE_UPPER_THRESHOLD: ${ELO_CURVE_UPPER_THRESHOLD:-1600}
+      ELO_CURVE_LOWER_THRESHOLD: ${ELO_CURVE_LOWER_THRESHOLD:-800}
+      ELO_CURVE_GAIN_BOOST_FACTOR: ${ELO_CURVE_GAIN_BOOST_FACTOR:-1.2}
+      ELO_CURVE_LOSS_REDUCTION_FACTOR: ${ELO_CURVE_LOSS_REDUCTION_FACTOR:-0.8}
+      
+      # Security
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${DDL_AUTO:-validate}
+      SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
+      
+      # Logging
+      LOGGING_LEVEL_ROOT: ${LOG_LEVEL_ROOT:-INFO}
+      LOGGING_LEVEL_COM_EXAMPLE_JAVAPINGPONGELO: ${LOG_LEVEL_APP:-INFO}
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M

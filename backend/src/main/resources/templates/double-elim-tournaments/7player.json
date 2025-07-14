@@ -1,0 +1,154 @@
+{
+  "name": "Double Elimination Tournament - 7 Players",
+  "description": "Double elimination bracket for 7 players",
+  "tournamentType": "DOUBLE_ELIMINATION",
+  "gameType": "SINGLES",
+  "numberOfPlayers": 7,
+  "matches": [
+    {
+      "id": "W1R1",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "W1R2",
+      "loserNextMatchId": "L1R2",
+      "completed": false,
+      "bracketType": "WINNER"
+    },
+    {
+      "id": "W2R1",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "W2R2",
+      "loserNextMatchId": "L1R1",
+      "completed": false,
+      "bracketType": "WINNER"
+    },
+    {
+      "id": "W3R1",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "W2R2",
+      "loserNextMatchId": "L1R1",
+      "completed": false,
+      "bracketType": "WINNER"
+    },
+    {
+      "id": "W1R2",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "W1R3",
+      "loserNextMatchId": "L2R2",
+      "completed": false,
+      "bracketType": "WINNER"
+    },
+    {
+      "id": "W2R2",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "W1R3",
+      "loserNextMatchId": "L1R3",
+      "completed": false,
+      "bracketType": "WINNER"
+    },
+    {
+      "id": "W1R3",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "F1R6",
+      "loserNextMatchId": "L1R4",
+      "completed": false,
+      "bracketType": "WINNER"
+    },
+    {
+      "id": "L1R1",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "L2R2",
+      "loserNextMatchId": null,
+      "completed": false,
+      "bracketType": "LOSER"
+    },
+    {
+      "id": "L1R2",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "L1R3",
+      "loserNextMatchId": null,
+      "completed": false,
+      "bracketType": "LOSER"
+    },
+    {
+      "id": "L2R2",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "L1R3",
+      "loserNextMatchId": null,
+      "completed": false,
+      "bracketType": "LOSER"
+    },
+    {
+      "id": "L1R3",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "L1R4",
+      "loserNextMatchId": null,
+      "completed": false,
+      "bracketType": "LOSER"
+    },
+    {
+      "id": "L1R4",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "F1R5",
+      "loserNextMatchId": null,
+      "completed": false,
+      "bracketType": "LOSER"
+    },
+    {
+      "id": "F1R5",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "F1R6",
+      "loserNextMatchId": "F1R6",
+      "completed": false,
+      "bracketType": "FINAL"
+    },
+    {
+      "id": "F1R6",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": null,
+      "loserNextMatchId": null,
+      "completed": false,
+      "bracketType": "CHAMPIONSHIP"
+    }
+  ],
+  "status": "CREATED",
+  "currentRound": 0
+}

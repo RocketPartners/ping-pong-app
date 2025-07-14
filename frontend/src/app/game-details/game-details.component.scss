@@ -1,0 +1,637 @@
+// Import shared styles
+@use '../../styles/abstracts/tokens' as tokens;
+@use '../../styles/abstracts/mixins' as mixins;
+
+// ===== Variables =====
+$card-border-radius: 12px;
+$card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+$transition-standard: all 0.3s ease;
+
+// Colors
+$challenger-color: var(--primary-color);
+$opponent-color: var(--accent-color);
+$win-color: var(--success-color);
+$lose-color: var(--warning-color);
+
+// ===== Container =====
+.game-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+
+  @include mixins.responsive-md {
+    padding: 1rem;
+  }
+}
+
+// ===== Game Header =====
+.game-header {
+  background-color: var(--card-background);
+  border-radius: $card-border-radius;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  box-shadow: $card-shadow;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, $challenger-color, $opponent-color);
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    @include mixins.responsive-md {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+
+  .header-left {
+    flex: 1;
+  }
+
+  .game-id {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .game-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .game-date {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+      margin-right: 0.5rem;
+      color: var(--text-hint);
+    }
+  }
+}
+
+// ===== Game Type Badge =====
+.game-type-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+
+  &.ranked-badge {
+    background-color: rgba($challenger-color, 0.1);
+    color: $challenger-color;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: $challenger-color;
+      margin-right: 0.5rem;
+    }
+  }
+
+  &.normal-badge {
+    background-color: rgba($win-color, 0.1);
+    color: $win-color;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: $win-color;
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+// ===== Match Result Card =====
+.match-result-card {
+  background-color: var(--card-background);
+  border-radius: $card-border-radius;
+  box-shadow: $card-shadow;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  padding: 0;
+}
+
+.match-info {
+  padding: 1rem 1.5rem;
+  background-color: var(--surface-variant);
+
+  .match-type {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+}
+
+.score-container {
+  display: flex;
+  padding: 2rem;
+
+  @include mixins.responsive-md {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
+// ===== Team Containers =====
+.team-container {
+  flex: 1;
+  padding: 1.5rem;
+  border-radius: $card-border-radius;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: $transition-standard;
+  position: relative;
+  overflow: hidden;
+
+  &.challenger-side {
+    background-color: rgba($challenger-color, 0.05);
+    border: 1px solid rgba($challenger-color, 0.1);
+
+    &.winner {
+      background-color: rgba($challenger-color, 0.1);
+      border-color: rgba($challenger-color, 0.2);
+      box-shadow: 0 4px 12px rgba($challenger-color, 0.15);
+      transform: translateY(-4px);
+    }
+  }
+
+  &.opponent-side {
+    background-color: rgba($opponent-color, 0.05);
+    border: 1px solid rgba($opponent-color, 0.1);
+
+    &.winner {
+      background-color: rgba($opponent-color, 0.1);
+      border-color: rgba($opponent-color, 0.2);
+      box-shadow: 0 4px 12px rgba($opponent-color, 0.15);
+      transform: translateY(-4px);
+    }
+  }
+
+  // Victory crown effect
+  &.winner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, $win-color, transparent);
+  }
+}
+
+.team-header {
+  margin-bottom: 1.5rem;
+  width: 100%;
+  text-align: center;
+}
+
+.team-label {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .winner-icon {
+    margin-left: 0.5rem;
+    color: #FFD700;
+  }
+}
+
+.team-avatars {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.player-avatar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: $transition-standard;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  .player-name {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+}
+
+.team-score {
+  font-size: 3rem;
+  font-weight: 700;
+
+  .challenger-side & {
+    color: $challenger-color;
+  }
+
+  .opponent-side & {
+    color: $opponent-color;
+  }
+
+  .winner & {
+    color: $win-color;
+  }
+}
+
+// ===== Score Divider =====
+.score-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.5rem;
+
+  @include mixins.responsive-md {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .versus-label {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+
+    @include mixins.responsive-md {
+      margin-bottom: 0;
+    }
+  }
+
+  .result-indicator {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    background-color: rgba($win-color, 0.1);
+    color: $win-color;
+    font-weight: 600;
+  }
+}
+
+// ===== Details Section =====
+.details-section {
+  margin-bottom: 2rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+
+  @include mixins.responsive-md {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ===== Match Stats Card =====
+.match-stats-card {
+  background-color: var(--card-background);
+  border-radius: $card-border-radius;
+  box-shadow: $card-shadow;
+  overflow: hidden;
+  height: fit-content;
+
+  mat-card-header {
+    padding: 1.25rem 1.5rem;
+    background-color: var(--surface-variant);
+    border-bottom: 1px solid var(--divider-color);
+    display: flex;
+    align-items: center;
+
+    .card-header-icon {
+      margin-right: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background-color: rgba($challenger-color, 0.1);
+
+      mat-icon {
+        color: $challenger-color;
+      }
+    }
+
+    mat-card-title {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+  }
+
+  mat-card-content {
+    padding: 1.5rem;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+
+  .stat-item {
+    &.full-width {
+      grid-column: span 2;
+    }
+  }
+
+  .stat-label {
+    font-size: 0.813rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+
+    &.mode-value {
+      &.ranked-text {
+        color: $challenger-color;
+      }
+
+      &.normal-text {
+        color: $win-color;
+      }
+    }
+
+    &.score-value {
+      .challenger-score {
+        color: $challenger-color;
+        font-weight: 600;
+      }
+
+      .score-separator {
+        margin: 0 0.25rem;
+      }
+
+      .opponent-score {
+        color: $opponent-color;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// ===== Players Section =====
+.players-section {
+  background-color: var(--card-background);
+  border-radius: $card-border-radius;
+  box-shadow: $card-shadow;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background-color: var(--surface-variant);
+  border-bottom: 1px solid var(--divider-color);
+
+  mat-icon {
+    margin-right: 0.75rem;
+    color: $challenger-color;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+}
+
+// ===== Singles Players =====
+.singles-players-container {
+  display: flex;
+  padding: 1.5rem;
+  gap: 1.5rem;
+
+  @include mixins.responsive-md {
+    flex-direction: column;
+  }
+
+  .versus-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+
+    @include mixins.responsive-md {
+      padding: 1rem 0;
+    }
+  }
+}
+
+// ===== Doubles Players =====
+.doubles-players-container {
+  display: flex;
+  padding: 1.5rem;
+  gap: 1.5rem;
+
+  @include mixins.responsive-md {
+    flex-direction: column;
+  }
+}
+
+.team-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  &.challenger-team {
+    .team-title {
+      color: $challenger-color;
+      border-bottom-color: $challenger-color;
+    }
+  }
+
+  &.opponent-team {
+    .team-title {
+      color: $opponent-color;
+      border-bottom-color: $opponent-color;
+    }
+  }
+
+  .team-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid;
+  }
+}
+
+// ===== Player Detail Cards =====
+.player-detail-card {
+  background-color: var(--surface);
+  border-radius: 8px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: $transition-standard;
+
+  &:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .player-detail-header {
+    display: flex;
+    margin-bottom: 1.25rem;
+
+    .player-meta {
+      margin-left: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .player-username {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
+    }
+  }
+
+  .player-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+
+    .player-stat {
+      .stat-name {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-figure {
+        font-size: 1rem;
+        font-weight: 500;
+
+        &.win-rate-excellent {
+          color: #388e3c; // Dark green
+        }
+
+        &.win-rate-good {
+          color: #7cb342; // Light green
+        }
+
+        &.win-rate-average {
+          color: #ffb300; // Amber
+        }
+
+        &.win-rate-poor {
+          color: #f57c00; // Orange
+        }
+
+        &.win-rate-struggling {
+          color: #e53935; // Red
+        }
+
+        .wins {
+          color: $win-color;
+        }
+
+        .losses {
+          color: $lose-color;
+        }
+      }
+    }
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+// ===== Action Buttons =====
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+
+  button {
+    min-width: 140px;
+
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+  }
+
+  @include mixins.responsive-md {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// ===== Game Content =====
+.game-content {
+  animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

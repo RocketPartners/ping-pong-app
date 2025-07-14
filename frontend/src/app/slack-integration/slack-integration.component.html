@@ -1,0 +1,365 @@
+<div class="slack-integration-container">
+  <div class="header">
+    <h1>
+      <mat-icon>chat</mat-icon>
+      Slack Integration
+    </h1>
+    <p class="subtitle">Connect your ping pong league with Slack for seamless team communication</p>
+  </div>
+
+  <mat-tab-group>
+    <!-- Configuration Tab -->
+    <mat-tab label="Settings">
+      <div class="tab-content">
+        <form [formGroup]="configForm" (ngSubmit)="onSaveConfig()">
+          <mat-card class="config-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>settings</mat-icon>
+                Slack Configuration
+              </mat-card-title>
+              <mat-card-subtitle>Configure your Slack workspace integration</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="form-section">
+                <mat-slide-toggle formControlName="enabled" color="primary">
+                  Enable Slack Integration
+                </mat-slide-toggle>
+                <p class="help-text">Turn on Slack integration to receive match notifications and enable bot commands</p>
+              </div>
+
+              <div class="form-row" *ngIf="configForm.get('enabled')?.value">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Bot Token</mat-label>
+                  <input matInput formControlName="botToken" placeholder="xoxb-your-bot-token">
+                  <mat-icon matSuffix>token</mat-icon>
+                  <mat-hint>Get this from your Slack app settings</mat-hint>
+                  <mat-error *ngIf="configForm.get('botToken')?.hasError('pattern')">
+                    Bot token must start with 'xoxb-'
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row" *ngIf="configForm.get('enabled')?.value">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Channel ID</mat-label>
+                  <input matInput formControlName="channelId" placeholder="C1234567890">
+                  <mat-icon matSuffix>tag</mat-icon>
+                  <mat-hint>Channel where notifications will be posted</mat-hint>
+                  <mat-error *ngIf="configForm.get('channelId')?.hasError('pattern')">
+                    Channel ID must start with 'C' followed by 10 characters
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row" *ngIf="configForm.get('enabled')?.value">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Webhook URL</mat-label>
+                  <input matInput formControlName="webhookUrl" placeholder="https://hooks.slack.com/services/...">
+                  <mat-icon matSuffix>link</mat-icon>
+                  <mat-hint>Incoming webhook URL for posting messages</mat-hint>
+                  <mat-error *ngIf="configForm.get('webhookUrl')?.hasError('pattern')">
+                    Must be a valid Slack webhook URL
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="notifications-section" *ngIf="configForm.get('enabled')?.value">
+                <h3>Notification Settings</h3>
+                <div class="notification-toggles">
+                  <mat-slide-toggle formControlName="autoPostMatches" color="primary">
+                    Auto-post match results
+                  </mat-slide-toggle>
+                  <mat-slide-toggle formControlName="autoPostAchievements" color="primary">
+                    Auto-post achievements
+                  </mat-slide-toggle>
+                  <mat-slide-toggle formControlName="dailyDigest" color="primary">
+                    Daily stats digest
+                  </mat-slide-toggle>
+                  <mat-slide-toggle formControlName="weeklyDigest" color="primary">
+                    Weekly summary
+                  </mat-slide-toggle>
+                </div>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-raised-button 
+                      color="primary" 
+                      type="submit" 
+                      [disabled]="configForm.invalid">
+                <mat-icon>save</mat-icon>
+                Save Configuration
+              </button>
+              
+              <button mat-stroked-button 
+                      type="button" 
+                      (click)="onTestConnection()"
+                      [disabled]="!configForm.get('enabled')?.value || configForm.invalid || isTestingConnection">
+                <mat-icon *ngIf="!isTestingConnection">wifi</mat-icon>
+                <mat-icon *ngIf="isTestingConnection" class="spinning">refresh</mat-icon>
+                Test Connection
+              </button>
+
+              <button mat-button 
+                      type="button"
+                      (click)="onGenerateSlackApp()">
+                <mat-icon>open_in_new</mat-icon>
+                Create Slack App
+              </button>
+            </mat-card-actions>
+
+            <!-- Connection Test Result -->
+            <div class="test-result" *ngIf="connectionTestResult">
+              <div class="test-success" *ngIf="connectionTestResult === 'success'">
+                <mat-icon>check_circle</mat-icon>
+                Connection successful! Test message sent to Slack.
+              </div>
+              <div class="test-error" *ngIf="connectionTestResult === 'error'">
+                <mat-icon>error</mat-icon>
+                Connection failed. Please check your settings.
+              </div>
+            </div>
+          </mat-card>
+        </form>
+
+        <!-- Setup Instructions -->
+        <mat-card class="instructions-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>help_outline</mat-icon>
+              Setup Instructions
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <ol class="setup-steps">
+              <li>
+                <strong>Create a Slack App:</strong>
+                <a href="https://api.slack.com/apps?new_app=1" target="_blank">Go to Slack API</a> and create a new app
+              </li>
+              <li>
+                <strong>Enable Bot Features:</strong>
+                Add bot token scopes: <code>chat:write</code>, <code>commands</code>, <code>channels:read</code>
+              </li>
+              <li>
+                <strong>Install to Workspace:</strong>
+                Install the app to your workspace and copy the Bot User OAuth Token
+              </li>
+              <li>
+                <strong>Create Webhook:</strong>
+                Add an incoming webhook and copy the webhook URL
+              </li>
+              <li>
+                <strong>Get Channel ID:</strong>
+                Right-click your channel → View channel details → Copy the channel ID
+              </li>
+            </ol>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Challenges Tab -->
+    <mat-tab label="Challenges">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>sports_tennis</mat-icon>
+              Active Challenges
+              <mat-chip-set>
+                <mat-chip [highlighted]="true">{{challenges.length}}</mat-chip>
+              </mat-chip-set>
+            </mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <mat-list *ngIf="challenges.length > 0; else noChallenges">
+              <mat-list-item *ngFor="let challenge of challenges">
+                <mat-icon matListItemIcon [style.color]="getChallengeStatusColor(challenge.status)">
+                  {{getChallengeStatusIcon(challenge.status)}}
+                </mat-icon>
+                
+                <div matListItemTitle>
+                  <strong>{{challenge.challengerName}}</strong> challenged <strong>{{challenge.challengedName}}</strong>
+                </div>
+                
+                <div matListItemLine>
+                  {{getGameTypeDisplay(challenge.gameType)}} • {{getTimeAgo(challenge.timestamp)}}
+                  <span *ngIf="challenge.message"> • "{{challenge.message}}"</span>
+                </div>
+
+                <div matListItemMeta *ngIf="challenge.status === 'pending'">
+                  <button mat-icon-button color="primary" (click)="onAcceptChallenge(challenge.id)">
+                    <mat-icon>check</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="onDeclineChallenge(challenge.id)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+
+                <mat-chip matListItemMeta [style.background-color]="getChallengeStatusColor(challenge.status)">
+                  {{challenge.status | titlecase}}
+                </mat-chip>
+              </mat-list-item>
+            </mat-list>
+
+            <ng-template #noChallenges>
+              <div class="empty-state">
+                <mat-icon>sports_tennis</mat-icon>
+                <h3>No Active Challenges</h3>
+                <p>Challenge requests will appear here when sent via Slack</p>
+              </div>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Bot Commands Tab -->
+    <mat-tab label="Bot Commands">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>smart_toy</mat-icon>
+              Available Slack Commands
+            </mat-card-title>
+            <mat-card-subtitle>Use these commands in your Slack workspace</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="commands-list">
+              <div class="command-item" *ngFor="let cmd of botCommands">
+                <div class="command-header">
+                  <code class="command-text">{{cmd.command}}</code>
+                </div>
+                <div class="command-description">{{cmd.description}}</div>
+                <div class="command-example">
+                  <strong>Example:</strong> <code>{{cmd.example}}</code>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Quick Actions -->
+        <mat-card class="quick-actions-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>flash_on</mat-icon>
+              Quick Actions
+            </mat-card-title>
+            <mat-card-subtitle>Test Slack functionality</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="action-buttons">
+              <button mat-raised-button color="primary" (click)="onPostLeaderboard()">
+                <mat-icon>leaderboard</mat-icon>
+                Post Leaderboard
+              </button>
+              
+              <button mat-raised-button color="accent" (click)="onSendDailyDigest()">
+                <mat-icon>today</mat-icon>
+                Send Daily Digest
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Preview Tab -->
+    <mat-tab label="Preview">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>preview</mat-icon>
+              Slack Message Preview
+            </mat-card-title>
+            <mat-card-subtitle>See how your messages will look in Slack</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="slack-preview">
+              <!-- Match Result Preview -->
+              <div class="slack-message">
+                <div class="slack-header">
+                  <strong>Ping Pong Bot</strong>
+                  <span class="timestamp">2:34 PM</span>
+                </div>
+                <div class="slack-content">
+                  <div class="slack-attachment match-result">
+                    <div class="attachment-header">🏆 Game Complete</div>
+                    <div class="attachment-body">
+                      <strong>Alex Chen defeated Maria Rodriguez!</strong>
+                      <div class="attachment-fields">
+                        <div class="field">
+                          <strong>Winner:</strong> Alex Chen
+                        </div>
+                        <div class="field">
+                          <strong>Score:</strong> 21 - 18
+                        </div>
+                        <div class="field">
+                          <strong>Game Type:</strong> Singles Ranked
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Challenge Preview -->
+              <div class="slack-message">
+                <div class="slack-header">
+                  <strong>Ping Pong Bot</strong>
+                  <span class="timestamp">1:15 PM</span>
+                </div>
+                <div class="slack-content">
+                  <div class="slack-attachment challenge">
+                    <div class="attachment-header">⚔️ New Ping Pong Challenge!</div>
+                    <div class="attachment-body">
+                      <strong>John Smith has challenged Sarah Johnson to a Doubles Normal match!</strong>
+                      <div class="attachment-fields">
+                        <div class="field">
+                          <strong>Message:</strong> Ready for some doubles action?
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Achievement Preview -->
+              <div class="slack-message">
+                <div class="slack-header">
+                  <strong>Ping Pong Bot</strong>
+                  <span class="timestamp">12:45 PM</span>
+                </div>
+                <div class="slack-content">
+                  <div class="slack-attachment achievement">
+                    <div class="attachment-header">🎉 New Achievement Unlocked!</div>
+                    <div class="attachment-body">
+                      <strong>Maria Rodriguez just earned a new achievement!</strong>
+                      <div class="attachment-fields">
+                        <div class="field">
+                          <strong>Achievement:</strong> Winning Streak Master
+                        </div>
+                        <div class="field">
+                          <strong>Description:</strong> Win 10 consecutive ranked matches
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

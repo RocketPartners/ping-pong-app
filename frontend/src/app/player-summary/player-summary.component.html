@@ -1,0 +1,58 @@
+<mat-card (click)="clickable && navigateToProfile()"
+          [class.clickable]="clickable"
+          [class.compact]="compact"
+          class="player-summary-card">
+  <div class="player-header">
+    <div class="avatar-container">
+      <div [ngClass]="getRatingClass(player?.singlesRankedRating || 0)" class="player-avatar">
+        {{ getPlayerInitials() }}
+      </div>
+    </div>
+
+    <div class="player-info">
+      <h2 class="player-name">{{ player?.firstName }} {{ player?.lastName }}</h2>
+      <p class="player-username">{{ '@' + (player?.username || '') }}</p>
+    </div>
+  </div>
+
+  <mat-card-content class="player-summary-content">
+    <div class="rating-row">
+      <div class="rating-item">
+        <span class="rating-label">Singles</span>
+        <span [ngClass]="getRatingClass(player?.singlesRankedRating || 0)" class="rating-value">
+          {{ player?.singlesRankedRating || 0 }}
+        </span>
+        <app-win-rate-bar
+          [showLabels]="false"
+          [winRate]="getSinglesWinRate()">
+        </app-win-rate-bar>
+      </div>
+
+      <div class="rating-item">
+        <span class="rating-label">Doubles</span>
+        <span [ngClass]="getRatingClass(player?.doublesRankedRating || 0)" class="rating-value">
+          {{ player?.doublesRankedRating || 0 }}
+        </span>
+        <app-win-rate-bar
+          [showLabels]="false"
+          [winRate]="getDoublesWinRate()">
+        </app-win-rate-bar>
+      </div>
+    </div>
+
+    <div class="record-row">
+      <div class="games-info">
+        <span class="games-count">{{ getTotalGames() }}</span>
+        <span class="games-label">Games</span>
+      </div>
+
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions *ngIf="showActions && !clickable">
+    <button (click)="navigateToProfile()" color="primary" mat-button>
+      <mat-icon>person</mat-icon>
+      View Profile
+    </button>
+  </mat-card-actions>
+</mat-card>

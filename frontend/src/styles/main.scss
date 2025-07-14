@@ -1,0 +1,193 @@
+// src/styles/main.scss
+
+// Import abstracts (variables, mixins, functions)
+@use '../styles/abstracts/tokens';
+@use '../styles/abstracts/mixins';
+
+// Base
+@use '../styles/base/reset';
+@use '../styles/base/animations';
+
+// Components
+@use '../styles/components/cards';
+@use '../styles/components/avatars';
+@use '../styles/components/badges';
+@use '../styles/components/buttons';
+@use '../styles/components/player-styles';
+@use '../styles/components/game-cards';
+@use '../styles/components/auth-forms';
+
+// Layout
+@use '../styles/layout/grid';
+@use '../styles/layout/header';
+@use '../styles/layout/footer';
+@use '../styles/layout/dashboard';
+
+// Utilities
+@use '../styles/utilities/spacing';
+@use '../styles/utilities/flex';
+@use '../styles/utilities/colors';
+@use '../styles/utilities/typography';
+@use '../styles/utilities/layout';
+
+// Current theme - must be loaded last to override defaults
+@use "../styles/themes/dark";
+@use '../styles/themes/light';
+
+// Global styles
+body {
+  margin: 0;
+  font-family: var(--font-family-base), serif;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  line-height: var(--line-height-md);
+}
+
+// Angular Material theme support
+:root {
+  --md-sys-color-primary: var(--primary-color);
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: var(--primary-color-light);
+  --md-sys-color-on-primary-container: var(--primary-color-dark);
+
+  --md-sys-color-secondary: var(--accent-color);
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: var(--accent-color-light);
+  --md-sys-color-on-secondary-container: var(--accent-color-dark);
+
+  --md-sys-color-tertiary: var(--success-color);
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: var(--success-color-light);
+  --md-sys-color-on-tertiary-container: var(--success-color-dark);
+
+  --md-sys-color-error: var(--warning-color);
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: rgba(var(--warning-color-rgb), 0.1);
+  --md-sys-color-on-error-container: var(--warning-color-dark);
+
+  --md-sys-color-surface: #ffffff;
+  --md-sys-color-on-surface: var(--text-primary);
+  --md-sys-color-surface-variant: var(--gray-100);
+  --md-sys-color-on-surface-variant: var(--text-secondary);
+
+  --md-sys-color-outline: var(--border-color);
+  --md-sys-color-background: var(--background-color);
+  --md-sys-color-on-background: var(--text-primary);
+}
+
+// Common layout styles
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+}
+
+.page-header {
+  margin-bottom: var(--spacing-lg);
+
+  .page-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .page-subtitle {
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+    margin-top: 0;
+  }
+}
+
+// Error and empty states
+.error-message {
+  display: flex;
+  align-items: center;
+  background-color: rgba(var(--warning-color-rgb), 0.1);
+  color: var(--warning-color);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-md);
+
+  .error-icon {
+    margin-right: var(--spacing-sm);
+  }
+}
+
+.empty-state {
+  @include mixins.flex-column-center;
+  padding: var(--spacing-xl) 0;
+  text-align: center;
+  color: var(--text-secondary);
+
+  .empty-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
+  }
+
+  .empty-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .empty-description {
+    max-width: 400px;
+    margin: 0 auto var(--spacing-md);
+  }
+}
+
+// Loading states
+.loading-container {
+  @include mixins.flex-center;
+  padding: var(--spacing-xl) 0;
+
+  .loading-text {
+    margin-top: var(--spacing-md);
+    color: var(--text-secondary);
+  }
+}
+
+// Responsive images
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+// Links
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--primary-color-dark);
+    text-decoration: underline;
+  }
+}
+
+// Game sidebar overlay
+.game-drawer-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.game-drawer-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// RGB color values for semi-transparent backgrounds
+:root {
+  --surface-color-rgb: 255, 255, 255;
+  --primary-color-rgb: 25, 118, 210;
+  --accent-color-rgb: 233, 30, 99;
+  --success-color-rgb: 76, 175, 80;
+  --warning-color-rgb: 244, 67, 54;
+  --info-color-rgb: 33, 150, 243;
+  --neutral-color-rgb: 96, 125, 139;
+}

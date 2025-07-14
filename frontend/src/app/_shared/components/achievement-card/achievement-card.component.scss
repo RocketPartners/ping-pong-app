@@ -1,0 +1,261 @@
+@use '../../../../styles/abstracts/tokens' as tokens;
+@use '../../../../styles/abstracts/mixins' as mixins;
+
+.achievement-card {
+  position: relative;
+  border-radius: tokens.$border-radius-md;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer; /* Make card clickable */
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: tokens.$shadow-lg;
+  }
+  
+  // Dark mode styling
+  :host-context(.dark-theme) & {
+    background-color: #262626;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    
+    mat-card-title {
+      color: white !important;
+    }
+    
+    mat-card-subtitle {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+  }
+
+  // Border styles based on achievement category
+  &.achievement-easy {
+    border-left: 4px solid #4caf50; // Green
+  }
+
+  &.achievement-medium {
+    border-left: 4px solid #2196f3; // Blue
+  }
+
+  &.achievement-hard {
+    border-left: 4px solid #9c27b0; // Purple
+  }
+
+  &.achievement-legendary {
+    border-left: 4px solid #ffc107; // Amber
+    background: linear-gradient(to right, rgba(255, 215, 0, 0.1), transparent);
+  }
+
+  // Size variations
+  &.achievement-card-small {
+    height: 80px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+
+    .achievement-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      margin-right: 8px;
+    }
+
+    mat-card-header {
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+
+      mat-card-title {
+        font-size: 14px;
+        margin-bottom: 0;
+      }
+
+      mat-card-subtitle {
+        font-size: 12px;
+        margin-top: 2px;
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &.achievement-card-medium {
+    height: 180px;
+    width: 240px;
+  }
+
+  &.achievement-card-large {
+    height: 220px;
+    width: 300px;
+  }
+}
+
+// Active state for click feedback
+.achievement-card:active {
+  transform: translateY(0);
+  transition: transform 0.1s;
+}
+
+// Locked vs. Achieved styles
+.achievement-card.locked {
+  opacity: 0.7;
+  filter: grayscale(0.7);
+
+  .achievement-icon {
+    background-color: #9e9e9e;
+  }
+
+  .achievement-description {
+    font-style: italic;
+  }
+  
+  // Dark mode
+  :host-context(.dark-theme) & {
+    opacity: 0.5;
+    background-color: #1e1e1e;
+    
+    .achievement-icon {
+      background-color: #555555;
+    }
+  }
+}
+
+.achievement-card.achieved {
+  .achievement-icon {
+    &.achievement-easy {
+      background-color: #4caf50;
+    }
+
+    &.achievement-medium {
+      background-color: #2196f3;
+    }
+
+    &.achievement-hard {
+      background-color: #9c27b0;
+    }
+
+    &.achievement-legendary {
+      background: linear-gradient(135deg, #ffd700, #ff8f00);
+    }
+  }
+}
+
+// Icon styling
+.achievement-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #9e9e9e;
+  color: white;
+  z-index: 1;
+
+  mat-icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+  }
+}
+
+// Content styling
+mat-card-header {
+  padding-top: 16px;
+  padding-right: 48px; // Space for icon
+}
+
+.achievement-description {
+  margin-top: 8px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);
+  height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  
+  // Dark mode
+  :host-context(.dark-theme) & {
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.achievement-progress {
+  margin-top: 12px;
+
+  mat-progress-bar {
+    height: 6px;
+    border-radius: 3px;
+  }
+
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.6);
+    margin-top: 4px;
+    
+    // Dark mode
+    :host-context(.dark-theme) & {
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+}
+
+.achievement-date {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
+  font-style: italic;
+  
+  // Dark mode
+  :host-context(.dark-theme) & {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Prevent card action buttons from triggering card click */
+mat-card-actions button {
+  position: relative;
+  z-index: 2;
+}
+
+/* Progress bar colors by category */
+:host {
+  .achievement-easy {
+    ::ng-deep .mat-progress-bar-fill::after {
+      background-color: #4caf50 !important;
+    }
+  }
+
+  .achievement-medium {
+    ::ng-deep .mat-progress-bar-fill::after {
+      background-color: #2196f3 !important;
+    }
+  }
+
+  .achievement-hard {
+    ::ng-deep .mat-progress-bar-fill::after {
+      background-color: #9c27b0 !important;
+    }
+  }
+
+  .achievement-legendary {
+    ::ng-deep .mat-progress-bar-fill::after {
+      background-color: #ffc107 !important;
+    }
+  }
+}

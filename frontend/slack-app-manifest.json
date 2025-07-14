@@ -1,0 +1,81 @@
+{
+  "display_information": {
+    "name": "Ping Pong League Bot",
+    "description": "Track matches, challenge players, and share achievements for your workplace ping pong league",
+    "background_color": "#4a154b",
+    "long_description": "A comprehensive ping pong league bot that helps teams track matches, challenge each other, view leaderboards, and celebrate achievements. Perfect for workplace leagues and competitive ping pong communities."
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "Ping Pong Bot",
+      "always_online": true
+    },
+    "slash_commands": [
+      {
+        "command": "/challenge",
+        "url": "https://your-domain.com/api/slack/challenge",
+        "description": "Challenge another player to a match",
+        "usage_hint": "@player [singles|doubles] [ranked|normal] [message]",
+        "should_escape": false
+      },
+      {
+        "command": "/stats",
+        "url": "https://your-domain.com/api/slack/stats",
+        "description": "View player statistics",
+        "usage_hint": "[@player]",
+        "should_escape": false
+      },
+      {
+        "command": "/leaderboard",
+        "url": "https://your-domain.com/api/slack/leaderboard",
+        "description": "Show current leaderboard",
+        "usage_hint": "[singles|doubles]",
+        "should_escape": false
+      },
+      {
+        "command": "/recent",
+        "url": "https://your-domain.com/api/slack/recent",
+        "description": "Show recent match history",
+        "usage_hint": "[@player] [count]",
+        "should_escape": false
+      },
+      {
+        "command": "/pingpong-help",
+        "url": "https://your-domain.com/api/slack/help",
+        "description": "Show all available ping pong commands",
+        "usage_hint": "",
+        "should_escape": false
+      }
+    ]
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "chat:write",
+        "chat:write.public",
+        "commands",
+        "users:read",
+        "channels:read",
+        "groups:read",
+        "im:read",
+        "mpim:read"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "request_url": "https://your-domain.com/api/slack/events",
+      "bot_events": [
+        "app_mention",
+        "message.channels"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true,
+      "request_url": "https://your-domain.com/api/slack/interactive"
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": false
+  }
+}

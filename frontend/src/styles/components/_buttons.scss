@@ -1,0 +1,267 @@
+// src/styles/components/_buttons.scss
+@use '../abstracts/tokens';
+@use '../abstracts/mixins';
+
+//----------------------------------------------
+// Base Button Styles
+//----------------------------------------------
+.btn {
+  @include mixins.button-base;
+  font-size: var(--font-size-md);
+
+  // Add icon styling when used inside buttons
+  .btn-icon {
+    margin-right: var(--spacing-xs);
+
+    &:last-child:not(:first-child) {
+      margin-right: 0;
+      margin-left: var(--spacing-xs);
+    }
+  }
+
+  // Size variations
+  &.btn-sm {
+    font-size: var(--font-size-sm);
+    padding: calc(var(--spacing-xs) + 2px) var(--spacing-sm);
+  }
+
+  &.btn-lg {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-sm) var(--spacing-lg);
+  }
+
+  // Disabled state
+  &:disabled,
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // Focus styles
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.4);
+  }
+
+  // Full width
+  &.btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  // Loading state with spinner
+  &.btn-loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: calc(50% - 0.5em);
+      left: calc(50% - 0.5em);
+      width: 1em;
+      height: 1em;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      border-right-color: transparent;
+      animation: spin 0.75s linear infinite;
+    }
+  }
+}
+
+//----------------------------------------------
+// Button Variants
+//----------------------------------------------
+.btn-primary {
+  @include mixins.button-primary;
+}
+
+.btn-secondary {
+  @include mixins.button-secondary;
+}
+
+.btn-success {
+  @include mixins.button-success;
+}
+
+.btn-warning {
+  @include mixins.button-warning;
+}
+
+.btn-outline-primary {
+  @include mixins.button-outline;
+}
+
+.btn-text {
+  @include mixins.button-base;
+  background-color: transparent;
+  color: var(--primary-color);
+  padding: var(--spacing-xs) var(--spacing-sm);
+
+  &:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+  }
+}
+
+//----------------------------------------------
+// Button Layouts
+//----------------------------------------------
+.btn-group {
+  display: inline-flex;
+
+  .btn {
+    border-radius: 0;
+
+    &:first-child {
+      border-top-left-radius: var(--border-radius-md);
+      border-bottom-left-radius: var(--border-radius-md);
+    }
+
+    &:last-child {
+      border-top-right-radius: var(--border-radius-md);
+      border-bottom-right-radius: var(--border-radius-md);
+    }
+
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+  }
+}
+
+// Action buttons container
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+
+  &.justify-end {
+    justify-content: flex-end;
+  }
+
+  &.justify-center {
+    justify-content: center;
+  }
+
+  &.justify-between {
+    justify-content: space-between;
+  }
+
+  // Responsive stacking for buttons
+  @include mixins.responsive-sm {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+// Float action button
+.fab {
+  @include mixins.button-base;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2),
+  0 6px 10px 0 rgba(0, 0, 0, 0.14),
+  0 1px 18px 0 rgba(0, 0, 0, 0.12);
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: var(--z-index-fixed);
+
+  // Background variations
+  &.fab-primary {
+    background-color: var(--primary-color);
+    color: white;
+
+    &:hover {
+      background-color: var(--primary-color-dark);
+    }
+  }
+
+  &.fab-secondary {
+    background-color: var(--accent-color);
+    color: white;
+
+    &:hover {
+      background-color: var(--accent-color-dark);
+    }
+  }
+
+  // Size variations
+  &.fab-sm {
+    width: 40px;
+    height: 40px;
+  }
+
+  // Icon styling inside floating action button
+  .fab-icon {
+    font-size: 24px;
+  }
+}
+
+// Icon buttons
+.btn-icon-only {
+  @include mixins.button-base;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.btn-icon-sm {
+    width: 32px;
+    height: 32px;
+
+    .icon {
+      font-size: 16px;
+    }
+  }
+
+  &.btn-icon-lg {
+    width: 48px;
+    height: 48px;
+
+    .icon {
+      font-size: 24px;
+    }
+  }
+
+  // Colors
+  &.btn-icon-primary {
+    background-color: var(--primary-color);
+    color: white;
+
+    &:hover {
+      background-color: var(--primary-color-dark);
+    }
+  }
+
+  &.btn-icon-outline {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+// Loading spinner animation
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

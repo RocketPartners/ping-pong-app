@@ -1,0 +1,156 @@
+// Dark mode styles for achievements page
+.dark-theme {
+  // Achievement container styles
+  .achievement-container {
+    // Make sure all text is white
+    color: white;
+    
+    // Section title
+    .section-title {
+      color: white !important;
+    }
+    
+    // Toolbar filters and selects
+    .achievement-toolbar {
+      // Moved all form field styling to _form-fields-dark.scss
+    }
+    
+    // Summary card
+    .achievement-summary-card {
+      background-color: #262626;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      
+      .summary-stats {
+        .stat-item {
+          .stat-value {
+            color: var(--primary-color-light);
+          }
+          
+          .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+          }
+          
+          &.progress-item {
+            .progress-text {
+              color: rgba(255, 255, 255, 0.7);
+            }
+          }
+        }
+      }
+    }
+    
+    // Player view header
+    .player-view-header {
+      background-color: rgba(33, 150, 243, 0.15);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      
+      .viewing-info {
+        .view-label {
+          color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .player-name {
+          color: var(--primary-color-light);
+        }
+      }
+      
+      button {
+        color: white;
+        border-color: rgba(255, 255, 255, 0.3);
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+    
+    // Tab group
+    mat-tab-group {
+      .mat-tab-label {
+        color: white !important;
+        
+        .mat-tab-label-content {
+          color: white !important;
+        }
+      }
+      
+      .mat-tab-label-active {
+        opacity: 1;
+      }
+      
+      .mat-ink-bar {
+        background-color: var(--primary-color-light) !important;
+      }
+    }
+    
+    // Empty state
+    .empty-state {
+      color: rgba(255, 255, 255, 0.5);
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 60px 20px;
+      
+      mat-icon {
+        color: rgba(255, 255, 255, 0.3);
+      }
+      
+      h3 {
+        color: white;
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+    
+    // Player search form - styling moved to _form-fields-dark.scss
+  }
+  
+  // Achievement card dark styling
+  .achievement-card {
+    background-color: #262626;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    
+    // Card header text
+    mat-card-header {
+      mat-card-title {
+        color: white !important;
+      }
+      
+      mat-card-subtitle {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+    }
+    
+    // Card content
+    .achievement-description {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .achievement-progress {
+      .progress-text {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+    
+    .achievement-date {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    // Locked state
+    &.locked {
+      opacity: 0.5;
+      background-color: #1e1e1e;
+      
+      .achievement-icon {
+        background-color: #555555;
+      }
+    }
+  }
+}

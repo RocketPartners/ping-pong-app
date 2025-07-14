@@ -1,0 +1,556 @@
+// Dark mode styling for player statistics page
+.dark-theme {
+  // Main container
+  .statistics-container {
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    
+    // Section titles
+    app-section-title {
+      color: var(--primary-color-light) !important;
+    }
+    
+    // Profile header card
+    .profile-header {
+      background-color: #262626;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      
+      .profile-name {
+        color: var(--primary-color-light);
+      }
+      
+      .profile-username {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      
+      .profile-since {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+      
+      // Profile stats section already has a dark background
+      .profile-stats {
+        background-color: #1e1e1e;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    }
+    
+    // Rating cards
+    .ratings-grid .rating-card {
+      background-color: #262626;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      
+      &:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        transform: translateY(-5px);
+      }
+      
+      // Card title
+      mat-card-header {
+        .mat-mdc-card-title {
+          color: white !important;
+        }
+      }
+      
+      // Card content
+      mat-card-content {
+        color: white;
+      }
+      
+      .rating-value {
+        color: white;
+      }
+      
+      .rating-record {
+        color: rgba(255, 255, 255, 0.7);
+        
+        .wins {
+          color: var(--success-color);
+        }
+        
+        .losses {
+          color: var(--warning-color);
+        }
+      }
+    }
+    
+    // Analytics section
+    .analytics-section {
+      background-color: #1e1e1e;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      
+      // Tab headers
+      .mat-mdc-tab-header {
+        background-color: #121212;
+      }
+      
+      // Tab background and layout
+      .mat-mdc-tab-group {
+        .mat-mdc-tab-header {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+      }
+      
+      // The individual tabs 
+      .mat-mdc-tab {
+        opacity: 0.7;
+        
+        &.mat-mdc-tab-active {
+          opacity: 1;
+        }
+        
+        // This targets the actual text content
+        .mdc-tab__text-label {
+          color: white !important;
+        }
+        
+        // For backwards compatibility
+        .mat-mdc-tab-label-content {
+          color: white !important;
+        }
+      }
+      
+      // The colored indicator bar under the active tab
+      .mat-mdc-ink-bar,
+      .mdc-tab-indicator__content--underline {
+        background-color: var(--primary-color-light) !important;
+        border-color: var(--primary-color-light) !important;
+      }
+      
+      // The tab label container
+      .mat-mdc-tab-labels,
+      .mat-mdc-tab-list {
+        .mat-mdc-tab {
+          opacity: 0.7;
+          
+          &.mat-mdc-tab-active {
+            opacity: 1;
+          }
+          
+          // Force white color on tab labels
+          .mdc-tab__text-label,
+          .mat-mdc-tab-label-content {
+            color: white !important;
+          }
+        }
+      }
+      
+      // Chart container
+      .chart-container {
+        background-color: transparent;
+      }
+      
+      .chart-wrapper {
+        .chart-title {
+          color: var(--primary-color-light);
+        }
+        
+        .chart-description {
+          color: rgba(255, 255, 255, 0.7);
+        }
+      }
+      
+      // Stacked bar chart
+      .stacked-bar-label {
+        color: white;
+      }
+      
+      .stacked-bar {
+        background-color: #333333;
+      }
+      
+      .stacked-bar-total {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      
+      // Win/loss segments
+      .win-segment {
+        background-color: var(--success-color);
+      }
+      
+      .loss-segment {
+        background-color: var(--warning-color);
+      }
+      
+      // Chart filters
+      .filter-label {
+        color: var(--text-primary);
+      }
+      
+      .filter-button {
+        background-color: #333333;
+        border-color: #444444;
+        color: white;
+        
+        &:hover:not(.active) {
+          background-color: #444444;
+        }
+        
+        &.active {
+          background-color: var(--primary-color);
+          border-color: var(--primary-color);
+        }
+      }
+      
+      // Game type buttons
+      .game-type-button.active {
+        color: white !important;
+      }
+      
+      // Canvas container
+      .chart-canvas-container {
+        background-color: #262626;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      
+      // Chart axes will now be handled in the component code directly
+      
+      // Chart loading overlay
+      .chart-loading-overlay {
+        background-color: rgba(0, 0, 0, 0.7);
+        
+        span {
+          color: white;
+        }
+      }
+      
+      // No data message
+      .no-data-message {
+        background-color: rgba(255, 255, 255, 0.03);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+        
+        mat-icon {
+          color: rgba(255, 255, 255, 0.3);
+        }
+        
+        p {
+          color: rgba(255, 255, 255, 0.7);
+        }
+        
+        button {
+          background-color: var(--primary-color);
+          color: white;
+        }
+      }
+      
+      // Chart stats
+      .chart-stats .stat-card {
+        background-color: #333333;
+        
+        .stat-title {
+          color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .stat-value {
+          color: white;
+        }
+        
+        .trend {
+          .trend-up {
+            color: var(--success-color);
+          }
+          
+          .trend-down {
+            color: var(--warning-color);
+          }
+          
+          .trend-stable {
+            color: #ff9800;
+          }
+        }
+      }
+      
+      // Rank highlight cards
+      .rank-highlight-stats .rank-highlight-card {
+        background-color: #333333;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        
+        .rank-position {
+          color: white;
+        }
+        
+        .rank-highlight-label {
+          color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .percentile-explanation {
+          color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .rank-change {
+          &.trend-up {
+            color: var(--success-color);
+          }
+          
+          &.trend-down {
+            color: var(--warning-color);
+          }
+        }
+      }
+      
+      // Distribution chart
+      .distribution-chart {
+        .donut-segment {
+          stroke-width: 20;
+        }
+        
+        .donut-chart-center {
+          color: white;
+        }
+        
+        .legend-label {
+          color: white;
+        }
+      }
+    }
+    
+    // Skills analysis
+    .skill-analysis {
+      background-color: #1e1e1e;
+      
+      h4 {
+        color: var(--primary-color-light);
+        
+        &::after {
+          background: linear-gradient(to right, var(--primary-color-light), rgba(var(--primary-color-rgb), 0.2));
+        }
+      }
+      
+      // Radar chart
+      .radar-chart-container {
+        // Apply filter to make chart more readable in dark mode
+        canvas {
+          filter: brightness(1.2) contrast(1.1);
+        }
+      }
+      
+      // Style ratings
+      .style-rating-item {
+        background-color: #262626;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        
+        .style-badge {
+          color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .style-rating-value {
+          background-color: rgba(255, 255, 255, 0.1);
+          color: white;
+        }
+        
+        .style-rating-bar {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .style-rating-description {
+          color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .style-level {
+          background-color: #333333;
+          color: white;
+        }
+      }
+      
+      .toggle-styles-button button {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--primary-color-light);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+        }
+      }
+      
+      // Recommendations
+      .recommendations-title {
+        color: var(--primary-color-light);
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+        
+        &::after {
+          background-color: var(--primary-color-light);
+        }
+      }
+      
+      .recommendation-item {
+        background-color: #262626;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        
+        strong {
+          background-color: rgba(255, 255, 255, 0.1);
+          color: white;
+        }
+      }
+    }
+    
+    // Recent games card
+    .recent-games-card, .ranking-card {
+      background-color: #262626;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      
+      // Card titles
+      mat-card-header {
+        .mat-mdc-card-title {
+          color: white !important;
+        }
+      }
+      
+      .section-header {
+        .section-icon {
+          color: var(--primary-color-light);
+        }
+      }
+      
+      // Game items
+      .game-item {
+        background-color: #333333;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        
+        &:hover {
+          background-color: #444444;
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        &.win-game {
+          border-left-color: var(--success-color);
+        }
+        
+        &.loss-game {
+          border-left-color: var(--warning-color);
+        }
+        
+        .game-header {
+          background-color: rgba(0, 0, 0, 0.2);
+          border-bottom-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .game-type, .game-date {
+          color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .game-content {
+          .score-value {
+            color: white;
+          }
+          
+          .score-separator {
+            color: rgba(255, 255, 255, 0.6);
+          }
+          
+          .game-result {
+            color: white;
+          }
+        }
+        
+        .game-footer {
+          border-top-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .view-game-link {
+          color: var(--primary-color-light);
+        }
+      }
+      
+      // No games message
+      .no-games {
+        h3 {
+          color: white;
+        }
+        
+        p {
+          color: rgba(255, 255, 255, 0.6);
+        }
+      }
+      
+      // Ranking metrics
+      .ranking-metrics .ranking-metric {
+        .position-number {
+          color: var(--primary-color-light);
+        }
+        
+        .metric-label {
+          color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .trend {
+          &.up-trend {
+            color: var(--success-color);
+          }
+          
+          &.down-trend {
+            color: var(--warning-color);
+          }
+          
+          &.stable-trend {
+            color: #ff9800;
+          }
+        }
+      }
+    }
+    
+    // Player search container
+    .player-search-container {
+      .search-field {
+        // MDC form field wrapper
+        .mat-mdc-text-field-wrapper {
+          background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        // Form field outline
+        .mat-mdc-form-field-outline {
+          color: rgba(255, 255, 255, 0.3);
+        }
+        
+        // Input text
+        input, .mat-mdc-input-element {
+          color: white !important;
+          caret-color: white !important;
+        }
+        
+        // Form field label
+        .mat-mdc-form-field-label, .mat-form-field-label {
+          color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        // Placeholder
+        ::placeholder {
+          color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        // Search icon
+        .mat-icon, .mat-mdc-form-field-icon-suffix {
+          color: white !important;
+        }
+      }
+      
+      // Autocomplete panel
+      .mat-mdc-autocomplete-panel {
+        background-color: #262626;
+        
+        .mat-mdc-option {
+          color: white;
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+        }
+      }
+    }
+    
+    // Back button
+    .back-to-profile {
+      button {
+        background-color: rgba(var(--primary-color-rgb), 0.2);
+        color: var(--primary-color-light);
+        
+        &:hover {
+          background-color: rgba(var(--primary-color-rgb), 0.3);
+        }
+        
+        mat-icon {
+          color: var(--primary-color-light);
+        }
+      }
+    }
+  }
+}

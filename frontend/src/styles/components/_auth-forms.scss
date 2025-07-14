@@ -1,0 +1,112 @@
+// src/styles/components/_auth-forms.scss
+@use '../abstracts/tokens';
+@use '../abstracts/mixins';
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 100px);
+  padding: var(--spacing-lg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  @include mixins.card-container;
+  padding: var(--spacing-lg);
+}
+
+.form-field {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin: var(--spacing-lg) 0 var(--spacing-md);
+}
+
+.auth-button {
+  width: 100%;
+  height: 48px;
+}
+
+.button-spinner {
+  margin: 0 auto;
+}
+
+.links-container {
+  @include mixins.flex-column;
+  margin-top: var(--spacing-md);
+  align-items: center;
+}
+
+.links-container a {
+  text-align: center;
+  margin: var(--spacing-xs) 0;
+  color: var(--primary-color);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.links-container mat-divider {
+  margin: var(--spacing-sm) 0;
+  width: 100%;
+}
+
+.helper-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+// Password strength meter
+.password-strength-container {
+  margin: var(--spacing-sm) 0 var(--spacing-lg);
+}
+
+.password-strength-label {
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-secondary);
+}
+
+.password-strength-meter {
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.password-strength-meter-fill {
+  height: 100%;
+  transition: width 0.3s ease-in-out;
+
+  &.weak {
+    background-color: var(--warning-color);
+  }
+
+  &.fair {
+    background-color: #ff9800;
+  }
+
+  &.good {
+    background-color: var(--primary-color);
+  }
+
+  &.strong {
+    background-color: var(--success-color);
+  }
+}
+
+.password-feedback {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}

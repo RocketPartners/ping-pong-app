@@ -1,0 +1,274 @@
+// src/styles/abstracts/_tokens.scss
+
+// Color System
+// Primary Colors
+$primary-color: #1976d2;
+$primary-color-light: #42a5f5;
+$primary-color-dark: #0d47a1;
+$primary-color-rgb: 25, 118, 210;
+
+// Secondary Colors
+$accent-color: #e91e63;
+$accent-color-light: #f48fb1;
+$accent-color-dark: #c2185b;
+$accent-color-rgb: 233, 30, 99;
+
+// Semantic Colors
+$warning-color: #f44336;
+$warning-color-light: #ef5350;
+$warning-color-dark: #d32f2f;
+
+$success-color: #4caf50;
+$success-color-light: #66bb6a;
+$success-color-dark: #388e3c;
+
+$info-color: #2196f3;
+$info-color-light: #64b5f6;
+$info-color-dark: #1565c0;
+
+$neutral-color: #607d8b;
+$neutral-color-light: #90a4ae;
+$neutral-color-dark: #455a64;
+
+// Grays
+$gray-50: #fafafa;
+$gray-100: #f5f5f5;
+$gray-200: #eeeeee;
+$gray-300: #e0e0e0;
+$gray-400: #bdbdbd;
+$gray-500: #9e9e9e;
+$gray-600: #757575;
+$gray-700: #616161;
+$gray-800: #424242;
+$gray-900: #212121;
+
+// Rating level colors
+$rating-beginner: #78909c;
+$rating-novice: #4caf50;
+$rating-intermediate: #2196f3;
+$rating-advanced: #9c27b0;
+$rating-expert: #f9a825;
+
+// Win rate colors
+$win-rate-struggling: #f44336;
+$win-rate-poor: #ff9800;
+$win-rate-average: #ffc107;
+$win-rate-good: #4caf50;
+$win-rate-excellent: #2196f3;
+
+// Style colors - for player styles
+$style-spin: #2196f3;
+$style-power: #f44336;
+$style-creative: #9c27b0;
+$style-aggressive: #ff5722;
+$style-resilient: #4caf50;
+$style-ace: #ffc107;
+$style-rally: #795548;
+$style-tactician: #607d8b;
+$style-sportsmanship: #8bc34a;
+$style-aura: #673ab7;
+
+// Spacing
+$spacing-unit: 4px;
+$spacing-xxs: calc($spacing-unit / 2);
+$spacing-xs: $spacing-unit;
+$spacing-sm: $spacing-unit * 2;
+$spacing-md: $spacing-unit * 4;
+$spacing-lg: $spacing-unit * 6;
+$spacing-xl: $spacing-unit * 8;
+$spacing-xxl: $spacing-unit * 12;
+
+// Typography
+$font-family-base: Roboto, "Helvetica Neue", sans-serif;
+$font-size-xxs: 10px;
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-md: 16px;
+$font-size-lg: 20px;
+$font-size-xl: 24px;
+$font-size-xxl: 32px;
+
+// Font weights
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+// Line heights
+$line-height-sm: 1.2;
+$line-height-md: 1.5;
+$line-height-lg: 1.8;
+
+// Border radius
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-circle: 50%;
+
+// Shadows
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+$shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.25);
+
+// Z-indices
+$z-index-default: 1;
+$z-index-dropdown: 1000;
+$z-index-fixed: 1030;
+$z-index-modal: 1050;
+$z-index-tooltip: 1070;
+
+// Breakpoints
+$breakpoint-xs: 0;
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+$breakpoint-xxl: 1400px;
+
+// Transitions
+$transition-speed-fast: 0.15s;
+$transition-speed-normal: 0.3s;
+$transition-speed-slow: 0.5s;
+$transition-timing-default: ease;
+$transition-timing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+$transition-default: all $transition-speed-normal $transition-timing-default;
+
+// CSS Custom Properties
+:root {
+  // Core colors
+  --primary-color: #{$primary-color};
+  --primary-color-light: #{$primary-color-light};
+  --primary-color-dark: #{$primary-color-dark};
+  --primary-color-rgb: #{$primary-color-rgb};
+
+  --accent-color: #{$accent-color};
+  --accent-color-light: #{$accent-color-light};
+  --accent-color-dark: #{$accent-color-dark};
+  --accent-color-rgb: #{$accent-color-rgb};
+
+  --warning-color: #{$warning-color};
+  --warning-color-light: #{$warning-color-light};
+  --warning-color-dark: #{$warning-color-dark};
+
+  --success-color: #{$success-color};
+  --success-color-light: #{$success-color-light};
+  --success-color-dark: #{$success-color-dark};
+
+  --info-color: #{$info-color};
+  --info-color-light: #{$info-color-light};
+  --info-color-dark: #{$info-color-dark};
+
+  --neutral-color: #{$neutral-color};
+  --neutral-color-light: #{$neutral-color-light};
+  --neutral-color-dark: #{$neutral-color-dark};
+
+  // Grays
+  --gray-50: #{$gray-50};
+  --gray-100: #{$gray-100};
+  --gray-200: #{$gray-200};
+  --gray-300: #{$gray-300};
+  --gray-400: #{$gray-400};
+  --gray-500: #{$gray-500};
+  --gray-600: #{$gray-600};
+  --gray-700: #{$gray-700};
+  --gray-800: #{$gray-800};
+  --gray-900: #{$gray-900};
+
+  // Rating colors
+  --rating-beginner: #{$rating-beginner};
+  --rating-novice: #{$rating-novice};
+  --rating-intermediate: #{$rating-intermediate};
+  --rating-advanced: #{$rating-advanced};
+  --rating-expert: #{$rating-expert};
+
+  // Win rate colors
+  --win-rate-struggling: #{$win-rate-struggling};
+  --win-rate-poor: #{$win-rate-poor};
+  --win-rate-average: #{$win-rate-average};
+  --win-rate-good: #{$win-rate-good};
+  --win-rate-excellent: #{$win-rate-excellent};
+
+  // Player style colors
+  --style-spin: #{$style-spin};
+  --style-power: #{$style-power};
+  --style-creative: #{$style-creative};
+  --style-aggressive: #{$style-aggressive};
+  --style-resilient: #{$style-resilient};
+  --style-ace: #{$style-ace};
+  --style-rally: #{$style-rally};
+  --style-tactician: #{$style-tactician};
+  --style-sportsmanship: #{$style-sportsmanship};
+  --style-aura: #{$style-aura};
+
+  // UI colors
+  --background-color: #{$gray-100};
+  --surface-color: #ffffff;
+  --card-background: #ffffff;
+  --text-color-primary: #{$gray-900};
+  --text-color-secondary: #{$gray-700};
+  --border-color: #{$gray-300};
+
+  // Game colors
+  --challenger-color: #{$primary-color};
+  --opponent-color: #{$accent-color};
+  --singles-ranked-color: #{$info-color};
+  --doubles-ranked-color: #{$success-color};
+  --singles-normal-color: #{$neutral-color};
+  --doubles-normal-color: #{$neutral-color-light};
+  --win-color: #{$success-color};
+  --loss-color: #{$warning-color};
+
+  // Spacing
+  --spacing-xxs: #{$spacing-xxs};
+  --spacing-xs: #{$spacing-xs};
+  --spacing-sm: #{$spacing-sm};
+  --spacing-md: #{$spacing-md};
+  --spacing-lg: #{$spacing-lg};
+  --spacing-xl: #{$spacing-xl};
+  --spacing-xxl: #{$spacing-xxl};
+
+  // Typography
+  --font-family-base: #{$font-family-base};
+  --font-size-xxs: #{$font-size-xxs};
+  --font-size-xs: #{$font-size-xs};
+  --font-size-sm: #{$font-size-sm};
+  --font-size-md: #{$font-size-md};
+  --font-size-lg: #{$font-size-lg};
+  --font-size-xl: #{$font-size-xl};
+  --font-size-xxl: #{$font-size-xxl};
+
+  // Font weights
+  --font-weight-normal: #{$font-weight-normal};
+  --font-weight-medium: #{$font-weight-medium};
+  --font-weight-bold: #{$font-weight-bold};
+
+  // Line heights
+  --line-height-sm: #{$line-height-sm};
+  --line-height-md: #{$line-height-md};
+  --line-height-lg: #{$line-height-lg};
+
+  // Border radius
+  --border-radius-sm: #{$border-radius-sm};
+  --border-radius-md: #{$border-radius-md};
+  --border-radius-lg: #{$border-radius-lg};
+
+  // Shadows
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
+
+  // Z-indices
+  --z-index-default: #{$z-index-default};
+  --z-index-dropdown: #{$z-index-dropdown};
+  --z-index-fixed: #{$z-index-fixed};
+  --z-index-modal: #{$z-index-modal};
+  --z-index-tooltip: #{$z-index-tooltip};
+
+  // Transitions
+  --transition-speed-fast: #{$transition-speed-fast};
+  --transition-speed-normal: #{$transition-speed-normal};
+  --transition-speed-slow: #{$transition-speed-slow};
+  --transition-timing-default: #{$transition-timing-default};
+  --transition-default: #{$transition-default};
+}

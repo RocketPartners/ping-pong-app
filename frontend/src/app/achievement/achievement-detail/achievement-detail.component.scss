@@ -1,0 +1,103 @@
+// src/app/achievement/achievement-detail/achievement-detail.component.scss
+@use '../../../styles/abstracts/mixins';
+
+.achievement-detail-side-drawer {
+  @include mixins.side-drawer('right', 480px);
+
+  // Apply achievement card variants using our mixin
+  &.achievement-easy {
+    @include mixins.achievement-card-variant('easy');
+  }
+
+  &.achievement-medium {
+    @include mixins.achievement-card-variant('medium');
+  }
+
+  &.achievement-hard {
+    @include mixins.achievement-card-variant('hard');
+  }
+
+  &.achievement-legendary {
+    @include mixins.achievement-card-variant('legendary');
+  }
+}
+
+// No need to redefine drawer header, content and footer
+// as they are included in the side-drawer mixin
+
+.achievement-header {
+  display: flex;
+  margin-bottom: var(--spacing-lg);
+  align-items: center;
+
+  .achievement-icon-container {
+    margin-right: var(--spacing-lg);
+    flex-shrink: 0;
+
+    .achievement-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      @include mixins.flex-center;
+
+      &.achievement-easy {
+        background-color: var(--rating-novice);
+      }
+
+      &.achievement-medium {
+        background-color: var(--rating-intermediate);
+      }
+
+      &.achievement-hard {
+        background-color: var(--rating-advanced);
+      }
+
+      &.achievement-legendary {
+        background: linear-gradient(135deg, #ffd700, #ff8f00);
+      }
+
+      mat-icon {
+        font-size: 32px;
+        height: 32px;
+        width: 32px;
+        color: white;
+      }
+    }
+  }
+}
+
+/* Responsive adjustments */
+@include mixins.responsive-md {
+  .achievement-detail-side-drawer {
+    max-width: 100%;
+  }
+
+  .achievement-header {
+    flex-direction: column;
+    text-align: center;
+
+    .achievement-icon-container {
+      margin-right: 0;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .achievement-title-container {
+      .achievement-meta {
+        justify-content: center;
+      }
+    }
+  }
+
+  .achievement-status {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .status-info {
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .earned-date {
+      align-self: flex-start;
+    }
+  }
+}

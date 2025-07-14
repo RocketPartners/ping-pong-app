@@ -1,0 +1,13 @@
+<div [ngClass]="['profile-avatar', 'size-' + size, clickable ? 'clickable' : '']"
+     [style.background-color]="hasProfileImage() ? getProfileIconColor() : getRatingBackgroundColor()">
+
+  <!-- Show icon if profile image exists -->
+  <ng-container *ngIf="hasProfileImage(); else initialsTemplate">
+    <mat-icon>{{ getProfileIconName() }}</mat-icon>
+  </ng-container>
+
+  <!-- Fallback to initials -->
+  <ng-template #initialsTemplate>
+    <span class="initials">{{ getInitials() }}</span>
+  </ng-template>
+</div>

@@ -1,0 +1,185 @@
+/* Base style badge classes */
+.style-badge {
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.style-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.style-badge-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style badge for each style type */
+.style-spin {
+  background-color: #2196f3;
+}
+
+.style-power {
+  background-color: #f44336;
+}
+
+.style-creative {
+  background-color: #9c27b0;
+}
+
+.style-aggressive {
+  background-color: #ff5722;
+}
+
+.style-resilient {
+  background-color: #4caf50;
+}
+
+.style-ace_master, .style-ace {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.style-rally_king, .style-rally {
+  background-color: #795548;
+}
+
+.style-tactician {
+  background-color: #607d8b;
+}
+
+/* New style rating specific classes */
+.style-badge-with-rating {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin: 4px;
+}
+
+.style-name {
+  margin-bottom: 2px;
+}
+
+.style-rating {
+  font-size: 9px;
+  text-align: right;
+  opacity: 0.9;
+}
+
+/* Style rating progress bars */
+.style-rating-bar {
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.style-rating-progress {
+  height: 100%;
+  border-radius: 4px;
+}
+
+/* Style rating levels */
+.style-rating-beginner {
+  opacity: 0.6;
+}
+
+.style-rating-novice {
+  opacity: 0.7;
+}
+
+.style-rating-intermediate {
+  opacity: 0.8;
+}
+
+.style-rating-advanced {
+  opacity: 0.9;
+}
+
+.style-rating-expert {
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5) inset;
+}
+
+/* Skill radar chart */
+.style-ratings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.style-rating-item {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.style-rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.style-rating-value {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.style-rating-description {
+  font-size: 12px;
+  color: #555;
+  margin-top: 4px;
+}
+
+.style-level {
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+/* Radar chart enhancements */
+.radar-shape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(33, 150, 243, 0.5);
+  border: 2px solid #2196f3;
+  transition: all 0.3s ease;
+}
+
+.recommendations-title {
+  margin-top: 24px;
+  margin-bottom: 8px;
+  color: #1976d2;
+}
+
+.recommendations-list {
+  padding-left: 20px;
+}
+
+.recommendation-item {
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}

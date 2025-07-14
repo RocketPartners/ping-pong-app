@@ -1,0 +1,68 @@
+<div [ngClass]="categoryClass" class="achievement-detail-side-drawer">
+  <div class="drawer-header">
+    <h2>Achievement Details</h2>
+    <button (click)="close()" mat-icon-button>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="drawer-content">
+    <div class="achievement-header">
+      <div class="achievement-icon-container">
+        <div [ngClass]="categoryClass" class="achievement-icon">
+          <mat-icon>{{ getIconName() }}</mat-icon>
+        </div>
+      </div>
+
+      <div class="achievement-title-container">
+        <h3 class="achievement-title">{{ achievementData.achievement.name }}</h3>
+        <div class="achievement-meta">
+          <span class="achievement-category">{{ achievementData.achievement.category }}</span>
+          <span class="achievement-points">{{ achievementData.achievement.points }} points</span>
+        </div>
+      </div>
+    </div>
+
+    <div [ngClass]="isAchieved ? 'achieved' : 'locked'" class="achievement-status">
+      <div class="status-info">
+        <mat-icon>{{ isAchieved ? 'check_circle' : 'lock' }}</mat-icon>
+        <span>{{ isAchieved ? 'Achievement Unlocked' : 'Achievement Locked' }}</span>
+      </div>
+      <div *ngIf="isAchieved && achievementData.playerProgress.dateEarned" class="earned-date">
+        Earned on {{ achievementData.playerProgress.dateEarned | date:'medium' }}
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="achievement-details">
+      <h4>Description</h4>
+      <p class="achievement-description">{{ achievementData.achievement.description }}</p>
+
+      <h4>Criteria</h4>
+      <p class="achievement-criteria">{{ formatCriteria(achievementData.achievement.criteria) }}</p>
+
+      <div class="achievement-progress">
+        <h4>Progress</h4>
+        <mat-progress-bar
+          [mode]="isAchieved ? 'determinate' : 'determinate'"
+          [value]="achievementData.percentComplete">
+        </mat-progress-bar>
+
+        <div class="progress-text">
+          <span *ngIf="isAchieved">Complete</span>
+          <span *ngIf="!isAchieved">{{ achievementData.percentComplete | number:'1.0-0' }}% Complete</span>
+        </div>
+      </div>
+
+      <div class="achievement-type">
+        <h4>Type</h4>
+        <p>{{ achievementData.achievement.type === AchievementType.ONE_TIME ? 'One-time achievement' : 'Progressive achievement' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button (click)="close()" mat-button>Close</button>
+  </div>
+</div>

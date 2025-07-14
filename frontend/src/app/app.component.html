@@ -1,0 +1,152 @@
+<mat-toolbar
+  [style.background-color]="playerColor || '#3f51b5'"
+  [style.color]="playerColor ? '#ffffff' : null"
+  class="main-toolbar">
+  <button (click)="sidenav.toggle()" *ngIf="authenticatedPlayer" mat-icon-button>
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span class="app-title">{{ appName }}</span>
+
+  <span class="spacer"></span>
+
+  <button *ngIf="!authenticatedPlayer" mat-button routerLink="/login">Login</button>
+  <button *ngIf="!authenticatedPlayer" mat-button routerLink="/register">Register</button>
+
+  <!-- Theme Toggle - available to everyone -->
+  <app-theme-toggle class="theme-toggle-icon"></app-theme-toggle>
+
+  <!-- Add achievement notifications -->
+  <app-achievement-notifications *ngIf="authenticatedPlayer"></app-achievement-notifications>
+  <app-review-notifications *ngIf="authenticatedPlayer"></app-review-notifications>
+
+  <button *ngIf="authenticatedPlayer" [matMenuTriggerFor]="userMenu" class="user-menu-trigger" mat-icon-button>
+    <app-profile-avatar [player]="authenticatedPlayer.player" class="centered-avatar" size="md"></app-profile-avatar>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    <div *ngIf="authenticatedPlayer && authenticatedPlayer.player" class="user-menu-header">
+      <div class="user-info">
+        <div class="user-name">{{ authenticatedPlayer.player.firstName }} {{ authenticatedPlayer.player.lastName }}
+        </div>
+        <p class="profile-username">{{ '@' + authenticatedPlayer.player.username }}</p>
+      </div>
+    </div>
+    <mat-divider></mat-divider>
+
+    <button mat-menu-item routerLink="/profile-settings">
+      <mat-icon>settings</mat-icon>
+      <span>Profile Settings</span>
+    </button>
+
+    <button mat-menu-item routerLink="/">
+      <mat-icon>home</mat-icon>
+      <span>Home</span>
+    </button>
+    <button mat-menu-item routerLink="/statistics">
+      <mat-icon>bar_chart</mat-icon>
+      <span>My Statistics</span>
+    </button>
+
+    <!-- Add achievements menu item -->
+    <button mat-menu-item routerLink="/achievements">
+      <mat-icon>emoji_events</mat-icon>
+      <span>Achievements</span>
+    </button>
+
+    <button mat-menu-item routerLink="/tournaments">
+      <mat-icon>emoji_events</mat-icon>
+      <span>Tournaments</span>
+    </button>
+
+    <button mat-menu-item routerLink="/live-matches">
+      <mat-icon>live_tv</mat-icon>
+      <span>Live Matches</span>
+    </button>
+
+    <button mat-menu-item routerLink="/slack-integration">
+      <mat-icon>chat</mat-icon>
+      <span>Slack Integration</span>
+    </button>
+
+    <mat-divider></mat-divider>
+    <button (click)="logout()" mat-menu-item>
+      <mat-icon>exit_to_app</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>
+
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav class="sidenav" fixedInViewport="true" mode="over">
+    <div class="sidenav-header">
+      <div class="app-name">{{ appName }}</div>
+      <div class="app-version">v{{ appVersion }}</div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <mat-nav-list>
+      <a [routerLinkActiveOptions]="{exact: true}" mat-list-item routerLink="/" routerLinkActive="active-route">
+        <mat-icon matListItemIcon>home</mat-icon>
+        <span matListItemTitle>Home</span>
+      </a>
+
+      <a mat-list-item routerLink="/leaderboard" routerLinkActive="active-route">
+        <mat-icon matListItemIcon>leaderboard</mat-icon>
+        <span matListItemTitle>Leaderboard</span>
+      </a>
+
+      <a mat-list-item routerLink="/match-builder" routerLinkActive="active-route">
+        <mat-icon matListItemIcon>sports_tennis</mat-icon>
+        <span matListItemTitle>Create Match</span>
+      </a>
+
+      <a mat-list-item routerLink="/live-matches" routerLinkActive="active-route">
+        <mat-icon matListItemIcon>live_tv</mat-icon>
+        <span matListItemTitle>Live Matches</span>
+      </a>
+
+      <a mat-list-item routerLink="/slack-integration" routerLinkActive="active-route">
+        <mat-icon matListItemIcon>chat</mat-icon>
+        <span matListItemTitle>Slack Integration</span>
+      </a>
+
+      <!-- Add achievements menu item to sidebar -->
+      <a mat-list-item routerLink="/achievements" routerLinkActive="active-route">
+        <mat-icon matListItemIcon>emoji_events</mat-icon>
+        <span matListItemTitle>Achievements</span>
+      </a>
+
+      <a mat-list-item routerLink="/tournaments" routerLinkActive="active-route">
+        <mat-icon matListItemIcon>emoji_events</mat-icon>
+        <span matListItemTitle>Tournaments</span>
+      </a>
+
+      <a mat-list-item routerLink="/statistics" routerLinkActive="active-route">
+        <mat-icon matListItemIcon>bar_chart</mat-icon>
+        <span matListItemTitle>My Statistics</span>
+      </a>
+    </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <!-- Theme toggle in sidebar -->
+      <button (click)="toggleTheme()" class="theme-toggle-button" mat-button>
+        <mat-icon>{{ currentTheme === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        <span>{{ currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+      </button>
+      
+      <button (click)="logout()" class="logout-button" mat-button>
+        <mat-icon>exit_to_app</mat-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div class="content-container">
+      <alert></alert>
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

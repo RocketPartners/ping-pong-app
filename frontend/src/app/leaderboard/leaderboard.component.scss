@@ -1,0 +1,559 @@
+// src/app/leaderboard/leaderboard.component.scss
+@use '../../styles/abstracts/mixins';
+
+// Main container
+.leaderboard-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg) auto;
+  background-color: var(--background-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+// Header section
+.leaderboard-header {
+  @include mixins.flex-between;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+
+  .title-section {
+    .main-title {
+      font-size: var(--font-size-xxl);
+      font-weight: var(--font-weight-bold);
+      margin: 0;
+      color: var(--primary-color);
+      position: relative;
+      line-height: var(--line-height-sm);
+    }
+
+    .subtitle {
+      margin: var(--spacing-xs) 0 0;
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+    }
+  }
+
+  .actions-section {
+    @include mixins.flex-center;
+    gap: var(--spacing-sm);
+
+    .search-field {
+      min-width: 200px;
+      max-width: 300px;
+    }
+  }
+}
+
+// Section titles inside tabs
+.section-title {
+  @include mixins.section-title;
+  
+  // Only white in dark mode
+  .dark-theme & {
+    color: white !important;
+  }
+}
+
+// White headers in dark mode using direct styling
+.dark-theme .dark-headers {
+  th {
+    color: white !important;
+  }
+  
+  .mat-sort-header-container {
+    color: white !important;
+  }
+  
+  .mat-sort-header-content {
+    color: white !important;
+  }
+  
+  .mat-sort-header-arrow {
+    color: white !important;
+  }
+  
+  .mat-sort-header {
+    &:hover {
+      color: white !important;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+// Label color overrides - only in dark mode
+.dark-theme .mat-tab-label {
+  color: white !important;
+  
+  .mat-tab-label-content {
+    color: white !important;
+  }
+}
+
+// Search field styling for dark mode
+.dark-theme .leaderboard-container {
+  .search-field {
+    // Input element
+    input {
+      color: white !important;
+    }
+    
+    // Label above the input
+    .mat-mdc-form-field-label {
+      color: white !important;
+    }
+    
+    // Placeholder text
+    ::placeholder {
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+    
+    // Search icon
+    .mat-icon {
+      color: white !important;
+    }
+  }
+}
+
+// Container for forcing white text in dark mode only
+.dark-theme .white-text-container {
+  // Apply to all text within the container
+  h1, h2, h3, h4, h5, h6, p, span, th, td, div, button, a {
+    color: white !important;
+  }
+  
+  // Material components with custom color properties
+  .mat-sort-header-arrow, 
+  .mat-sort-header-container,
+  .mat-sort-header-content,
+  .mat-tab-label,
+  .mat-tab-label-content,
+  .mat-header-cell,
+  .mat-cell {
+    color: white !important;
+  }
+  
+  // Tab ink bar
+  .mat-ink-bar {
+    background-color: white !important;
+  }
+}
+
+// Loading overlay
+.loading-overlay {
+  @include mixins.flex-center;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: var(--z-index-dropdown);
+  min-height: 300px;
+  backdrop-filter: blur(2px);
+  border-radius: var(--border-radius-md);
+
+  .loading-text {
+    margin-top: var(--spacing-md);
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+// No data message
+.no-data-message {
+  @include mixins.flex-center;
+  flex-direction: column;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  text-align: center;
+  color: var(--text-secondary);
+  min-height: 250px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-md);
+  margin: var(--spacing-md);
+
+  mat-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.4;
+    color: var(--text-secondary);
+  }
+
+  p {
+    font-size: var(--font-size-lg);
+    margin: 0 0 var(--spacing-lg);
+    max-width: 400px;
+    color: var(--text-secondary);
+  }
+  
+  button {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--primary-color-light);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+}
+
+// Table container (holds table and paginator)
+.table-container {
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--card-background);
+  margin-bottom: var(--spacing-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+// Table styling
+.rankings-table {
+  width: 100%;
+
+  th.mat-header-cell {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+
+  // Position column styling
+  .position-cell {
+    @include mixins.flex-center;
+    gap: var(--spacing-sm);
+    font-weight: var(--font-weight-bold);
+    min-width: 50px;
+
+    mat-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
+    .gold-medal {
+      color: #f9a602;
+    }
+
+    .silver-medal {
+      color: var(--gray-500);
+    }
+
+    .bronze-medal {
+      color: #cd7f32;
+    }
+  }
+
+  // Player column styling
+  .player-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    padding: var(--spacing-sm) 0;
+
+    .player-avatar {
+      @include mixins.avatar('sm');
+      background-color: var(--primary-color);
+      border: 2px solid white;
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    }
+
+    // Specific avatar colors for medals
+    .gold-medal {
+      background: linear-gradient(45deg, #f9a602, #ffd700);
+      color: #333;
+    }
+
+    .silver-medal {
+      background: linear-gradient(45deg, #c0c0c0, #e8e8e8);
+      color: #333;
+    }
+
+    .bronze-medal {
+      background: linear-gradient(45deg, #cd7f32, #e09a60);
+      color: #fff;
+    }
+
+    .player-info {
+      @include mixins.flex-column;
+      line-height: var(--line-height-sm);
+
+      .player-name {
+        font-weight: var(--font-weight-medium);
+        font-size: var(--font-size-sm);
+        color: var(--text-primary);
+      }
+
+      .player-username {
+        font-size: var(--font-size-xs);
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  // Rating styling
+  .rating-value {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    color: var(--primary-color);
+  }
+
+  // Win rate styling
+  .win-rate-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    .win-rate-bar {
+      width: 80px;
+      height: 8px;
+      background-color: var(--gray-300);
+      border-radius: 4px;
+      overflow: hidden;
+
+      .win-rate-progress {
+        height: 100%;
+        background-color: var(--success-color);
+        border-radius: 4px;
+        transition: width 0.3s ease-in-out;
+      }
+    }
+
+    span {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      min-width: 36px;
+    }
+  }
+
+  // Styles column
+  .styles-container {
+    display: flex;
+    align-items: center;
+
+    .fanned-icons {
+      position: relative;
+      height: 36px;
+      width: 90px; // Enough width for up to 3 icons with overlap
+
+      .fanned-style-icon {
+        position: absolute;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+        border-radius: 50%;
+        background-color: white;
+        color: inherit; /* Ensure color is inherited properly */
+        text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+        padding: 5px;
+        transition: all 0.2s ease-in-out;
+        top: 0;
+        transform-origin: center center;
+
+        &:hover {
+          transform: translateY(-5px) scale(1.2) rotate(0deg) !important;
+          filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+          z-index: 10 !important; // Override when hovered
+          background-color: white;
+        }
+      }
+    }
+
+    .no-styles {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+  }
+
+  // Row styling with enhanced hover effects
+  tr.mat-row.player-row {
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 60px;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+      background-color: rgba(var(--primary-color-rgb), 0.05);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      z-index: 2;
+      
+      // Hover effect for player cell
+      .player-cell {
+        .player-avatar {
+          transform: scale(1.1);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+        
+        .player-info {
+          transform: translateX(4px);
+        }
+      }
+      
+      // Hover effect for rating and other cells
+      .rating-value {
+        color: var(--primary-color-dark);
+        font-weight: var(--font-weight-bold);
+        transform: scale(1.1);
+      }
+      
+      // Style icons expand on hover
+      .styles-container .fanned-icons {
+        transform: scale(1.05);
+      }
+    }
+    
+    // Add subtle hover indicator
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background-color: transparent;
+      transition: background-color 0.3s ease;
+    }
+    
+    &:hover::after {
+      background-color: var(--primary-color);
+    }
+  }
+
+  // Cell padding
+  td.mat-cell {
+    padding: 0 var(--spacing-sm);
+  }
+
+  // Highlight top rows without animation
+  .top-three-row {
+    border-left: 3px solid var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.03);
+  }
+
+  .first-place-row {
+    border-left: 3px solid #f9a602;
+    background-color: rgba(249, 166, 2, 0.05);
+    
+    td.mat-cell:first-child {
+      font-weight: bold;
+    }
+    
+    // No animation for first place
+    .position-cell {
+      position: relative;
+    }
+  }
+}
+
+// Paginator styling
+mat-paginator {
+  border-top: 1px solid var(--border-color);
+}
+
+// Responsive styles
+@media (max-width: 960px) {
+  .rankings-table {
+    .mat-column-losses {
+      display: none;
+    }
+  }
+}
+
+@include mixins.responsive-md {
+  .leaderboard-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    .actions-section {
+      width: 100%;
+      flex-direction: column;
+
+      .search-field {
+        width: 100%;
+        max-width: none;
+      }
+
+      button {
+        align-self: flex-end;
+      }
+    }
+  }
+
+  .rankings-table {
+    .mat-column-wins {
+      display: none;
+    }
+
+    // Keep styles column but adjust
+    .styles-container {
+      .fanned-icons {
+        width: 70px;
+
+        .fanned-style-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          padding: 4px;
+        }
+      }
+    }
+
+    th.mat-header-cell, td.mat-cell {
+      padding: 0 var(--spacing-sm);
+    }
+
+    .player-cell {
+      .player-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+      }
+
+      .player-info .player-name {
+        font-size: var(--font-size-xs);
+      }
+
+      .player-info .player-username {
+        display: none;
+      }
+    }
+
+    .win-rate-cell .win-rate-bar {
+      width: 60px;
+    }
+  }
+}
+
+@include mixins.responsive-sm {
+  .leaderboard-container {
+    padding: var(--spacing-md);
+  }
+
+  .leaderboard-header .title-section .main-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .rankings-table {
+    th.mat-header-cell {
+      font-size: var(--font-size-xs);
+    }
+
+    td.mat-cell {
+      font-size: var(--font-size-sm);
+    }
+
+    .player-cell {
+      gap: var(--spacing-sm);
+    }
+  }
+}

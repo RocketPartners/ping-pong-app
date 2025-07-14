@@ -1,0 +1,47 @@
+// src/styles/components/_avatars.scss
+@use '../abstracts/tokens';
+@use '../abstracts/mixins';
+
+.profile-avatar {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+
+  // Size variations
+  &.size-xs {
+    @include mixins.avatar('xs');
+  }
+
+  &.size-sm {
+    @include mixins.avatar('sm');
+  }
+
+  &.size-md {
+    @include mixins.avatar('md');
+  }
+
+  &.size-lg {
+    @include mixins.avatar('lg');
+  }
+
+  &.size-xl {
+    @include mixins.avatar('xl');
+  }
+
+  &.size-xxl {
+    @include mixins.avatar('xxl');
+  }
+
+  // Clickable behavior
+  &.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+}

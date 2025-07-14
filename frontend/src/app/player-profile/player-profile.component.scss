@@ -1,0 +1,254 @@
+// src/app/player-profile/player-profile.component.scss
+@use '../../styles/abstracts/mixins';
+
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  background-color: rgba(var(--warning-color-rgb), 0.1);
+  color: var(--warning-color-dark);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-lg);
+
+  mat-icon {
+    margin-right: var(--spacing-sm);
+  }
+}
+
+.profile-header {
+  @include mixins.card-container;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+}
+
+.profile-avatar {
+  @include mixins.avatar('lg');
+  background-color: var(--primary-color);
+  margin-right: var(--spacing-lg);
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--primary-color);
+}
+
+.profile-username {
+  font-size: var(--font-size-md);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.profile-since {
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.player-styles {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: var(--spacing-md);
+  gap: var(--spacing-xs);
+}
+
+.style-chip {
+  @include mixins.badge-base;
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  color: var(--primary-color);
+}
+
+.rating-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.rating-card {
+  @include mixins.card-container;
+  padding: var(--spacing-md);
+
+  mat-card-header {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .rating-value {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .win-loss-record {
+    text-align: center;
+    font-size: var(--font-size-md);
+  }
+
+  .wins {
+    color: var(--success-color);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .losses {
+    color: var(--warning-color);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .win-rate {
+    color: var(--text-secondary);
+    margin-left: var(--spacing-sm);
+  }
+}
+
+.recent-games-section h2 {
+  @include mixins.section-title;
+}
+
+.no-games-message {
+  display: flex;
+  align-items: center;
+  background-color: rgba(var(--success-color-rgb), 0.1);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  color: var(--success-color-dark);
+
+  mat-icon {
+    margin-right: var(--spacing-sm);
+  }
+}
+
+.games-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.game-card {
+  position: relative;
+  overflow: hidden;
+  @include mixins.card-container;
+
+  &.win-game {
+    border-left: 4px solid var(--success-color);
+  }
+
+  &.loss-game {
+    border-left: 4px solid var(--warning-color);
+  }
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.game-type {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.game-result {
+  font-weight: var(--font-weight-medium);
+}
+
+.win-game .game-result {
+  color: var(--success-color);
+}
+
+.loss-game .game-result {
+  color: var(--warning-color);
+}
+
+.game-content {
+  padding: var(--spacing-md);
+}
+
+.score-display {
+  @include mixins.flex-center;
+  margin-bottom: var(--spacing-md);
+}
+
+.challenger-score, .opponent-score {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.win-game .challenger-score {
+  color: var(--success-color);
+}
+
+.loss-game .opponent-score {
+  color: var(--warning-color);
+}
+
+.score-separator {
+  margin: 0 var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  color: var(--gray-500);
+}
+
+.game-details {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.game-footer {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  text-align: right;
+}
+
+.view-details-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+
+  mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+    margin-left: var(--spacing-xs);
+  }
+}
+
+/* Responsive adjustments */
+@include mixins.responsive-md {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    margin-right: 0;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .player-styles {
+    justify-content: center;
+  }
+
+  .games-list {
+    grid-template-columns: 1fr;
+  }
+}

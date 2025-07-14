@@ -1,0 +1,73 @@
+// src/styles/base/_animations.scss
+
+// Fade in animation
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// Scale in animation
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+// Slide in from bottom animation
+@keyframes slideInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+// Rotate animation
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// Pulse animation
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+// Skeleton loading animations
+@keyframes skeleton-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.6; }
+}
+
+@keyframes skeleton-wave {
+  0% { transform: translateX(-100%); }
+  50%, 100% { transform: translateX(100%); }
+}
+
+// Define common animations as utility classes
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+// Variable for defining CSS vars in :root
+:root {
+  --animation-speed-slow: 0.5s;
+  --animation-speed-normal: 0.3s;
+  --animation-speed-fast: 0.15s;
+  --animation-timing-function: ease;
+  
+  // Skeleton colors
+  --skeleton-background: rgba(0, 0, 0, 0.11);
+}
+
+// Dark theme skeleton colors
+:root.dark-theme {
+  --skeleton-background: rgba(255, 255, 255, 0.06);
+}

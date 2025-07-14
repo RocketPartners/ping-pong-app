@@ -1,0 +1,123 @@
+// Angular Material form field dark theme overrides
+
+// Better alternatives to ::ng-deep for styling Angular Material components
+
+// Dark theme styling for form fields, inputs, selects, etc.
+.dark-theme {
+  // Global style for all form fields in dark mode
+  .mat-form-field-appearance-outline {
+    // Form field label colors
+    .mat-form-field-label {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    // Input text color
+    .mat-input-element {
+      color: white !important;
+      caret-color: white !important;
+    }
+    
+    // Placeholder text
+    .mat-input-element::placeholder {
+      color: rgba(255, 255, 255, 0.5) !important;
+    }
+    
+    // Select arrow
+    .mat-select-arrow {
+      color: white !important;
+    }
+    
+    // Select value text
+    .mat-select-value-text {
+      color: white !important;
+    }
+    
+    // Form field outline
+    .mat-form-field-outline {
+      color: rgba(255, 255, 255, 0.5) !important;
+    }
+    
+    .mat-form-field-outline-start,
+    .mat-form-field-outline-gap,
+    .mat-form-field-outline-end {
+      color: rgba(255, 255, 255, 0.5) !important;
+      opacity: 1 !important;
+    }
+    
+    // Focused outline
+    &.mat-focused .mat-form-field-outline {
+      color: white !important;
+      opacity: 1 !important;
+    }
+    
+    // Required marker
+    .mat-form-field-required-marker {
+      color: var(--warning-color) !important;
+    }
+    
+    // Icon suffix
+    .mat-icon {
+      color: white !important;
+    }
+  }
+  
+  // Select panel (dropdown)
+  .mat-select-panel {
+    background-color: #333333 !important;
+    
+    .mat-option {
+      color: white !important;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+      
+      &.mat-selected {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+      }
+      
+      .mat-option-text {
+        color: white !important;
+      }
+    }
+  }
+  
+  // Autocomplete panel
+  .mat-autocomplete-panel {
+    background-color: #333333 !important;
+    
+    .mat-option {
+      color: white !important;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+      
+      .mat-option-text {
+        color: white !important;
+      }
+    }
+  }
+  
+  // Button toggles
+  .mat-button-toggle-group {
+    background-color: transparent !important;
+    
+    .mat-button-toggle {
+      background-color: rgba(255, 255, 255, 0.08) !important;
+      color: white !important;
+      
+      .mat-button-toggle-label-content {
+        color: white !important;
+      }
+      
+      .mat-icon {
+        color: white !important;
+      }
+      
+      &.mat-button-toggle-checked {
+        background-color: var(--primary-color) !important;
+      }
+    }
+  }
+}

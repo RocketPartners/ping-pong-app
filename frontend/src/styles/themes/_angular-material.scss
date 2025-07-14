@@ -1,0 +1,190 @@
+// src/styles/themes/_angular-material.scss
+// This file ensures Angular Material components use our theme variables
+
+// Import this file into your main.scss after the theme files
+
+// Angular Material components will use these CSS variables
+// See: https://material.angular.io/guide/theming-your-components#using-css-custom-properties
+
+// The base classes that will be applied by our theme service
+.light-theme {
+  // Light theme variables are already defined in :root via _light.scss
+  // Angular Material variables are already defined in main.scss
+}
+
+.dark-theme {
+  // Override with dark theme colors
+  --primary-color: #{$primary-color-dark-theme};
+  --primary-color-light: #{$primary-color-light-dark-theme};
+  --primary-color-dark: #{$primary-color-dark-dark-theme};
+  --primary-color-rgb: #{$primary-color-rgb-dark-theme};
+
+  --accent-color: #{$accent-color-dark-theme};
+  --accent-color-light: #{$accent-color-light-dark-theme};
+  --accent-color-dark: #{$accent-color-dark-dark-theme};
+  --accent-color-rgb: #{$accent-color-rgb-dark-theme};
+
+  --warning-color: #{$warning-color-dark-theme};
+  --warning-color-light: #{$warning-color-light-dark-theme};
+  --warning-color-dark: #{$warning-color-dark-dark-theme};
+  --warning-color-rgb: #{$warning-color-rgb-dark-theme};
+
+  --success-color: #{$success-color-dark-theme};
+  --success-color-light: #{$success-color-light-dark-theme};
+  --success-color-dark: #{$success-color-dark-dark-theme};
+  --success-color-rgb: #{$success-color-rgb-dark-theme};
+
+  --info-color: #{$info-color-dark-theme};
+  --info-color-light: #{$info-color-light-dark-theme};
+  --info-color-dark: #{$info-color-dark-dark-theme};
+  --info-color-rgb: #{$info-color-rgb-dark-theme};
+
+  --neutral-color: #{$neutral-color-dark-theme};
+  --neutral-color-light: #{$neutral-color-light-dark-theme};
+  --neutral-color-dark: #{$neutral-color-dark-dark-theme};
+  --neutral-color-rgb: #{$neutral-color-rgb-dark-theme};
+
+  // Dark theme UI colors
+  --background-color: #{$background-color-dark-theme};
+  --card-background: #{$card-background-dark-theme};
+  --text-primary: #{$text-primary-dark-theme};
+  --text-secondary: #{$text-secondary-dark-theme};
+  --border-color: #{$border-color-dark-theme};
+
+  // Gray scale
+  --gray-50: #{$gray-50-dark-theme};
+  --gray-100: #{$gray-100-dark-theme};
+  --gray-200: #{$gray-200-dark-theme};
+  --gray-300: #{$gray-300-dark-theme};
+  --gray-400: #{$gray-400-dark-theme};
+  --gray-500: #{$gray-500-dark-theme};
+  --gray-600: #{$gray-600-dark-theme};
+  --gray-700: #{$gray-700-dark-theme};
+  --gray-800: #{$gray-800-dark-theme};
+  --gray-900: #{$gray-900-dark-theme};
+
+  // Angular Material theme variables
+  --md-sys-color-primary: var(--primary-color);
+  --md-sys-color-on-primary: #000000;
+  --md-sys-color-primary-container: var(--primary-color-dark);
+  --md-sys-color-on-primary-container: #ffffff;
+
+  --md-sys-color-secondary: var(--accent-color);
+  --md-sys-color-on-secondary: #000000;
+  --md-sys-color-secondary-container: var(--accent-color-dark);
+  --md-sys-color-on-secondary-container: #ffffff;
+
+  --md-sys-color-tertiary: var(--success-color);
+  --md-sys-color-on-tertiary: #000000;
+  --md-sys-color-tertiary-container: var(--success-color-dark);
+  --md-sys-color-on-tertiary-container: #ffffff;
+
+  --md-sys-color-error: var(--warning-color);
+  --md-sys-color-on-error: #000000;
+  --md-sys-color-error-container: var(--warning-color-dark);
+  --md-sys-color-on-error-container: #ffffff;
+
+  --md-sys-color-surface: var(--card-background);
+  --md-sys-color-on-surface: var(--text-primary);
+  --md-sys-color-surface-variant: var(--gray-800);
+  --md-sys-color-on-surface-variant: var(--text-secondary);
+
+  --md-sys-color-outline: var(--border-color);
+  --md-sys-color-background: var(--background-color);
+  --md-sys-color-on-background: var(--text-primary);
+}
+
+// Custom Angular Material component styling
+.mat-mdc-card {
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  .mat-mdc-card-header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+
+    .mat-mdc-card-title {
+      color: var(--text-primary);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .mat-mdc-card-subtitle {
+      color: var(--text-secondary);
+    }
+  }
+
+  .mat-mdc-card-content {
+    padding: var(--spacing-md);
+  }
+
+  .mat-mdc-card-actions {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+  }
+}
+
+.mat-mdc-snack-bar-container {
+  &.success-snackbar {
+    --mdc-snackbar-container-color: var(--success-color);
+    --mat-snack-bar-button-color: white;
+    --mdc-snackbar-supporting-text-color: white;
+  }
+
+  &.warning-snackbar {
+    --mdc-snackbar-container-color: var(--warning-color);
+    --mat-snack-bar-button-color: white;
+    --mdc-snackbar-supporting-text-color: white;
+  }
+
+  &.info-snackbar {
+    --mdc-snackbar-container-color: var(--info-color);
+    --mat-snack-bar-button-color: white;
+    --mdc-snackbar-supporting-text-color: white;
+  }
+}
+
+// Custom styling for common Angular Material components
+.mat-mdc-table {
+  background-color: var(--card-background);
+
+  .mat-mdc-header-cell {
+    background-color: var(--gray-100);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .mat-mdc-cell {
+    color: var(--text-primary);
+  }
+
+  .mat-mdc-row:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.mat-mdc-tab-group {
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .mat-mdc-tab-label-active {
+    color: var(--primary-color);
+  }
+}
+
+.mat-mdc-form-field {
+  .mat-mdc-form-field-wrapper {
+    padding-bottom: 1.25em;
+  }
+
+  .mat-mdc-form-field-hint {
+    font-size: var(--font-size-xs);
+  }
+
+  .mat-mdc-form-field-error {
+    font-size: var(--font-size-xs);
+  }
+}
+
+// Add other Angular Material component styles as needed

@@ -1,0 +1,298 @@
+<div class="game-sidebar-container" role="dialog" aria-labelledby="match-details-title">
+  <!-- Header -->
+  <div class="sidebar-header">
+    <div class="header-content">
+      <h2 id="match-details-title">Match Details</h2>
+      <div class="match-id" aria-label="Game identifier">ID: {{ game.gameId }}</div>
+    </div>
+    <button (click)="close()" aria-label="Close dialog" class="close-button" mat-icon-button>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="sidebar-content">
+    <!-- Match Hero Section -->
+    <div class="match-hero">
+      <div [ngClass]="{'ranked-badge': game.ratedGame, 'normal-badge': !game.ratedGame}" class="match-type-badge">
+        {{ getGameType() }}
+      </div>
+
+      <div *ngIf="game.datePlayed" class="match-date">
+        <mat-icon>event</mat-icon>
+        <span>{{ formatDate(game.datePlayed) }}</span>
+      </div>
+    </div>
+
+    <!-- Match Score Card -->
+    <mat-card class="score-card">
+      <div class="score-container">
+        <!-- Challenger Side -->
+        <div [ngClass]="{'winner': game.challengerTeamWin}" class="team-side challenger-side">
+          <div class="team-label">{{ game.singlesGame ? 'Challenger' : 'Challenger Team' }}</div>
+
+          <div class="team-players">
+            <ng-container *ngIf="game.singlesGame">
+              <div (click)="navigateToPlayer(game.challengerId)"
+                   (keydown.enter)="navigateToPlayer(game.challengerId)"
+                   class="player-avatar"
+                   tabindex="0"
+                   role="button"
+                   [attr.aria-label]="'View profile of ' + getPlayerName(game.challengerId)">
+                <div class="avatar-circle" aria-hidden="true">
+                  {{ getPlayerInitials(game.challengerId) }}
+                </div>
+                <div class="player-name">{{ getPlayerName(game.challengerId) }}</div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="!game.singlesGame">
+              <div *ngFor="let playerId of game.challengerTeam; trackBy: trackByPlayerId"
+                   (click)="navigateToPlayer(playerId)"
+                   (keydown.enter)="navigateToPlayer(playerId)"
+                   class="player-avatar"
+                   tabindex="0"
+                   role="button"
+                   [attr.aria-label]="'View profile of ' + getPlayerName(playerId)">
+                <div class="avatar-circle" aria-hidden="true">
+                  {{ getPlayerInitials(playerId) }}
+                </div>
+                <div class="player-name">{{ getPlayerName(playerId) }}</div>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="team-score">{{ game.challengerTeamScore }}</div>
+
+          <div *ngIf="game.challengerTeamWin" class="result-badge">
+            <mat-icon>emoji_events</mat-icon>
+            <span>Winner</span>
+          </div>
+        </div>
+
+        <!-- Score Divider -->
+        <div class="score-divider">
+          <div class="versus">VS</div>
+        </div>
+
+        <!-- Opponent Side -->
+        <div [ngClass]="{'winner': game.opponentTeamWin}" class="team-side opponent-side">
+          <div class="team-label">{{ game.singlesGame ? 'Opponent' : 'Opponent Team' }}</div>
+
+          <div class="team-players">
+            <ng-container *ngIf="game.singlesGame">
+              <div (click)="navigateToPlayer(game.opponentId)"
+                   (keydown.enter)="navigateToPlayer(game.opponentId)"
+                   class="player-avatar"
+                   tabindex="0"
+                   role="button"
+                   [attr.aria-label]="'View profile of ' + getPlayerName(game.opponentId)">
+                <div class="avatar-circle" aria-hidden="true">
+                  {{ getPlayerInitials(game.opponentId) }}
+                </div>
+                <div class="player-name">{{ getPlayerName(game.opponentId) }}</div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="!game.singlesGame">
+              <div *ngFor="let playerId of game.opponentTeam; trackBy: trackByPlayerId"
+                   (click)="navigateToPlayer(playerId)"
+                   (keydown.enter)="navigateToPlayer(playerId)"
+                   class="player-avatar"
+                   tabindex="0"
+                   role="button"
+                   [attr.aria-label]="'View profile of ' + getPlayerName(playerId)">
+                <div class="avatar-circle" aria-hidden="true">
+                  {{ getPlayerInitials(playerId) }}
+                </div>
+                <div class="player-name">{{ getPlayerName(playerId) }}</div>
+              </div>
+            </ng-container>
+          </div>
+
+          <div class="team-score">{{ game.opponentTeamScore }}</div>
+
+          <div *ngIf="game.opponentTeamWin" class="result-badge">
+            <mat-icon>emoji_events</mat-icon>
+            <span>Winner</span>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Match Details Section -->
+    <section class="match-details-section">
+      <h3 class="section-title">
+        <mat-icon>sports_tennis</mat-icon>
+        <span>Match Information</span>
+      </h3>
+
+      <mat-card class="details-card">
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="detail-label">Match Type</span>
+            <span class="detail-value">{{ game.singlesGame ? 'Singles' : 'Doubles' }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Match Mode</span>
+            <span class="detail-value">
+              <span [ngClass]="{'ranked-text': game.ratedGame, 'normal-text': !game.ratedGame}" class="mode-badge">
+                {{ game.ratedGame ? 'Ranked' : 'Normals' }}
+              </span>
+            </span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Score Difference</span>
+            <span class="detail-value">{{ getScoreDifference() }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Winner</span>
+            <span class="detail-value winner-value">{{ getWinnerFormatted() }}</span>
+          </div>
+        </div>
+      </mat-card>
+    </section>
+
+    <!-- Player Stats Section -->
+    <section *ngIf="hasPlayerRatings()" class="player-stats-section">
+      <h3 class="section-title">
+        <mat-icon>equalizer</mat-icon>
+        <span>Player Statistics</span>
+      </h3>
+
+      <mat-card class="stats-card">
+        <div class="player-stats-container">
+          <!-- Singles Game -->
+          <ng-container *ngIf="game.singlesGame">
+            <div class="player-stat-item challenger-stat">
+              <div class="stat-player">
+                <div class="avatar-circle">
+                  {{ getPlayerInitials(game.challengerId) }}
+                </div>
+                <div class="player-name">{{ getPlayerName(game.challengerId) }}</div>
+              </div>
+
+              <div class="stat-details">
+                <div class="rating-info">
+                  <span class="rating-label">Rating</span>
+                  <span class="rating-value">{{ getPlayerRating(game.challengerId) }}</span>
+                </div>
+
+                <div class="record-info">
+                  <span class="record-label">Record</span>
+                  <span class="record-value">
+                    <span class="wins">{{ getPlayerWins(game.challengerId) }}W</span>
+                    <span class="separator">/</span>
+                    <span class="losses">{{ getPlayerLosses(game.challengerId) }}L</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="player-stat-item opponent-stat">
+              <div class="stat-player">
+                <div class="avatar-circle">
+                  {{ getPlayerInitials(game.opponentId) }}
+                </div>
+                <div class="player-name">{{ getPlayerName(game.opponentId) }}</div>
+              </div>
+
+              <div class="stat-details">
+                <div class="rating-info">
+                  <span class="rating-label">Rating</span>
+                  <span class="rating-value">{{ getPlayerRating(game.opponentId) }}</span>
+                </div>
+
+                <div class="record-info">
+                  <span class="record-label">Record</span>
+                  <span class="record-value">
+                    <span class="wins">{{ getPlayerWins(game.opponentId) }}W</span>
+                    <span class="separator">/</span>
+                    <span class="losses">{{ getPlayerLosses(game.opponentId) }}L</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Doubles Game -->
+          <ng-container *ngIf="!game.singlesGame">
+            <div class="team-stats challenger-team-stats">
+              <h4 class="team-title">Challenger Team</h4>
+
+              <div class="team-players-stats">
+                <div *ngFor="let playerId of game.challengerTeam; trackBy: trackByPlayerId" class="player-stat-card">
+                  <div class="stat-player">
+                    <div class="avatar-circle">
+                      {{ getPlayerInitials(playerId) }}
+                    </div>
+                    <div class="player-name">{{ getPlayerName(playerId) }}</div>
+                  </div>
+
+                  <div class="player-stats-compact">
+                    <div class="doubles-rating">
+                      <mat-icon>emoji_events</mat-icon>
+                      <span>{{ getPlayerRating(playerId, false) }}</span>
+                    </div>
+
+                    <div class="doubles-record">
+                      <span class="wins">{{ getPlayerWins(playerId, false) }}W</span>
+                      <span class="separator">/</span>
+                      <span class="losses">{{ getPlayerLosses(playerId, false) }}L</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="team-stats opponent-team-stats">
+              <h4 class="team-title">Opponent Team</h4>
+
+              <div class="team-players-stats">
+                <div *ngFor="let playerId of game.opponentTeam; trackBy: trackByPlayerId" class="player-stat-card">
+                  <div class="stat-player">
+                    <div class="avatar-circle">
+                      {{ getPlayerInitials(playerId) }}
+                    </div>
+                    <div class="player-name">{{ getPlayerName(playerId) }}</div>
+                  </div>
+
+                  <div class="player-stats-compact">
+                    <div class="doubles-rating">
+                      <mat-icon>emoji_events</mat-icon>
+                      <span>{{ getPlayerRating(playerId, false) }}</span>
+                    </div>
+
+                    <div class="doubles-record">
+                      <span class="wins">{{ getPlayerWins(playerId, false) }}W</span>
+                      <span class="separator">/</span>
+                      <span class="losses">{{ getPlayerLosses(playerId, false) }}L</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </mat-card>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <button (click)="viewMatchDetails()" color="primary" mat-stroked-button>
+      <mat-icon>open_in_new</mat-icon>
+      Full Details
+    </button>
+    <button (click)="close()" color="accent" mat-flat-button>
+      Close
+    </button>
+  </div>
+</div>

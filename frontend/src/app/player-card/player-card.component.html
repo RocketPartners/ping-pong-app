@@ -1,0 +1,127 @@
+<div [class.compact]="compact" [class.highlighted]="highlight" class="player-card-container">
+  <div [@flipState]="flip" class="player-card-inner">
+    <!-- Front side of the card -->
+    <div class="player-card-front">
+      <!-- Card Header with player info -->
+      <div class="player-header">
+        <div class="avatar-container">
+          <div [ngClass]="getRatingClass(singlesRating)" class="player-avatar">
+            {{ getPlayerInitials() }}
+          </div>
+          <div *ngIf="recentActivity" class="activity-indicator"></div>
+        </div>
+
+        <div class="player-info">
+          <h2 class="player-name">{{ getPlayerFullName() }}</h2>
+          <p class="player-username">{{ player?.username || '' }}</p>
+        </div>
+
+        <button (click)="toggleFlip()" *ngIf="showFlip" class="flip-button" mat-icon-button>
+          <mat-icon>flip</mat-icon>
+        </button>
+      </div>
+
+      <!-- Main stat display -->
+      <div class="player-stats-container">
+        <!-- Rating panels -->
+        <div class="rating-panels">
+          <div class="rating-panel singles">
+            <div [ngClass]="getRatingClass(player?.singlesRankedRating || 0)" class="rating-value">
+              {{ player?.singlesRankedRating || 0 }}
+            </div>
+            <div class="rating-label">Singles</div>
+          </div>
+
+          <div class="rating-panel doubles">
+            <div [ngClass]="getRatingClass(player?.doublesRankedRating || 0)" class="rating-value">
+              {{ player?.doublesRankedRating || 0 }}
+            </div>
+            <div class="rating-label">Doubles</div>
+          </div>
+        </div>
+
+        <!-- Win rate bar -->
+        <div class="win-rate-container">
+          <div class="win-rate-header">
+            <span class="win-rate-label">Win Rate</span>
+            <span [ngClass]="getWinRateClass(overallWinRate)" class="win-rate-value">{{ overallWinRate }}%</span>
+          </div>
+          <div class="win-rate-bar">
+            <div [ngClass]="getWinRateClass(overallWinRate)" [style.width.%]="overallWinRate"
+                 class="win-rate-progress"></div>
+          </div>
+        </div>
+
+        <!-- Records summary -->
+        <div class="records-summary">
+          <div class="record-item">
+            <span class="record-label">Singles</span>
+            <span class="record-value">
+              <span class="wins">{{ player?.singlesRankedWins || 0 }}</span>
+              <span class="separator">-</span>
+              <span class="losses">{{ player?.singlesRankedLoses || 0 }}</span>
+            </span>
+          </div>
+          <div class="record-item">
+            <span class="record-label">Doubles</span>
+            <span class="record-value">
+              <span class="wins">{{ player?.doublesRankedWins || 0 }}</span>
+              <span class="separator">-</span>
+              <span class="losses">{{ player?.doublesRankedLoses || 0 }}</span>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Back side of the card (simplified detailed stats) -->
+    <div class="player-card-back">
+      <button (click)="toggleFlip()" class="flip-button" mat-icon-button>
+        <mat-icon>flip</mat-icon>
+      </button>
+
+      <div class="back-header">
+        <h2 class="back-title">{{ getPlayerFullName() }}</h2>
+        <p
+          class="back-subtitle">{{ getRatingLabel(Math.max(player?.singlesRankedRating || 0, player?.doublesRankedRating || 0)) }}
+          Player</p>
+      </div>
+
+      <div class="stats-section">
+        <h3 class="section-title">Statistics</h3>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">{{ totalMatches }}</div>
+            <div class="stat-label">Total Matches</div>
+          </div>
+
+          <div class="stat-item">
+            <div [ngClass]="getWinRateClass(overallWinRate)" class="stat-value">{{ overallWinRate }}%</div>
+            <div class="stat-label">Win Rate</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-value">{{ getTotalWins() }}</div>
+            <div class="stat-label">Wins</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-value">{{ getTotalLosses() }}</div>
+            <div class="stat-label">Losses</div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Account Info -->
+      <div class="account-info">
+        <div class="account-info-item">
+          <mat-icon>event</mat-icon>
+          <span>Member since: {{ player?.created ? (player?.created | date:'mediumDate') : 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

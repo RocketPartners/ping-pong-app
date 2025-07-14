@@ -1,0 +1,33 @@
+// src/app/login/login.component.scss
+@use '../../styles/abstracts/tokens';
+@use '../../styles/abstracts/mixins';
+@use '../../styles/components/auth-forms';
+
+// Use the auth container styles from our components
+.login-container {
+  @extend .auth-container;
+}
+
+.login-card {
+  @extend .auth-card;
+}
+
+.full-width {
+  @extend .form-field;
+}
+
+.login-button {
+  @extend .auth-button;
+}
+
+// Only add component-specific styles here
+.register-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--spacing-xs);
+
+  span {
+    margin-right: var(--spacing-sm);
+  }
+}

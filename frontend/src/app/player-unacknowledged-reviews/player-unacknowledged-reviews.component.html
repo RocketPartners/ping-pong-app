@@ -1,0 +1,52 @@
+<div class="reviews-container">
+  <h2>Recent Reviews</h2>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading && unacknowledgedReviews.length === 0" class="no-reviews">
+    <mat-icon>check_circle</mat-icon>
+    <p>No new reviews to acknowledge</p>
+  </div>
+
+  <div *ngIf="!loading && unacknowledgedReviews.length > 0" class="reviews-list">
+    <mat-card *ngFor="let review of unacknowledgedReviews" class="review-card">
+      <mat-card-header>
+        <mat-card-title>Review from {{ review.reviewerUsername || 'Anonymous' }}</mat-card-title>
+        <mat-card-subtitle>{{ review.reviewDate | date:'medium' }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="review-sections">
+          <div class="review-section">
+            <h3>Strengths</h3>
+            <div class="chip-list">
+              <span *ngFor="let strength of review.strengths" class="style-chip primary">
+                {{ formatStyleName(strength) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="review-section">
+            <h3>Areas to Improve</h3>
+            <div class="chip-list">
+              <span *ngFor="let improvement of review.improvements" class="style-chip accent">
+                {{ formatStyleName(improvement) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button (click)="review.id && dismissReview(review)" mat-icon-button matTooltip="Dismiss without response">
+          <mat-icon>close</mat-icon>
+        </button>
+        <button (click)="respondToReview(review)" color="primary" mat-icon-button matTooltip="Respond to review">
+          <mat-icon>check</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

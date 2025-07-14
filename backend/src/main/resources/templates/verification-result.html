@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Email Verification Result</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .success {
+            color: #2ecc71;
+        }
+        .error {
+            color: #e74c3c;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 th:class="${success} ? 'success' : 'error'">
+            <span th:if="${success}">Email Verification Successful</span>
+            <span th:unless="${success}">Email Verification Failed</span>
+        </h1>
+        
+        <p th:text="${message}"></p>
+        
+        <div th:if="${success}">
+            <a class="button" href="/login">Log In</a>
+        </div>
+        
+        <div th:unless="${success}">
+            <a class="button" href="/register">Back to Registration</a>
+        </div>
+    </div>
+</body>
+</html>

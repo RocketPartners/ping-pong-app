@@ -1,0 +1,205 @@
+<!-- src/app/tournament/tournament-create/tournament-create.component.html -->
+
+<div class="tournament-create-container">
+  <div class="page-header">
+    <h1>Create Tournament</h1>
+  </div>
+
+  <mat-card class="stepper-card">
+    <mat-card-content>
+      <!-- Horizontal stepper indicator -->
+      <div class="stepper-header">
+        <div [ngClass]="{'active': currentStep === 0, 'completed': currentStep > 0}" class="step">
+          <div class="step-number">1</div>
+          <div class="step-label">Tournament Setup</div>
+        </div>
+        <div class="step-line"></div>
+        <div [ngClass]="{'active': currentStep === 1, 'completed': currentStep > 1}" class="step">
+          <div class="step-number">2</div>
+          <div class="step-label">Player Selection</div>
+        </div>
+      </div>
+
+      <!-- Error message -->
+      <app-error-message *ngIf="error" [message]="error"></app-error-message>
+
+      <!-- Step 1: Tournament Setup -->
+      <div *ngIf="currentStep === 0" class="step-content">
+        <form [formGroup]="tournamentForm">
+          <div class="form-section">
+            <h2 class="section-title">Tournament Details</h2>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Tournament Name</mat-label>
+                <input formControlName="name" matInput placeholder="Enter tournament name">
+                <mat-error *ngIf="tournamentForm.get('name')?.errors?.['required']">
+                  Tournament name is required
+                </mat-error>
+                <mat-error *ngIf="tournamentForm.get('name')?.errors?.['minlength']">
+                  Tournament name must be at least 3 characters
+                </mat-error>
+                <mat-error *ngIf="tournamentForm.get('name')?.errors?.['maxlength']">
+                  Tournament name cannot exceed 100 characters
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description (Optional)</mat-label>
+                <textarea formControlName="description" matInput placeholder="Enter tournament description"
+                          rows="3"></textarea>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Start Date</mat-label>
+                <input [matDatepicker]="startDatePicker" [min]="minDate" formControlName="startDate" matInput>
+                <mat-hint>When the tournament will begin</mat-hint>
+                <mat-datepicker-toggle [for]="startDatePicker" matIconSuffix></mat-datepicker-toggle>
+                <mat-datepicker #startDatePicker></mat-datepicker>
+                <mat-error *ngIf="tournamentForm.get('startDate')?.errors?.['required']">
+                  Start date is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2 class="section-title">Tournament Format</h2>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Tournament Type</mat-label>
+                <mat-select formControlName="tournamentType">
+                  <mat-option *ngFor="let type of tournamentTypes" [value]="type.value">
+                    {{ type.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-hint>The elimination format for the tournament</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Game Type</mat-label>
+                <mat-select formControlName="gameType">
+                  <mat-option *ngFor="let type of gameTypes" [value]="type.value">
+                    {{ type.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-hint>Whether players compete individually or in pairs</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Step 2: Player Selection -->
+      <div *ngIf="currentStep === 1" class="step-content">
+        <div class="form-section">
+          <h2 class="section-title">Select Players</h2>
+          <p class="section-description">
+            Add players to your tournament. You need {{ getPlayerCountRequirement() }} to create a tournament.
+          </p>
+
+          <!-- Player search -->
+          <div class="player-search">
+            <form [formGroup]="playerSelectionForm">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Search Players</mat-label>
+                <input
+                  [matAutocomplete]="auto"
+                  formControlName="playerSearch"
+                  matInput
+                  placeholder="Search by name or username">
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayPlayer">
+                  <mat-option (click)="addPlayer(player)" *ngFor="let player of filteredPlayers | async"
+                              [value]="player">
+                    {{ player.firstName }} {{ player.lastName }} ({{ player.username }})
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+            </form>
+          </div>
+
+          <!-- Selected players list -->
+          <div class="selected-players-title">
+            <h3>Selected Players ({{ selectedPlayers.length }})</h3>
+          </div>
+
+          <div *ngIf="selectedPlayers.length === 0" class="no-players-message">
+            <mat-icon>people</mat-icon>
+            <p>No players selected yet. Search and add players above.</p>
+          </div>
+
+          <div *ngIf="selectedPlayers.length > 0" class="selected-players-list">
+            <div *ngFor="let player of selectedPlayers; let i = index" class="player-chip">
+              <div class="player-info">
+                <div class="player-avatar">
+                  {{ player.firstName.charAt(0) }}{{ player.lastName.charAt(0) }}
+                </div>
+                <div class="player-details">
+                  <div class="player-name">
+                    {{ player.firstName }} {{ player.lastName }}
+                  </div>
+                  <div class="player-username">
+                    {{ player.username }}
+                  </div>
+                </div>
+
+                <!-- For doubles, show team indication -->
+                <div *ngIf="tournamentForm.get('gameType')?.value === 'DOUBLES'" class="team-indicator">
+                  Team {{ Math.floor(i / 2) + 1 }}
+                </div>
+              </div>
+              <button (click)="removePlayer(player)" color="warn" mat-icon-button>
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Doubles warning if odd number of players -->
+          <div
+            *ngIf="tournamentForm.get('gameType')?.value === 'DOUBLES' && selectedPlayers.length % 2 !== 0 && selectedPlayers.length > 0"
+            class="doubles-warning">
+            <mat-icon>warning</mat-icon>
+            <span>Doubles tournaments require an even number of players</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation buttons -->
+      <div class="stepper-actions">
+        <button
+          (click)="prevStep()"
+          *ngIf="currentStep > 0"
+          mat-button>
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
+
+        <button
+          (click)="nextStep()"
+          *ngIf="currentStep === 0"
+          [disabled]="!tournamentForm.valid"
+          color="primary"
+          mat-raised-button>
+          Next
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+
+        <button
+          (click)="createTournament()"
+          *ngIf="currentStep === 1"
+          [disabled]="!canCreateTournament() || loading"
+          color="primary"
+          mat-raised-button>
+          <mat-spinner *ngIf="loading" [diameter]="24"></mat-spinner>
+          <span *ngIf="!loading">Create Tournament</span>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,41 @@
+// _leaderboard-dark.scss
+// Dedicated style overrides for leaderboard in dark mode
+
+// These overrides need to be loaded after Angular Material styles
+// They use ::ng-deep as a last resort to force style precedence
+.dark-theme {
+  .leaderboard-container {
+    // Make table headers white with higher specificity
+    .mat-sort-header-container {
+      color: white !important;
+    }
+    
+    .mat-sort-header-arrow {
+      color: white !important;
+      opacity: 1 !important;
+    }
+    
+    .mat-sort-header-content {
+      color: white !important;
+    }
+    
+    // Force table header cell text to be white
+    th.mat-header-cell {
+      color: white !important;
+      
+      &.mat-sort-header {
+        color: white !important;
+      }
+    }
+    
+    // Fix for sort header arrow color
+    .mat-sort-header-stem, 
+    .mat-sort-header-indicator,
+    .mat-sort-header-pointer-left,
+    .mat-sort-header-pointer-right,
+    .mat-sort-header-pointer-middle {
+      background: white !important;
+      color: white !important;
+    }
+  }
+}

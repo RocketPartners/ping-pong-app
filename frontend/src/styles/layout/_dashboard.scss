@@ -1,0 +1,127 @@
+// src/styles/layout/_dashboard.scss
+@use '../abstracts/tokens';
+@use '../abstracts/mixins';
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+}
+
+.dashboard-header {
+  margin-bottom: var(--spacing-xl);
+
+  .dashboard-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-xs);
+    color: var(--primary-color);
+  }
+
+  .dashboard-subtitle {
+    font-size: var(--font-size-md);
+    color: var(--neutral-color);
+    margin: 0;
+  }
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.dashboard-section {
+  margin-bottom: var(--spacing-lg);
+
+  .section-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-md);
+    color: var(--primary-color);
+    position: relative;
+    padding-left: var(--spacing-md);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background-color: var(--primary-color);
+      border-radius: 2px;
+    }
+  }
+}
+
+.stats-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.stats-card {
+  @include mixins.card-container;
+  padding: var(--spacing-md);
+
+  .stats-value {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stats-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+
+  // Colored borders for different card types
+  &.primary-card {
+    border-top: 4px solid var(--primary-color);
+  }
+
+  &.success-card {
+    border-top: 4px solid var(--success-color);
+  }
+
+  &.warning-card {
+    border-top: 4px solid var(--warning-color);
+  }
+
+  &.accent-card {
+    border-top: 4px solid var(--accent-color);
+  }
+}
+
+// Grid layouts
+.two-column-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.three-column-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.sidebar-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+
+  @media (min-width: 992px) {
+    grid-template-columns: 3fr 1fr;
+  }
+}

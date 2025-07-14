@@ -1,0 +1,563 @@
+<div class="statistics-container">
+  <app-section-title>Player Statistics Dashboard</app-section-title>
+
+  <app-loading-spinner *ngIf="loading" [diameter]="40" [message]="'Loading player statistics...'"></app-loading-spinner>
+  <app-error-message *ngIf="error" [message]="error"></app-error-message>
+
+  <div class="player-search-container">
+    <form (ngSubmit)="searchPlayer()">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search Player</mat-label>
+        <input [formControl]="searchControl" [matAutocomplete]="auto" matInput placeholder="Enter username" type="text">
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option *ngFor="let username of filteredUsernames$ | async" [value]="username">{{ username }}</mat-option>
+        </mat-autocomplete>
+        <button aria-label="Search Player" mat-icon-button matSuffix type="submit">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <div *ngIf="isViewingOtherPlayer()" class="back-to-profile">
+    <button (click)="goBack()" color="primary" mat-raised-button>
+      <mat-icon>{{ backButtonIcon }}</mat-icon>
+      {{ backButtonText }}
+    </button>
+  </div>
+
+  <div *ngIf="player && !loading" class="dashboard-content">
+    <mat-card class="profile-header mat-elevation-z2">
+      <mat-card-content>
+        <div class="profile-header-content">
+          <div class="profile-avatar-container">
+            <app-profile-avatar [player]="player" size="xxl"></app-profile-avatar>
+          </div>
+          <div class="profile-info">
+            <h2 class="profile-name">{{ player.firstName }} {{ player.lastName }}</h2>
+            <p class="profile-username">{{ player.username }}</p>
+            <p class="profile-since">Member since {{ player.created | date:'mediumDate' }}</p>
+          </div>
+          <div class="profile-stats">
+            <div class="overall-win-rate">
+              <span [ngClass]="playerUtils.getWinRateClass(overallWinRate)" class="win-rate-value">{{ overallWinRate }}
+                %</span>
+              <span class="win-rate-label">Win Rate</span>
+            </div>
+            <div class="win-loss-record">
+              <span class="wins">{{ playerUtils.getTotalWins(player) }}W</span> / <span
+              class="losses">{{ playerUtils.getTotalLosses(player) }}L</span>
+            </div>
+            <div class="total-games">
+              <span class="games-count">{{ playerUtils.getTotalMatches(player) }}</span> total games
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="ratings-grid">
+      <mat-card class="rating-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Singles Ranked</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-content">
+            <div class="rating-main">
+              <div [ngClass]="playerUtils.getRatingClass(player.singlesRankedRating)"
+                   class="rating-value">{{ player.singlesRankedRating }}
+              </div>
+              <app-rating-badge [rating]="player.singlesRankedRating"></app-rating-badge>
+            </div>
+            <div class="rating-record">
+              <span class="wins">{{ player.singlesRankedWins }}W</span> / <span
+              class="losses">{{ player.singlesRankedLoses }}L</span>
+              <span
+                [ngClass]="playerUtils.getWinRateClass(calculateWinRate(player.singlesRankedWins, player.singlesRankedLoses))"
+                class="win-rate">
+                ({{ calculateWinRate(player.singlesRankedWins, player.singlesRankedLoses) }}%)
+              </span>
+            </div>
+            <app-win-rate-bar [label]="'Win Rate'"
+                              [winRate]="calculateWinRate(player.singlesRankedWins, player.singlesRankedLoses)"></app-win-rate-bar>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="rating-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Doubles Ranked</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-content">
+            <div class="rating-main">
+              <div [ngClass]="playerUtils.getRatingClass(player.doublesRankedRating)"
+                   class="rating-value">{{ player.doublesRankedRating }}
+              </div>
+              <app-rating-badge [rating]="player.doublesRankedRating"></app-rating-badge>
+            </div>
+            <div class="rating-record">
+              <span class="wins">{{ player.doublesRankedWins }}W</span> / <span
+              class="losses">{{ player.doublesRankedLoses }}L</span>
+              <span
+                [ngClass]="playerUtils.getWinRateClass(calculateWinRate(player.doublesRankedWins, player.doublesRankedLoses))"
+                class="win-rate">
+                ({{ calculateWinRate(player.doublesRankedWins, player.doublesRankedLoses) }}%)
+              </span>
+            </div>
+            <app-win-rate-bar [label]="'Win Rate'"
+                              [winRate]="calculateWinRate(player.doublesRankedWins, player.doublesRankedLoses)"></app-win-rate-bar>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="rating-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Singles Normal</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-content">
+            <div class="rating-main">
+              <div [ngClass]="playerUtils.getRatingClass(player.singlesNormalRating)"
+                   class="rating-value">{{ player.singlesNormalRating }}
+              </div>
+              <app-rating-badge [rating]="player.singlesNormalRating"></app-rating-badge>
+            </div>
+            <div class="rating-record">
+              <span class="wins">{{ player.singlesNormalWins }}W</span> / <span
+              class="losses">{{ player.singlesNormalLoses }}L</span>
+              <span
+                [ngClass]="playerUtils.getWinRateClass(calculateWinRate(player.singlesNormalWins, player.singlesNormalLoses))"
+                class="win-rate">
+                ({{ calculateWinRate(player.singlesNormalWins, player.singlesNormalLoses) }}%)
+              </span>
+            </div>
+            <app-win-rate-bar [label]="'Win Rate'"
+                              [winRate]="calculateWinRate(player.singlesNormalWins, player.singlesNormalLoses)"></app-win-rate-bar>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="rating-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Doubles Normal</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-content">
+            <div class="rating-main">
+              <div [ngClass]="playerUtils.getRatingClass(player.doublesNormalRating)"
+                   class="rating-value">{{ player.doublesNormalRating }}
+              </div>
+              <app-rating-badge [rating]="player.doublesNormalRating"></app-rating-badge>
+            </div>
+            <div class="rating-record">
+              <span class="wins">{{ player.doublesNormalWins }}W</span> / <span
+              class="losses">{{ player.doublesNormalLoses }}L</span>
+              <span
+                [ngClass]="playerUtils.getWinRateClass(calculateWinRate(player.doublesNormalWins, player.doublesNormalLoses))"
+                class="win-rate">
+                ({{ calculateWinRate(player.doublesNormalWins, player.doublesNormalLoses) }}%)
+              </span>
+            </div>
+            <app-win-rate-bar [label]="'Win Rate'"
+                              [winRate]="calculateWinRate(player.doublesNormalWins, player.doublesNormalLoses)"></app-win-rate-bar>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="analytics-section">
+      <mat-tab-group animationDuration="300ms" dynamicHeight>
+
+        <mat-tab label="Win/Loss Distribution">
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <h3 class="chart-title">Game Type Performance</h3>
+              <div class="chart-description">Shows your win/loss record across different game types</div>
+              <div class="stacked-bar-chart">
+                <div *ngFor="let record of gameTypeData" class="stacked-bar-container">
+                  <div class="stacked-bar-label">{{ record.name }}</div>
+                  <div class="stacked-bar">
+                    <div [matTooltip]="record.wins + ' Wins (' + calculatePercentage(record.wins, record.total) + '%)'"
+                         [style.width.%]="calculatePercentage(record.wins, record.total)"
+                         class="stacked-bar-segment win-segment">
+                      {{ record.wins }}
+                    </div>
+                    <div
+                      [matTooltip]="record.losses + ' Losses (' + calculatePercentage(record.losses, record.total) + '%)'"
+                      [style.width.%]="calculatePercentage(record.losses, record.total)"
+                      class="stacked-bar-segment loss-segment">
+                      {{ record.losses }}
+                    </div>
+                  </div>
+                  <div class="stacked-bar-total">
+                     <span [ngClass]="playerUtils.getWinRateClass(calculatePercentage(record.wins, record.total))">
+                      {{ calculatePercentage(record.wins, record.total) }}% Win Rate
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Game Type Distribution">
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <h3 class="chart-title">Game Type Distribution</h3>
+              <div class="chart-description">Shows the percentage of games played by type</div>
+              <div class="distribution-chart">
+                <div class="donut-chart">
+                  <div class="donut-chart-container">
+                    <svg class="donut-chart-svg" viewBox="0 0 120 120">
+                      <circle *ngFor="let segment of gameTypeData; let i = index"
+                              [ngClass]="'segment-' + i"
+                              [style.stroke-dasharray]="getDonutSegment(segment.percentage)"
+                              [style.stroke-dashoffset]="getDonutOffset(i)" class="donut-segment" cx="60"
+                              cy="60" r="50">
+                      </circle>
+                    </svg>
+                    <div class="donut-chart-center">{{ playerUtils.getTotalMatches(player) }}</div>
+                  </div>
+                </div>
+                <div class="distribution-legend">
+                  <div *ngFor="let item of gameTypeData; let i = index" class="legend-item">
+                    <div [ngClass]="'segment-' + i" class="legend-color"></div>
+                    <div class="legend-label">{{ item.name }} ({{ item.percentage }}%)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Rating Progression">
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <h3 class="chart-title">Rating History</h3>
+              <div class="chart-description">Shows your rating changes over time</div>
+              <div class="chart-filters">
+                <div class="filter-group">
+                  <label class="filter-label">Game Type</label>
+                  <div class="filter-options">
+                    <button (click)="changeEloGameTypeFilter('singlesRanked')"
+                            [class.active]="currentEloGameTypeFilter === 'singlesRanked'"
+                            [attr.aria-pressed]="currentEloGameTypeFilter === 'singlesRanked'"
+                            [attr.aria-label]="'Filter by Singles Ranked'"
+                            [ngClass]="'game-type-singles-ranked'" class="filter-button game-type-button">Singles Ranked
+                    </button>
+                    <button (click)="changeEloGameTypeFilter('doublesRanked')"
+                            [class.active]="currentEloGameTypeFilter === 'doublesRanked'"
+                            [attr.aria-pressed]="currentEloGameTypeFilter === 'doublesRanked'"
+                            [attr.aria-label]="'Filter by Doubles Ranked'"
+                            [ngClass]="'game-type-doubles-ranked'" class="filter-button game-type-button">Doubles Ranked
+                    </button>
+                    <button (click)="changeEloGameTypeFilter('singlesNormal')"
+                            [class.active]="currentEloGameTypeFilter === 'singlesNormal'"
+                            [attr.aria-pressed]="currentEloGameTypeFilter === 'singlesNormal'"
+                            [attr.aria-label]="'Filter by Singles Normal'"
+                            [ngClass]="'game-type-singles-normal'" class="filter-button game-type-button">Singles Normal
+                    </button>
+                    <button (click)="changeEloGameTypeFilter('doublesNormal')"
+                            [class.active]="currentEloGameTypeFilter === 'doublesNormal'"
+                            [attr.aria-pressed]="currentEloGameTypeFilter === 'doublesNormal'"
+                            [attr.aria-label]="'Filter by Doubles Normal'"
+                            [ngClass]="'game-type-doubles-normal'" class="filter-button game-type-button">Doubles Normal
+                    </button>
+                  </div>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Time Range</label>
+                  <div class="filter-options">
+                    <button (click)="changeEloTimeRange(days)" *ngFor="let days of timeRangeOptions"
+                            [class.active]="currentEloTimeRange === days"
+                            [attr.aria-pressed]="currentEloTimeRange === days"
+                            [attr.aria-label]="'Filter for ' + (days === 365 ? '1 Year' : days === 180 ? '6 Months' : days + ' Days')"
+                            class="filter-button">{{ days === 365 ? '1 Year' : days === 180 ? '6 Months' : days + ' Days' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="rating-history-chart">
+                <div [ngClass]="{'loading': isChartLoading}" class="chart-canvas-container">
+                  <canvas #eloChartRef [data]="eloChartConfigData" [options]="eloChartOptions" [type]="'line'"
+                          baseChart></canvas>
+                  <div *ngIf="isChartLoading" class="chart-loading-overlay">
+                    <mat-spinner [diameter]="30"></mat-spinner>
+                    <span>Loading chart data...</span></div>
+                </div>
+                <div *ngIf="!eloChartData[currentEloGameTypeFilter]?.length && !isChartLoading" class="no-data-message">
+                  <mat-icon>info</mat-icon>
+                  <p>No ELO history data available for this game type.</p></div>
+                <div *ngIf="eloChartData[currentEloGameTypeFilter]?.length" class="chart-stats">
+                  <div class="stat-card">
+                    <div class="stat-title">Current Rating</div>
+                    <div class="stat-value">{{ getCurrentEloRating(currentEloGameTypeFilter) }}</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-title">Peak Rating</div>
+                    <div class="stat-value">{{ getMaxEloRating(currentEloGameTypeFilter) }}</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-title">Trend</div>
+                    <div class="stat-value trend">
+                      <mat-icon *ngIf="getEloTrend(currentEloGameTypeFilter) === 'up'" class="trend-up">trending_up
+                      </mat-icon>
+                      <mat-icon *ngIf="getEloTrend(currentEloGameTypeFilter) === 'down'" class="trend-down">
+                        trending_down
+                      </mat-icon>
+                      <mat-icon *ngIf="getEloTrend(currentEloGameTypeFilter) === 'stable'" class="trend-stable">
+                        trending_flat
+                      </mat-icon>
+                      {{ getEloTrend(currentEloGameTypeFilter) === 'up' ? 'Improving' : getEloTrend(currentEloGameTypeFilter) === 'down' ? 'Declining' : 'Stable' }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Rank History">
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <h3 class="chart-title">Rank Position History</h3>
+              <div class="chart-description">Track your position on the leaderboard over time</div>
+              <div class="chart-filters">
+                <div class="filter-group">
+                  <label class="filter-label">Time Range</label>
+                  <div class="filter-options">
+                    <button (click)="loadRankDataWithDateRange(days)" *ngFor="let days of timeRangeOptions"
+                            [class.active]="currentRankTimeRange === days"
+                            class="filter-button">{{ days === 365 ? '1 Year' : days === 180 ? '6 Months' : days + ' Days' }}
+                    </button>
+                  </div>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Game Type</label>
+                  <div class="filter-options">
+                    <button (click)="changeRankGameTypeFilter('singlesRanked')"
+                            [class.active]="currentRankGameTypeFilter === 'singlesRanked'" class="filter-button">Singles
+                      Ranked
+                    </button>
+                    <button (click)="changeRankGameTypeFilter('doublesRanked')"
+                            [class.active]="currentRankGameTypeFilter === 'doublesRanked'" class="filter-button">Doubles
+                      Ranked
+                    </button>
+                    <button (click)="changeRankGameTypeFilter('singlesNormal')"
+                            [class.active]="currentRankGameTypeFilter === 'singlesNormal'" class="filter-button">Singles
+                      Normal
+                    </button>
+                    <button (click)="changeRankGameTypeFilter('doublesNormal')"
+                            [class.active]="currentRankGameTypeFilter === 'doublesNormal'" class="filter-button">Doubles
+                      Normal
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="rank-history-chart">
+                <div class="rank-highlight-stats">
+                  <div class="rank-highlight-card current-rank">
+                    <div class="rank-position">#{{ getCurrentRank(currentRankGameTypeFilter) || '-' }}</div>
+                    <div class="rank-highlight-label">Current Rank</div>
+                    <div *ngIf="getRankChangeOverPeriod(currentRankGameTypeFilter) !== 0"
+                         [ngClass]="{'trend-up': getRankChangeOverPeriod(currentRankGameTypeFilter) < 0, 'trend-down': getRankChangeOverPeriod(currentRankGameTypeFilter) > 0 }"
+                         class="rank-change">
+                      <mat-icon>{{ getRankChangeOverPeriod(currentRankGameTypeFilter) < 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+                      <span>{{ getRankChangeOverPeriod(currentRankGameTypeFilter) < 0 ? '+' + Math.abs(getRankChangeOverPeriod(currentRankGameTypeFilter)) : '-' + Math.abs(getRankChangeOverPeriod(currentRankGameTypeFilter)) }}
+                        positions</span>
+                    </div>
+                  </div>
+                  <div class="rank-highlight-card best-rank">
+                    <div class="rank-position">#{{ getBestRank(currentRankGameTypeFilter) }}</div>
+                    <div class="rank-highlight-label">Best Rank</div>
+                  </div>
+                  <div class="rank-highlight-card percentile">
+                    <div class="rank-position">{{ getCurrentPercentile(currentRankGameTypeFilter) }}%</div>
+                    <div class="rank-highlight-label">Percentile</div>
+                    <div class="percentile-explanation">(Top {{ getCurrentPercentile(currentRankGameTypeFilter) }}%
+                      of {{ getTotalPlayersCount(currentRankGameTypeFilter) }} players)
+                    </div>
+                  </div>
+                </div>
+                <div [ngClass]="{'loading': isRankChartLoading}" class="chart-canvas-container">
+                  <canvas #rankChartRef [data]="rankChartConfigData" [options]="rankChartOptions" [type]="'line'"
+                          baseChart></canvas>
+                  <div *ngIf="isRankChartLoading" class="chart-loading-overlay">
+                    <mat-spinner [diameter]="30"></mat-spinner>
+                    <span>Loading chart data...</span></div>
+                </div>
+                <div *ngIf="!rankHistoryData[currentRankGameTypeFilter]?.length && !isRankChartLoading"
+                     class="no-data-message">
+                  <mat-icon>info</mat-icon>
+                  <p>No rank history data available for this game type.</p>
+                  <button color="primary" mat-raised-button routerLink="/match-builder">Play a Match to Get Ranked
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Skills Analysis">
+          <div class="chart-container">
+            <div class="chart-wrapper skills-radar-wrapper">
+              <h3 class="chart-title">Player Skills Radar</h3>
+              <div class="chart-description">Visual analysis of playing style strengths compared to other players (0-100
+                scale)
+              </div>
+
+              <div class="skills-radar-container">
+
+
+                <!-- The actual radar chart -->
+                <div class="radar-chart-container">
+                  <mat-progress-spinner *ngIf="isLoadingStyleComparisons"
+                                        class="loading-spinner"
+                                        diameter="30"
+                                        mode="indeterminate">
+                  </mat-progress-spinner>
+
+                  <canvas #radarChartRef [data]="radarChartData" [options]="radarChartOptions"
+                          [type]="radarChartType" baseChart>
+                  </canvas>
+
+                  <div *ngIf="!player?.styleRatings?.length && !loading" class="no-data-message">
+                    <span>No skill data available to display radar.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Keep the existing style ratings list -->
+              <div class="skill-analysis">
+                <h4>Player Strengths Profile</h4>
+                <div class="style-ratings-list">
+                  <div *ngFor="let styleRating of getSortedStyleRatings().slice(0, showAllStyles ? 10 : 4)"
+                       [ngClass]="'style-' + styleRating.styleType.toLowerCase()" class="style-rating-item">
+                    <div class="style-rating-header">
+                      <div [ngClass]="'style-' + styleRating.styleType.toLowerCase()" class="style-badge">
+                        <mat-icon class="style-icon">{{ getStyleIcon(styleRating.styleType) }}</mat-icon>
+                        <span class="style-name">{{ getStyleName(styleRating.styleType) }}</span>
+                      </div>
+                      <div class="style-rating-value">{{ styleRating.rating }}%</div>
+                    </div>
+                    <div class="style-rating-bar">
+                      <div [ngClass]="'style-' + styleRating.styleType.toLowerCase()"
+                           [style.width.%]="styleRating.rating" class="style-rating-progress"></div>
+                    </div>
+                    <div class="style-rating-description">
+                      {{ getStyleDescription(styleRating.styleType) }} <span
+                      class="style-level">{{ playerUtils.getStyleLevelLabel(styleRating.rating) }}</span></div>
+                  </div>
+                </div>
+                <div *ngIf="getSortedStyleRatings().length > 4" class="toggle-styles-button">
+                  <button (click)="toggleShowAllStyles()">{{ showAllStyles ? 'Show Less' : 'Show More Styles' }}
+                  </button>
+                </div>
+
+                <h4 class="recommendations-title">Areas for Improvement</h4>
+                <ul class="recommendations-list">
+                  <li *ngFor="let style of PlayerUtilities.getLowestStyles(3,player)"
+                      [ngClass]="'style-' + style.styleType.toLowerCase()"
+                      class="recommendation-item">
+                    <strong [ngClass]="'style-' + style.styleType.toLowerCase()">
+                      <mat-icon class="style-icon-small">{{ getStyleIcon(style.styleType) }}</mat-icon>
+                      {{ getStyleName(style.styleType) }}
+                    </strong>
+                    {{ getStyleRecommendation(style.styleType) }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+
+    <mat-card class="recent-games-card mat-elevation-z2">
+      <mat-card-header>
+        <mat-card-title>
+          <div class="section-header">
+            <mat-icon class="section-icon">sports_tennis</mat-icon>
+            <span>Recent Games</span></div>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="games-container">
+          <div *ngIf="recentGames?.length" class="games-list">
+            <div *ngFor="let game of recentGames?.slice(0, showAllGames ? 20 : 4)"
+                 [ngClass]="isWin(game) ? 'win-game' : 'loss-game'" class="game-item">
+              <div class="game-header">
+                <div
+                  class="game-type">{{ game.singlesGame ? 'Singles' : 'Doubles' }} {{ game.ratedGame ? 'Ranked' : 'Normal' }}
+                </div>
+                <div *ngIf="game.datePlayed" class="game-date">{{ game.datePlayed | date:'shortDate' }}</div>
+              </div>
+              <div class="game-content">
+                <div class="game-score"><span class="score-value">{{ game.challengerTeamScore }}</span> <span
+                  class="score-separator">-</span> <span class="score-value">{{ game.opponentTeamScore }}</span></div>
+                <div class="game-result">{{ getGameResult(game) }}</div>
+              </div>
+              <div class="game-footer"><a [routerLink]="['/game', game.gameId]" class="view-game-link">View Details
+                <mat-icon class="link-icon">arrow_forward</mat-icon>
+              </a></div>
+            </div>
+          </div>
+          <div *ngIf="!recentGames?.length" class="no-games">
+            <h3>No Recent Games</h3>
+            <p>Start playing to see your game history!</p>
+            <button color="primary" mat-raised-button routerLink="/match-builder">Create a Match</button>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions *ngIf="recentGames && recentGames.length > 4">
+        <button (click)="toggleShowAllGames()" color="primary"
+                mat-button>{{ showAllGames ? 'Show Less' : 'View More Games' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-card class="ranking-card mat-elevation-z2">
+      <mat-card-header>
+        <mat-card-title>
+          <div class="section-header">
+            <mat-icon class="section-icon">leaderboard</mat-icon>
+            <span>Leaderboard Position</span></div>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="ranking-container">
+          <div class="ranking-stats">
+            <div class="ranking-metric">
+              <div class="metric-value"><span
+                class="position-number">#{{ getCurrentRank('singlesRanked') || '-' }}</span></div>
+              <div class="metric-label">Singles Ranked</div>
+            </div>
+            <div class="ranking-metric">
+              <div class="metric-value"><span
+                class="position-number">#{{ getCurrentRank('doublesRanked') || '-' }}</span></div>
+              <div class="metric-label">Doubles Ranked</div>
+            </div>
+            <div class="ranking-metric">
+              <div class="metric-value">
+                <span
+                  [ngClass]="{'up-trend': getRankChangeOverPeriod('singlesRanked') < 0, 'down-trend': getRankChangeOverPeriod('singlesRanked') > 0, 'stable-trend': getRankChangeOverPeriod('singlesRanked') === 0}"
+                  class="trend">
+                  <mat-icon>{{ getRankChangeOverPeriod('singlesRanked') < 0 ? 'trending_up' : getRankChangeOverPeriod('singlesRanked') > 0 ? 'trending_down' : 'trending_flat' }}</mat-icon>
+                  <span>{{ getRankChangeOverPeriod('singlesRanked') === 0 ? '=' : getRankChangeOverPeriod('singlesRanked') < 0 ? '+' + Math.abs(getRankChangeOverPeriod('singlesRanked')) : '-' + Math.abs(getRankChangeOverPeriod('singlesRanked')) }}</span>
+                </span>
+              </div>
+              <div class="metric-label">Change ({{ currentRankTimeRange }} Days)</div>
+            </div>
+          </div>
+          <div class="ranking-link">
+            <button color="primary" mat-button routerLink="/leaderboard">View Full Leaderboard
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>

@@ -1,0 +1,760 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+// Import our design system
+@use 'styles/abstracts/tokens';
+@use 'styles/abstracts/mixins';
+
+// Import component styles
+@use 'styles/components/cards';
+@use 'styles/components/avatars';
+@use 'styles/components/leaderboard-dark';
+@use 'styles/components/leaderboard-white-headers';
+@use 'styles/components/achievements-dark';
+@use 'styles/components/form-fields-dark';
+@use 'styles/components/statistics-dark';
+
+// Import utilities
+@use 'styles/utilities/spacing';
+@use 'styles/utilities/flex';
+@use 'styles/utilities/colors';
+
+// Global styles
+/* Font optimization */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap; /* Improve font loading behavior */
+  src: local('Roboto'), local('Roboto-Regular'), url(https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxK.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap; /* Improve font loading behavior */
+  src: local('Roboto Medium'), local('Roboto-Medium'), url(https://fonts.gstatic.com/s/roboto/v20/KFOlCnqEu92Fr1MmEU9fBBc4.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-base, Roboto, sans-serif), serif;
+  background-color: var(--background-color, #f5f5f5);
+  color: var(--text-primary, rgba(0, 0, 0, 0.87));
+  text-rendering: optimizeSpeed; /* Optimize for speed rather than precision */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Angular 19 now supports standard CSS custom properties for theming
+// This approach is much simpler and more reliable
+:root {
+  --md-sys-color-primary: #{tokens.$primary-color};
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #e3f2fd;
+  --md-sys-color-on-primary-container: #004c8c;
+
+  --md-sys-color-secondary: #{tokens.$accent-color};
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #fce4ec;
+  --md-sys-color-on-secondary-container: #c2185b;
+
+  --md-sys-color-tertiary: #{tokens.$success-color};
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #e8f5e9;
+  --md-sys-color-on-tertiary-container: #2e7d32;
+
+  --md-sys-color-error: #{tokens.$warning-color};
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffebee;
+  --md-sys-color-on-error-container: #c62828;
+
+  --md-sys-color-surface: #ffffff;
+  --md-sys-color-on-surface: rgba(0, 0, 0, 0.87);
+  --md-sys-color-surface-variant: #f5f5f5;
+  --md-sys-color-on-surface-variant: rgba(0, 0, 0, 0.6);
+
+  --md-sys-color-outline: #bdbdbd;
+  --md-sys-color-background: #f5f5f5;
+  --md-sys-color-on-background: rgba(0, 0, 0, 0.87);
+}
+
+// Define your light theme (default)
+.light-theme {
+  // Light theme variables
+  --primary-color: #1976d2;
+  --primary-color-light: #42a5f5;
+  --primary-color-dark: #0d47a1;
+  --primary-color-rgb: 25, 118, 210;
+  
+  // Semantic colors
+  --success-color: #4caf50;
+  --success-color-light: #66bb6a;
+  --success-color-dark: #388e3c;
+  --success-color-rgb: 76, 175, 80;
+  
+  // Text colors
+  --text-primary: rgba(0, 0, 0, 0.87);
+  --text-secondary: rgba(0, 0, 0, 0.6);
+
+  // Material-specific light theme variables
+  --mdc-filled-text-field-container-color: white;
+  --mdc-filled-text-field-label-text-color: rgba(0, 0, 0, 0.6);
+  --mdc-filled-text-field-input-text-color: rgba(0, 0, 0, 0.87);
+  // Add more Material component specific variables as needed
+}
+
+// Support automatic dark mode detection
+@media (prefers-color-scheme: dark) {
+  body:not(.light-theme):not(.dark-theme) {
+    // This will apply dark theme automatically if user hasn't explicitly chosen a theme
+    // and their system is set to dark mode
+    color-scheme: dark;
+    background-color: #121212;
+    color: rgba(255, 255, 255, 0.87);
+    
+    // Apply basic dark theme styles
+    --background-color: #121212;
+    --card-background: #1e1e1e;
+    --text-primary: rgba(255, 255, 255, 0.87);
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --border-color: rgba(255, 255, 255, 0.12);
+    
+    // Tell the app to use dark theme
+    &::before {
+      content: '';
+      display: none;
+      content: 'dark';
+    }
+  }
+}
+
+.dark-theme {
+  // Basic text color overrides for dark mode
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --border-color: rgba(255, 255, 255, 0.15);
+  
+  // Background colors
+  --background-color: #121212;
+  --surface-color: #1e1e1e;
+  --card-background: #262626;
+  
+  // Make sure these override any specificity issues
+  color: var(--text-primary) !important;
+  background-color: var(--background-color) !important;
+  
+  // Enhanced colors for better visibility
+  --primary-color: #42a5f5; // Lighter shade for dark mode
+  --primary-color-light: #90caf9;
+  --primary-color-dark: #1976d2;
+  --primary-color-rgb: 66, 165, 245;
+  
+  // Semantic colors - brighter for dark mode
+  --success-color: #66bb6a;
+  --success-color-light: #81c784;
+  --success-color-dark: #43a047;
+  --success-color-rgb: 102, 187, 106;
+  
+  // Global Material tab styles for dark mode
+  .mat-mdc-tab .mdc-tab__text-label,
+  .mat-mdc-tab-header-pagination-title {
+    color: white !important;
+  }
+  
+  .mat-mdc-tab-header {
+    background-color: #121212;
+  }
+  
+  .mat-mdc-tab-label-container {
+    color: white !important;
+  }
+  
+  // Leaderboard component specific styles
+  .leaderboard-container {
+    background-color: var(--background-color);
+    color: var(--text-primary);
+
+    // Ensure table has proper dark mode styling
+    .rankings-table {
+      color: white;
+      
+      th.mat-header-cell {
+        color: white !important;
+        border-bottom-color: rgba(255, 255, 255, 0.3);
+        font-weight: 500;
+        
+        &.mat-sort-header {
+          color: white !important;
+          
+          .mat-sort-header-arrow {
+            color: white !important;
+            opacity: 1 !important;
+          }
+          
+          .mat-sort-header-content {
+            color: white !important;
+          }
+        }
+        
+        // Angular Material sort header container needs to be white too
+        .mat-sort-header-container {
+          color: white !important;
+          
+          &:hover {
+            color: white !important;
+          }
+        }
+      }
+      
+      .mat-header-row {
+        background-color: #121212;
+      }
+      
+      td.mat-cell {
+        color: white;
+        border-bottom-color: rgba(255, 255, 255, 0.2);
+      }
+      
+      // Override specific row styling for dark mode
+      tr.mat-row {
+        background-color: black;
+        
+        &:hover {
+          background-color: #1e1e1e;
+        }
+      }
+      
+      // Top three rows in dark mode  
+      .top-three-row {
+        background-color: #121212;
+        border-left: 3px solid var(--primary-color);
+      }
+      
+      .first-place-row {
+        background-color: #121212;
+        border-left: 3px solid #f9a602;
+      }
+      
+      // Rating value color
+      .rating-value {
+        color: white;
+      }
+      
+      // Win rate bar colors
+      .win-rate-cell .win-rate-bar {
+        background-color: rgba(255, 255, 255, 0.1);
+        
+        .win-rate-progress {
+          background-color: var(--success-color);
+        }
+      }
+      
+      // Make sure all numbers and text are white
+      .position-cell span,
+      .player-name,
+      .player-username,
+      td {
+        color: white !important;
+      }
+      
+      // Style icons already handled in component scss
+    }
+    
+    // Ensure tabs have proper styling
+    .mat-tab-group {
+      color: white;
+      
+      .mat-tab-label {
+        color: white;
+        opacity: 0.7;
+        
+        &.mat-tab-label-active {
+          color: white;
+          opacity: 1;
+        }
+
+        .mat-tab-label-content {
+          color: white;
+        }
+      }
+      
+      .mat-tab-header {
+        border-bottom-color: rgba(255, 255, 255, 0.3);
+      }
+      
+      .mat-tab-labels {
+        background-color: #121212;
+      }
+      
+      .mat-ink-bar {
+        background-color: white !important;
+      }
+    }
+    
+    // Search field styling
+    .search-field {
+      .mat-mdc-form-field-flex {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      .mat-mdc-text-field-wrapper {
+        background-color: transparent;
+      }
+      
+      .mat-mdc-form-field-label, 
+      .mat-mdc-input-element,
+      input,
+      .mat-form-field-label,
+      ::placeholder {
+        color: white !important;
+      }
+      
+      .mat-mdc-form-field-icon-suffix,
+      .mat-icon {
+        color: white !important;
+      }
+    }
+  }
+  
+  // Home component specific styles
+  .home-dashboard {
+    .dashboard-header {
+      .welcome-title {
+        color: #90caf9; // Lighter primary color for better visibility
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        
+        &::after {
+          background: linear-gradient(to right, #90caf9, #42a5f5);
+        }
+      }
+      
+      .welcome-subtitle {
+        color: var(--text-secondary);
+      }
+    }
+    
+    // Stat cards - dark mode enhancements
+    .stats-cards .stat-card {
+      background-color: #262626;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.05);
+      
+      mat-card-title {
+        color: var(--text-primary);
+      }
+      
+      mat-card-subtitle, p {
+        color: var(--text-secondary);
+      }
+      
+      mat-icon {
+        color: var(--primary-color);
+      }
+    }
+    
+    // Action buttons background
+    .action-card {
+      background: linear-gradient(to right, #1a1a1a, #262626);
+      
+      .action-buttons {
+        button {
+          // Enhanced button styles for dark mode
+          &.create-match-btn {
+            background: linear-gradient(45deg, #1565c0, #42a5f5);
+            box-shadow: 0 3px 8px rgba(25, 118, 210, 0.5);
+            
+            &:hover {
+              background: linear-gradient(45deg, #1976d2, #64b5f6);
+              box-shadow: 0 5px 12px rgba(25, 118, 210, 0.7);
+            }
+          }
+          
+          &.view-stats-btn {
+            background: linear-gradient(45deg, #c2185b, #f48fb1);
+            box-shadow: 0 3px 8px rgba(233, 30, 99, 0.5);
+            
+            &:hover {
+              background: linear-gradient(45deg, #d81b60, #f8bbd0);
+              box-shadow: 0 5px 12px rgba(233, 30, 99, 0.7);
+            }
+          }
+          
+          &.view-achievements-btn {
+            background: linear-gradient(45deg, #d32f2f, #ef5350);
+            box-shadow: 0 3px 8px rgba(244, 67, 54, 0.5);
+            
+            &:hover {
+              background: linear-gradient(45deg, #e53935, #e57373);
+              box-shadow: 0 5px 12px rgba(244, 67, 54, 0.7);
+            }
+          }
+          
+          &.view-tournaments-btn {
+            background: linear-gradient(45deg, #2e7d32, #66bb6a);
+            box-shadow: 0 3px 8px rgba(76, 175, 80, 0.5);
+            
+            &:hover {
+              background: linear-gradient(45deg, #388e3c, #81c784);
+              box-shadow: 0 5px 12px rgba(76, 175, 80, 0.7);
+            }
+          }
+          
+          &.view-leaderboard-btn {
+            background: linear-gradient(45deg, #455a64, #90a4ae);
+            box-shadow: 0 3px 8px rgba(96, 125, 139, 0.5);
+            
+            &:hover {
+              background: linear-gradient(45deg, #546e7a, #b0bec5);
+              box-shadow: 0 5px 12px rgba(96, 125, 139, 0.7);
+            }
+          }
+          
+          mat-icon {
+            // Add a subtle glow to icons
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
+          }
+        }
+      }
+    }
+    
+    // Game cards
+    .game-card {
+      background-color: #262626;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.05);
+      
+      &:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        transform: translateY(-5px);
+        background-color: #2c2c2c;
+      }
+      
+      .game-header {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        
+        .game-type {
+          color: var(--text-primary);
+        }
+        
+        .game-date {
+          color: var(--text-secondary);
+        }
+      }
+      
+      .game-players {
+        .player, .team {
+          background-color: rgba(0, 0, 0, 0.15);
+          
+          &.winner {
+            background-color: rgba(var(--success-color-rgb), 0.15);
+          }
+          
+          .player-name, .team-player {
+            color: var(--text-primary);
+          }
+          
+          .score {
+            color: var(--primary-color-light);
+          }
+        }
+        
+        .vs-separator {
+          color: var(--text-secondary);
+        }
+      }
+      
+      .game-footer {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+    }
+    
+    // Chart and data visualization
+    .donut-chart {
+      .chart-center {
+        background-color: #262626;
+        
+        .chart-value {
+          color: var(--primary-color-light);
+        }
+        
+        .chart-label {
+          color: var(--text-secondary);
+        }
+      }
+    }
+    
+    .chart-legend {
+      .legend-item {
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .legend-label {
+          color: var(--text-primary);
+        }
+        
+        .legend-value {
+          color: var(--text-secondary);
+        }
+      }
+    }
+    
+    // Player lists
+    .player-item {
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      .player-name {
+        color: var(--text-primary);
+      }
+      
+      .player-username {
+        color: var(--text-secondary);
+      }
+      
+      .stat-item {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--text-secondary);
+      }
+    }
+    
+    // Top players section
+    .top-player-card {
+      background-color: #262626;
+      
+      .category-label {
+        color: white;
+      }
+      
+      .player-content:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      .player-name {
+        color: var(--text-primary);
+      }
+      
+      .player-rating {
+        color: var(--primary-color-light);
+      }
+    }
+    
+    // Bar charts
+    .bar-chart-item {
+      .bar-label {
+        color: var(--text-secondary);
+      }
+      
+      .bar-container {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+    
+    // Achievements section
+    .achievement-item {
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      .achievement-name {
+        color: var(--text-primary);
+      }
+      
+      .achievement-count {
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  // Fix for section titles in the home page
+  .section-title,
+  .page-title,
+  .dashboard-title,
+  .app-title,
+  .card-title,
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important; // Force white color for all headings
+    text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3); // Add subtle shadow for better readability
+  }
+
+  // Ensure primary color text is readable on dark backgrounds
+  .text-primary {
+    color: var(--primary-color-light) !important; // Use lighter shade of primary
+  }
+  
+  // Material card overrides for better readability
+  mat-card, .mat-mdc-card {
+    background-color: #262626 !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    
+    .mat-mdc-card-title, .mat-card-title {
+      color: var(--text-primary) !important;
+    }
+    
+    .mat-mdc-card-subtitle, .mat-card-subtitle {
+      color: var(--text-secondary) !important;
+    }
+    
+    .mat-mdc-card-content, .mat-card-content {
+      color: var(--text-primary) !important;
+    }
+  }
+  
+  // Button overrides for better contrast
+  .mat-mdc-raised-button.mat-primary,
+  .mat-mdc-unelevated-button.mat-primary {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+  }
+  
+  // Make icon buttons more visible
+  .mat-mdc-icon-button {
+    color: var(--text-primary) !important;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+  }
+  
+  // Empty state styling
+  .no-games-message, .empty-state, .no-data-message {
+    background-color: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary) !important;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    
+    mat-icon {
+      color: rgba(255, 255, 255, 0.3);
+    }
+  }
+  
+  // Loading spinner enhancements
+  .mat-spinner circle, .mat-progress-spinner circle {
+    stroke: var(--primary-color-light) !important;
+  }
+  
+  .loading-overlay {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    
+    .loading-text {
+      color: var(--text-secondary) !important;
+    }
+  }
+  
+  // Section title overrides
+  .app-section-title {
+    color: var(--primary-color-light) !important;
+    
+    &::before {
+      background-color: var(--primary-color) !important;
+    }
+  }
+
+  // Fixes for sidenav container
+  .mat-sidenav-container {
+    background-color: var(--background-color) !important;
+    color: var(--text-primary) !important;
+
+    .mat-sidenav {
+      background-color: #121212 !important; // Very dark gray
+      color: var(--text-primary) !important;
+
+      .mat-nav-list {
+        .mat-list-item {
+          color: rgba(255, 255, 255, 0.87) !important;
+
+          &.active-route {
+            background-color: rgba(66, 165, 245, 0.15) !important; // Primary color with low opacity
+            color: var(--primary-color) !important;
+          }
+
+          .mat-icon {
+            color: rgba(255, 255, 255, 0.7) !important;
+          }
+        }
+      }
+    }
+
+    .mat-sidenav-content {
+      background-color: var(--background-color) !important;
+      color: var(--text-primary) !important;
+
+      .content-container {
+        background-color: var(--background-color) !important;
+      }
+    }
+  }
+
+  // App header/toolbar
+  .main-toolbar {
+    background-color: #121212 !important;
+    color: white !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+
+    .app-title {
+      color: white !important;
+    }
+
+    .mat-icon {
+      color: white !important;
+    }
+
+    .user-menu-trigger {
+      border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+  }
+
+  // Improved contrast for dashboard content
+  .dashboard-section,
+  .dashboard-container {
+    .section-title {
+      color: white !important;
+
+      &::before {
+        background-color: var(--primary-color) !important;
+      }
+    }
+  }
+
+  // Improved card contrast
+  .mat-mdc-card {
+    background-color: #1e1e1e !important; // Slightly lighter than the background
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  // Menu improvements
+  .mat-menu-panel {
+    background-color: #1e1e1e !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+
+    .mat-menu-item {
+      color: rgba(255, 255, 255, 0.87) !important;
+
+      .mat-icon {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+    }
+  }
+
+  // Make sure dividers are visible
+  .mat-divider {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  // Username styles
+  .user-username,
+  .profile-username {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+}

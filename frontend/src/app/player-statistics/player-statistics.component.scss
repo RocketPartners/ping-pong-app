@@ -1,0 +1,1981 @@
+// Import shared styles
+@use '../../styles/abstracts/tokens' as tokens;
+@use '../../styles/abstracts/mixins' as mixins;
+// Variables
+$card-border-radius: 8px;
+$card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+$transition-standard: all 0.3s ease;
+
+// Game Type Colors
+$singles-ranked-color: #1976d2;
+$doubles-ranked-color: #9c27b0;
+$singles-normal-color: #4caf50;
+$doubles-normal-color: #ff9800;
+
+// Win/Loss Colors
+$win-color: var(--success-color);
+$loss-color: var(--warning-color);
+
+// Rating Colors
+$rating-beginner: var(--rating-beginner);
+$rating-novice: var(--rating-novice);
+$rating-intermediate: var(--rating-intermediate);
+$rating-advanced: var(--rating-advanced);
+$rating-expert: var(--rating-expert);
+
+// Win Rate Colors
+$win-rate-struggling: var(--win-rate-struggling);
+$win-rate-poor: var(--win-rate-poor);
+$win-rate-average: var(--win-rate-average);
+$win-rate-good: var(--win-rate-good);
+$win-rate-excellent: var(--win-rate-excellent);
+
+// Media Breakpoints
+$breakpoint-sm: tokens.$breakpoint-sm;
+$breakpoint-md: tokens.$breakpoint-md;
+$breakpoint-lg: tokens.$breakpoint-lg;
+$breakpoint-xl: tokens.$breakpoint-xl;
+
+// Style colors map
+$style-colors: (
+  'spin': var(--style-spin),
+  'power': var(--style-power),
+  'creative': var(--style-creative),
+  'aggressive': var(--style-aggressive),
+  'resilient': var(--style-resilient),
+  'ace_master': var(--style-ace),
+  'rally_king': var(--style-rally),
+  'tactician': var(--style-tactician),
+  'sportsmanship': var(--style-sportsmanship),
+  'aura': var(--style-aura)
+);
+
+// Mixins
+@mixin card-style {
+  background-color: white;
+  border-radius: $card-border-radius;
+  box-shadow: $card-shadow;
+  transition: $transition-standard;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin section-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: $singles-ranked-color;
+  margin-bottom: 1rem;
+}
+
+// Base Container
+.statistics-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+// Player Search
+.player-search-container {
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+
+  .search-field {
+    width: 100%;
+  }
+}
+
+.back-to-profile {
+  margin-bottom: 1.5rem;
+}
+
+// Dashboard Layout
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: $breakpoint-lg) {
+    grid-template-columns: 2fr 1fr;
+
+    .profile-header,
+    .ratings-grid,
+    .analytics-section {
+      grid-column: span 2;
+    }
+  }
+}
+
+// Profile Header
+.profile-header {
+  @include card-style;
+  margin-bottom: 1.5rem;
+
+  .profile-header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    @media (min-width: $breakpoint-md) {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+
+  .profile-avatar-container {
+    margin-bottom: 1.25rem;
+
+    @media (min-width: $breakpoint-md) {
+      margin-right: 2rem;
+      margin-bottom: 0;
+    }
+  }
+
+  // Profile avatar is now handled by app-profile-avatar component
+  // which applies its own styling
+
+  .profile-info {
+    text-align: center;
+    margin-bottom: 1.25rem;
+
+    @media (min-width: $breakpoint-md) {
+      text-align: left;
+      flex: 1;
+    }
+  }
+
+  .profile-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: $singles-ranked-color;
+  }
+
+  .profile-username {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+
+  .profile-since {
+    font-size: 0.875rem;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 0.75rem;
+  }
+
+  .profile-stats {
+    background-color: #333;
+    color: white;
+    padding: 1.25rem;
+    border-radius: $card-border-radius;
+    text-align: center;
+
+    @media (min-width: $breakpoint-md) {
+      padding: 1.5rem;
+      min-width: 180px;
+    }
+  }
+
+  .overall-win-rate {
+    margin-bottom: 0.75rem;
+  }
+
+  .win-rate-value {
+    font-size: 2rem;
+    font-weight: 600;
+    display: block;
+
+    &.win-rate-struggling {
+      color: $win-rate-struggling;
+    }
+
+    &.win-rate-poor {
+      color: $win-rate-poor;
+    }
+
+    &.win-rate-average {
+      color: $win-rate-average;
+    }
+
+    &.win-rate-good {
+      color: $win-rate-good;
+    }
+
+    &.win-rate-excellent {
+      color: $win-rate-excellent;
+    }
+  }
+
+  .win-rate-label {
+    font-size: 0.875rem;
+    opacity: 0.8;
+  }
+
+  .win-loss-record {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+
+    .wins {
+      color: $win-color;
+    }
+
+    .losses {
+      color: $loss-color;
+    }
+  }
+
+  .total-games {
+    font-size: 0.875rem;
+    opacity: 0.8;
+
+    .games-count {
+      font-weight: 600;
+    }
+  }
+}
+
+// Rating Cards Grid
+.ratings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+
+  @media (min-width: $breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: $breakpoint-lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.rating-card {
+  @include card-style;
+
+  .rating-content {
+    padding: 0.75rem 0;
+  }
+
+  .rating-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .rating-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-right: 0.75rem;
+
+    &.rating-beginner {
+      color: $rating-beginner;
+    }
+
+    &.rating-novice {
+      color: $rating-novice;
+    }
+
+    &.rating-intermediate {
+      color: $rating-intermediate;
+    }
+
+    &.rating-advanced {
+      color: $rating-advanced;
+    }
+
+    &.rating-expert {
+      color: $rating-expert;
+    }
+  }
+
+  .rating-record {
+    text-align: center;
+    margin-bottom: 0.75rem;
+
+    .wins {
+      color: $win-color;
+      font-weight: 500;
+    }
+
+    .losses {
+      color: $loss-color;
+      font-weight: 500;
+    }
+
+    .win-rate {
+      font-size: 0.875rem;
+      margin-left: 0.5rem;
+
+      &.win-rate-struggling {
+        color: $win-rate-struggling;
+      }
+
+      &.win-rate-poor {
+        color: $win-rate-poor;
+      }
+
+      &.win-rate-average {
+        color: $win-rate-average;
+      }
+
+      &.win-rate-good {
+        color: $win-rate-good;
+      }
+
+      &.win-rate-excellent {
+        color: $win-rate-excellent;
+      }
+    }
+  }
+}
+
+// Analytics Section
+.analytics-section {
+  margin-bottom: 1.5rem;
+  background-color: white;
+  border-radius: $card-border-radius;
+  box-shadow: $card-shadow;
+  overflow: hidden;
+}
+
+.chart-container {
+  padding: 1.5rem;
+}
+
+.chart-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: $singles-ranked-color;
+  margin-bottom: 0.5rem;
+}
+
+.chart-description {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+// Stacked Bar Chart
+.stacked-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stacked-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stacked-bar-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.stacked-bar {
+  display: flex;
+  height: 30px;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.stacked-bar-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.win-segment {
+  background-color: $win-color;
+}
+
+.loss-segment {
+  background-color: $loss-color;
+}
+
+.stacked-bar-total {
+  text-align: right;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+// Distribution Chart
+.distribution-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+
+  @media (min-width: $breakpoint-md) {
+    flex-direction: row;
+    justify-content: center;
+    gap: 3rem;
+  }
+}
+
+.donut-chart {
+  flex-shrink: 0;
+}
+
+.donut-chart-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+
+.donut-chart-svg {
+  transform: rotate(-90deg);
+}
+
+.donut-segment {
+  fill: transparent;
+  stroke-width: 20;
+}
+
+.segment-0 {
+  stroke: $singles-ranked-color;
+}
+
+.segment-1 {
+  stroke: $singles-normal-color;
+}
+
+.segment-2 {
+  stroke: $doubles-ranked-color;
+}
+
+.segment-3 {
+  stroke: $doubles-normal-color;
+}
+
+.donut-chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $singles-ranked-color;
+}
+
+.distribution-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+
+  &.segment-0 {
+    background-color: $singles-ranked-color;
+  }
+
+  &.segment-1 {
+    background-color: $singles-normal-color;
+  }
+
+  &.segment-2 {
+    background-color: $doubles-ranked-color;
+  }
+
+  &.segment-3 {
+    background-color: $doubles-normal-color;
+  }
+}
+
+.legend-label {
+  font-size: 0.875rem;
+}
+
+// Chart Filters
+.chart-filters {
+  margin-bottom: 1.25rem;
+}
+
+.filter-group {
+  margin-bottom: 1rem;
+}
+
+.filter-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+
+    .filter-button {
+      width: 100%;
+    }
+  }
+}
+
+.filter-button {
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.active {
+    background-color: $singles-ranked-color;
+    color: white;
+    font-weight: 500;
+  }
+
+  &:hover:not(.active) {
+    background-color: #e0e0e0;
+  }
+}
+
+// Game Type Buttons
+.game-type-button {
+  position: relative;
+  padding-left: 20px;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+  }
+
+  &.active {
+    font-weight: 500;
+  }
+}
+
+.game-type-singles-ranked {
+  &::before {
+    background-color: $singles-ranked-color;
+  }
+
+  &.active {
+    background-color: rgba($singles-ranked-color, 0.1);
+    color: $singles-ranked-color;
+  }
+}
+
+.game-type-doubles-ranked {
+  &::before {
+    background-color: $doubles-ranked-color;
+  }
+
+  &.active {
+    background-color: rgba($doubles-ranked-color, 0.1);
+    color: $doubles-ranked-color;
+  }
+}
+
+.game-type-singles-normal {
+  &::before {
+    background-color: $singles-normal-color;
+  }
+
+  &.active {
+    background-color: rgba($singles-normal-color, 0.1);
+    color: $singles-normal-color;
+  }
+}
+
+.game-type-doubles-normal {
+  &::before {
+    background-color: $doubles-normal-color;
+  }
+
+  &.active {
+    background-color: rgba($doubles-normal-color, 0.1);
+    color: $doubles-normal-color;
+  }
+}
+
+// Chart Containers
+.chart-canvas-container {
+  background-color: #fff;
+  border-radius: $card-border-radius;
+  padding: 1.25rem;
+  height: 350px;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+  position: relative;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.loading {
+    opacity: 0.7;
+  }
+}
+
+.chart-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  @include flex-center;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.85);
+  z-index: 10;
+  border-radius: $card-border-radius;
+  backdrop-filter: blur(2px);
+
+  span {
+    margin-top: 0.625rem;
+    color: #616161;
+    font-weight: 500;
+  }
+}
+
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.25rem;
+  background-color: #f7f9fc;
+  border-radius: $card-border-radius;
+  color: #757575;
+  border: 1px dashed #e0e0e0;
+  text-align: center;
+
+  mat-icon {
+    font-size: 3rem;
+    height: 3rem;
+    width: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    color: #9e9e9e;
+  }
+
+  p {
+    margin-bottom: 1.25rem;
+    font-size: 1rem;
+  }
+}
+
+// Stats Cards
+.chart-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.938rem;
+  margin-top: 1.25rem;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+
+    .stat-card {
+      width: 100%;
+    }
+  }
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 120px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  padding: 0.75rem;
+  text-align: center;
+
+  .stat-title {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.125rem;
+    font-weight: 500;
+
+    &.positive {
+      color: $win-color;
+    }
+
+    &.negative {
+      color: $loss-color;
+    }
+
+    &.trend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        margin-right: 0.313rem;
+      }
+
+      .trend-up {
+        color: $win-color;
+      }
+
+      .trend-down {
+        color: $loss-color;
+      }
+
+      .trend-stable {
+        color: $doubles-normal-color;
+      }
+    }
+  }
+}
+
+// Rank History Chart
+.rank-history-chart {
+  background-color: white;
+  border-radius: $card-border-radius;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 1.25rem;
+}
+
+.rank-highlight-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.938rem;
+  margin-bottom: 1.25rem;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+  }
+}
+
+.rank-highlight-card {
+  flex: 1;
+  min-width: 150px;
+  padding: 0.938rem;
+  border-radius: $card-border-radius;
+  text-align: center;
+  background-color: #f5f7fa;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.current-rank {
+    border-left: 4px solid $singles-ranked-color;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: $singles-ranked-color;
+    }
+  }
+
+  &.best-rank {
+    border-left: 4px solid $win-color;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: $win-color;
+    }
+  }
+
+  &.percentile {
+    border-left: 4px solid $doubles-normal-color;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: $doubles-normal-color;
+    }
+  }
+}
+
+.rank-position {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212121;
+  line-height: 1.2;
+  margin-bottom: 0.313rem;
+}
+
+.rank-highlight-label {
+  font-size: 0.875rem;
+  color: #757575;
+  text-transform: uppercase;
+  letter-spacing: 0.031rem;
+}
+
+.percentile-explanation {
+  font-size: 0.75rem;
+  color: #9e9e9e;
+  margin-top: 0.313rem;
+}
+
+.rank-change {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  font-size: 0.813rem;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 1rem;
+    height: 1rem;
+    width: 1rem;
+    margin-right: 0.25rem;
+  }
+
+  &.trend-up {
+    color: $win-color;
+  }
+
+  &.trend-down {
+    color: $loss-color;
+  }
+}
+
+// Rank Insights
+.rank-insights {
+  margin-top: 1.875rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e0e0e0;
+
+  h4 {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #424242;
+    margin-bottom: 1rem;
+  }
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.insight-card {
+  display: flex;
+  background-color: #f5f7fa;
+  padding: 1rem;
+  border-radius: $card-border-radius;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .insight-icon {
+    font-size: 1.5rem;
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-right: 1rem;
+    color: #616161;
+  }
+
+  .insight-content {
+    flex: 1;
+
+    h5 {
+      font-size: 0.938rem;
+      font-weight: 500;
+      color: #424242;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      margin: 0;
+      color: #616161;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Trend Indicators
+.trend-up {
+  color: $win-color;
+  display: flex;
+  align-items: center;
+
+  mat-icon {
+    font-size: 1.125rem;
+    height: 1.125rem;
+    width: 1.125rem;
+    margin-right: 0.25rem;
+  }
+}
+
+.trend-down {
+  color: $loss-color;
+  display: flex;
+  align-items: center;
+
+  mat-icon {
+    font-size: 1.125rem;
+    height: 1.125rem;
+    width: 1.125rem;
+    margin-right: 0.25rem;
+  }
+}
+
+.trend-stable {
+  color: $doubles-normal-color;
+  display: flex;
+  align-items: center;
+
+  mat-icon {
+    font-size: 1.125rem;
+    height: 1.125rem;
+    width: 1.125rem;
+    margin-right: 0.25rem;
+  }
+}
+
+.rank-motivation {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+
+  button {
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+}
+
+// Skill Analysis
+.skill-radar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 1.25rem;
+
+  @media (min-width: $breakpoint-md) {
+    flex-direction: row;
+  }
+}
+
+.radar-chart {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.radar-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+
+.radar-levels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radar-level {
+  position: absolute;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+
+  &.level-1 {
+    width: 20%;
+    height: 20%;
+  }
+
+  &.level-2 {
+    width: 40%;
+    height: 40%;
+  }
+
+  &.level-3 {
+    width: 60%;
+    height: 60%;
+  }
+
+  &.level-4 {
+    width: 80%;
+    height: 80%;
+  }
+
+  &.level-5 {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.radar-axes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.radar-axis {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.2);
+  transform-origin: left center;
+
+  span {
+    position: absolute;
+    right: -20px;
+    top: -10px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  // Dynamic axes positioning using loops
+  @for $i from 1 through 10 {
+    &.axis-#{$i} {
+      transform: rotate(($i - 1) * 36deg);
+    }
+  }
+}
+
+.radar-shape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba($singles-ranked-color, 0.2);
+  border: 2px solid $singles-ranked-color;
+  transform-origin: center;
+}
+
+// Skill Analysis Content
+.skill-analysis {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: $card-border-radius;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+
+  // Add subtle pattern background
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #000 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: $singles-ranked-color;
+    padding-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 3px;
+      width: 100%;
+      background: linear-gradient(to right, $singles-ranked-color, rgba($singles-ranked-color, 0.2));
+      border-radius: 2px;
+    }
+  }
+
+  p {
+    margin-bottom: 1.5rem;
+    color: #555;
+    font-size: 0.938rem;
+    line-height: 1.6;
+  }
+}
+
+// Style Ratings
+.style-ratings-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+
+  @media (min-width: $breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.style-rating-item {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #ddd;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  @each $style, $color in $style-colors {
+    &.style-#{$style} {
+      &::before {
+        background-color: $color;
+      }
+
+      // Add a subtle gradient overlay with the style color
+      background-image: linear-gradient(to right,
+        rgba($color, 0.03) 0%,
+        rgba($color, 0.01) 30%,
+        rgba(255, 255, 255, 1) 100%
+      );
+    }
+  }
+}
+
+.style-rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.style-badge {
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: #212121; // Darker text for even better readability
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+
+  .style-icon {
+    margin-right: 0.5rem;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .style-name {
+    margin-left: 4px;
+  }
+
+  @each $style, $color in $style-colors {
+    &.style-#{$style} {
+      border-left: 3px solid $color;
+      background-color: rgba($color, 0.15);
+      // Add a slight shadow
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+      &:hover {
+        background-color: rgba($color, 0.25);
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+
+.style-rating-value {
+  font-weight: 700;
+  font-size: 1.125rem;
+  background-color: rgba(0, 0, 0, 0.06);
+  padding: 4px 12px;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  color: #212121;
+  min-width: 60px;
+  text-align: center;
+
+  // Add a slight glowing effect on hover
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.style-rating-bar {
+  height: 10px;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  margin: 0.75rem 0;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.style-rating-progress {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+
+  // Add shine effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+  }
+
+  @each $style, $color in $style-colors {
+    &.style-#{$style} {
+      background-color: $color;
+
+      // Add a layered effect with opacity
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.2);
+        clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%);
+      }
+    }
+  }
+}
+
+.style-rating-description {
+  font-size: 0.813rem;
+  color: #555;
+  margin-top: 0.625rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.style-level {
+  font-weight: 600;
+  font-size: 0.75rem;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.07);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  color: #212121;
+  position: relative;
+  overflow: hidden;
+
+  // Add subtle shimmer animation
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) rotate(30deg);
+    }
+    100% {
+      transform: translateX(100%) rotate(30deg);
+    }
+  }
+}
+
+.toggle-styles-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+// Recommendations
+.recommendations-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 1.75rem 0 1rem;
+  color: $singles-ranked-color;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba($singles-ranked-color, 0.2);
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 60px;
+    height: 2px;
+    background-color: $singles-ranked-color;
+  }
+}
+
+.recommendations-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+
+  @media (min-width: $breakpoint-md) {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+.recommendation-item {
+  padding: 1rem;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  border-radius: 8px;
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: $singles-ranked-color;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  // Apply style-specific styling to recommendation items
+  @each $style, $color in $style-colors {
+    &.style-#{$style} {
+      &::before {
+        background-color: $color;
+      }
+
+      // Add a subtle background effect
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.05;
+        background-color: $color;
+        z-index: -1;
+        mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.1) 70%, rgba(0, 0, 0, 0) 100%);
+        -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.1) 70%, rgba(0, 0, 0, 0) 100%);
+      }
+    }
+  }
+
+  strong {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 6px 12px;
+    background-color: rgba($singles-ranked-color, 0.1);
+    border-radius: 6px;
+    color: #212121;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: relative;
+    
+    .style-icon-small {
+      font-size: 16px;
+      height: 16px;
+      width: 16px;
+      margin-right: 6px;
+    }
+
+    // Style-specific coloring for the style name badge
+    @each $style, $color in $style-colors {
+      &.style-#{$style} {
+        background-color: rgba($color, 0.15);
+        color: #424242;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 3px;
+          background-color: $color;
+          border-radius: 6px 0 0 6px;
+        }
+      }
+    }
+  }
+}
+
+// Recent Games Card
+.recent-games-card, .ranking-card {
+  @include card-style;
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-icon {
+  color: $singles-ranked-color;
+}
+
+.games-container {
+  padding: 0.75rem 0;
+}
+
+.games-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+.game-item {
+  border-radius: $card-border-radius;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.win-game {
+    border-left: 4px solid $win-color;
+  }
+
+  &.loss-game {
+    border-left: 4px solid $loss-color;
+  }
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.game-type, .game-date {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.game-content {
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.game-score {
+  margin-bottom: 0.75rem;
+}
+
+.score-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.score-separator {
+  font-size: 1rem;
+  margin: 0 0.5rem;
+  color: #666;
+}
+
+.game-result {
+  font-weight: 500;
+
+  .win-game & {
+    color: $win-color;
+  }
+
+  .loss-game & {
+    color: $loss-color;
+  }
+}
+
+.game-footer {
+  padding: 0.75rem;
+  text-align: right;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.view-game-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: $singles-ranked-color;
+  font-size: 0.75rem;
+
+  .link-icon {
+    font-size: 1rem;
+    height: 1rem;
+    width: 1rem;
+    margin-left: 0.5rem;
+  }
+}
+
+// No Games State
+.no-games {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  text-align: center;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: #666;
+    margin-bottom: 1.25rem;
+  }
+}
+
+// Ranking Card
+.ranking-container {
+  padding: 0.75rem 0;
+}
+
+.ranking-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.ranking-metric {
+  text-align: center;
+}
+
+.metric-value {
+  margin-bottom: 0.5rem;
+}
+
+.position-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $singles-ranked-color;
+}
+
+.trend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 1rem;
+
+  mat-icon {
+    font-size: 1.125rem;
+    height: 1.125rem;
+    width: 1.125rem;
+    margin-right: 0.5rem;
+  }
+}
+
+.up-trend {
+  color: $win-color;
+}
+
+.down-trend {
+  color: $loss-color;
+}
+
+.stable-trend {
+  color: #ff9800;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.ranking-link {
+  text-align: center;
+}
+
+.skills-radar-wrapper {
+  margin-top: 1.5rem;
+
+  .chart-title {
+    color: $singles-ranked-color;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .chart-description {
+    color: #666;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.skills-radar-container {
+  position: relative;
+  background-color: white;
+  border-radius: $card-border-radius;
+  padding: 2rem 1rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, $singles-ranked-color, $doubles-ranked-color);
+  }
+
+  &:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+  }
+}
+
+.radar-chart-container {
+  position: relative;
+  height: 400px;
+  max-width: 500px;
+  margin: 0 auto 1.5rem;
+  z-index: 2; // Ensure chart is above the level indicators
+
+  .loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+  }
+}
+
+// Skill level indicators (concentric rings)
+.skill-level-indicators {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1; // Position behind the actual chart
+  max-width: 500px;
+  width: 100%;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skill-level-ring {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.2;
+  transition: all 0.3s ease;
+
+  &.elite-level {
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.05) 100%);
+    border: 1px dashed rgba(76, 175, 80, 0.5);
+  }
+
+  &.expert-level {
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(25, 118, 210, 0.2) 0%, rgba(25, 118, 210, 0.05) 100%);
+    border: 1px dashed rgba(25, 118, 210, 0.5);
+  }
+
+  &.advanced-level {
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, rgba(156, 39, 176, 0.2) 0%, rgba(156, 39, 176, 0.05) 100%);
+    border: 1px dashed rgba(156, 39, 176, 0.5);
+  }
+
+  &.intermediate-level {
+    width: 20%;
+    height: 20%;
+    background: radial-gradient(circle, rgba(255, 152, 0, 0.2) 0%, rgba(255, 152, 0, 0.05) 100%);
+    border: 1px dashed rgba(255, 152, 0, 0.5);
+  }
+}
+
+// Skill level legend
+.skill-level-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .level-legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #666;
+
+    .level-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .level-name {
+      font-weight: 500;
+    }
+
+    &.elite .level-color {
+      background-color: rgba(76, 175, 80, 0.6);
+    }
+
+    &.expert .level-color {
+      background-color: rgba(25, 118, 210, 0.6);
+    }
+
+    &.advanced .level-color {
+      background-color: rgba(156, 39, 176, 0.6);
+    }
+
+    &.intermediate .level-color {
+      background-color: rgba(255, 152, 0, 0.6);
+    }
+  }
+}
+
+// Enhanced styling for existing elements
+.style-ratings-list {
+  @media (min-width: $breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .style-rating-item {
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .style-rating-bar {
+    height: 10px;
+    overflow: hidden;
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.05);
+
+    .style-rating-progress {
+      height: 100%;
+      transition: width 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+  }
+}
+
+.recommendations-title {
+  margin-top: 2rem;
+}
+
+.recommendations-list {
+  .recommendation-item {
+    transition: all 0.3s ease;
+    border-radius: 4px;
+
+    &:hover {
+      transform: translateX(5px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// Better animation for toggle button
+.toggle-styles-button {
+  margin: 1.25rem 0;
+  display: flex;
+  justify-content: center;
+
+  button {
+    background-color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 8px 20px;
+    font-size: 0.875rem;
+    color: $singles-ranked-color;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 2px 8px rgba($singles-ranked-color, 0.2);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+
+    // Add subtle background color
+    background-color: rgba($singles-ranked-color, 0.07);
+
+    // Add hover effect
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba($singles-ranked-color, 0.1);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba($singles-ranked-color, 0.3);
+      color: $singles-ranked-color;
+      font-weight: 700;
+
+      &::before {
+        transform: scaleX(1);
+      }
+    }
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba($singles-ranked-color, 0.2);
+    }
+
+    // Add icon for show/hide
+    &::after {
+      content: '⌄';
+      margin-left: 6px;
+      font-size: 1.25rem;
+      line-height: 0.5;
+      transition: transform 0.3s ease;
+    }
+
+    // Flip the icon when showing all styles
+    .style-ratings-list + & button::after {
+      transform: rotate(180deg);
+    }
+  }
+}

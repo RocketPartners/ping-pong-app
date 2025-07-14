@@ -1,0 +1,20 @@
+@use '../../../../styles/abstracts/tokens' as tokens;
+@use '../../../../styles/abstracts/mixins' as mixins;
+
+:host {
+  display: block;
+}
+
+h2 {
+  margin-top: 0;
+  color: tokens.$primary-color;
+}
+
+mat-dialog-content {
+  min-width: 300px;
+  max-width: 500px;
+}
+
+mat-dialog-actions {
+  margin-bottom: 0;
+}

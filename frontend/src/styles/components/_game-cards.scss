@@ -1,0 +1,96 @@
+// src/styles/components/_game-cards.scss
+@use '../abstracts/tokens';
+@use '../abstracts/mixins';
+
+.game-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &.win-game {
+    border-left: 4px solid var(--success-color);
+  }
+
+  &.loss-game {
+    border-left: 4px solid var(--warning-color);
+  }
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.game-type {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+.game-date {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-color);
+}
+
+.game-players {
+  padding: var(--spacing-md);
+  flex-grow: 1;
+}
+
+.player-vs-player, .team-vs-team {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.player, .team {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  background-color: rgba(0, 0, 0, 0.02);
+
+  &.winner {
+    background-color: rgba(76, 175, 80, 0.1);
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+.player-name, .team-player {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  font-size: var(--font-size-sm);
+}
+
+.score {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-top: var(--spacing-xs);
+}
+
+.vs-separator {
+  font-weight: var(--font-weight-medium);
+  color: var(--neutral-color);
+}
+
+.game-footer {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  background-color: rgba(0, 0, 0, 0.02);
+}

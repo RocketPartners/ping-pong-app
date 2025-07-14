@@ -1,0 +1,126 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.5'
+    id 'jacoco' // For test coverage reports
+    id 'org.owasp.dependencycheck' version '9.0.9' // Security vulnerability scanning
+    id 'io.freefair.lombok' version '8.6' // Better Lombok integration
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '21'
+    withJavadocJar() // Generate Javadoc JAR
+    withSourcesJar() // Generate sources JAR
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Organize dependencies by purpose
+dependencies {
+    // Spring Boot Core
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Web & MVC
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
+    // Data access
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.hibernate.orm:hibernate-envers'
+    implementation 'org.postgresql:postgresql'
+    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
+
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Templating
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // Caching
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+
+    // Email
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // Utilities
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport // Generate coverage reports after tests
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true // Required for coverage tools like SonarQube
+        html.required = true
+    }
+}
+
+// Configure delombok task
+delombok {
+    encoding = 'UTF-8'
+}
+
+// Configure javadoc to use delomboked sources
+javadoc {
+    dependsOn delombok
+    source = delombok.target
+    options {
+        encoding = 'UTF-8'
+        // Optional: suppress any remaining warnings
+        // addStringOption('Xdoclint:none', '-quiet')
+
+        // Or be more selective about which warnings to suppress
+        addStringOption('Xdoclint:all,-missing', '-quiet')
+    }
+}
+
+// Optimize the build
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-parameters']
+}
+
+// Dependency check configuration
+dependencyCheck {
+    failBuildOnCVSS = 7 // Fail on high severity vulnerabilities
+    analyzers {
+        assemblyEnabled = false
+    }
+}
+
+springBoot {
+    buildInfo()
+}

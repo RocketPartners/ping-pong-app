@@ -1,0 +1,625 @@
+// src/app/game/game-sidebar/game-sidebar.component.scss
+@use '../../../styles/abstracts/tokens';
+@use '../../../styles/abstracts/mixins';
+
+// Main container
+.game-sidebar-container {
+  background-color: var(--card-background);
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  width: 500px;
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: zoom-in 0.3s ease-out;
+}
+
+// Header section
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+
+  .header-content {
+    h2 {
+      margin: 0;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-medium);
+      color: var(--text-color-primary);
+    }
+
+    .match-id {
+      font-size: var(--font-size-xs);
+      color: var(--text-color-secondary);
+      margin-top: var(--spacing-xxs);
+    }
+  }
+
+  .close-button {
+    color: var(--text-color-secondary);
+
+    &:hover {
+      color: var(--text-color-primary);
+    }
+  }
+}
+
+// Content section
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  background-color: var(--background-color);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+// Match hero section
+.match-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+
+  .match-type-badge {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-lg);
+
+    &.ranked-badge {
+      background-color: rgba(var(--primary-color-rgb), 0.1);
+      color: var(--primary-color);
+    }
+
+    &.normal-badge {
+      background-color: rgba(var(--neutral-color-rgb), 0.1);
+      color: var(--text-color-secondary);
+    }
+  }
+
+  .match-date {
+    display: flex;
+    align-items: center;
+    color: var(--text-color-secondary);
+    font-size: var(--font-size-sm);
+
+    mat-icon {
+      font-size: 16px;
+      height: 16px;
+      width: 16px;
+      margin-right: var(--spacing-xs);
+    }
+  }
+}
+
+// Score card
+.score-card {
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  overflow: hidden;
+  border: none;
+  transition: all 0.3s ease;
+
+  .score-container {
+    display: flex;
+    align-items: stretch;
+
+    .team-side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm);
+      border-radius: var(--border-radius-md);
+      position: relative;
+      transition: all 0.2s ease;
+
+      &.winner {
+        background-color: rgba(var(--success-color-rgb), 0.05);
+      }
+
+      .team-label {
+        font-size: var(--font-size-sm);
+        color: var(--text-color-secondary);
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .team-players {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+
+        .player-avatar {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          padding: var(--spacing-xs);
+          border-radius: var(--border-radius-md);
+          outline: none;
+
+          &:hover, &:focus {
+            transform: translateY(-2px);
+            background-color: rgba(var(--primary-color-rgb), 0.05);
+          }
+          
+          &:focus {
+            box-shadow: 0 0 0 2px var(--primary-color);
+          }
+
+          .avatar-circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-xs);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+          }
+
+          .player-name {
+            font-size: var(--font-size-sm);
+            color: var(--text-color-primary);
+            text-align: center;
+            max-width: 100px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.2s ease;
+          }
+          
+          &:hover, &:focus {
+            .avatar-circle {
+              box-shadow: var(--shadow-md);
+            }
+            
+            .player-name {
+              color: var(--primary-color);
+            }
+          }
+        }
+      }
+
+      .team-score {
+        font-size: 36px;
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color-primary);
+      }
+
+      .result-badge {
+        display: flex;
+        align-items: center;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        background-color: var(--success-color);
+        color: white;
+        border-radius: var(--border-radius-md);
+        font-size: var(--font-size-xs);
+        position: absolute;
+        top: var(--spacing-xs);
+        right: var(--spacing-xs);
+        font-weight: var(--font-weight-bold);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s ease;
+
+        mat-icon {
+          font-size: 14px;
+          height: 14px;
+          width: 14px;
+          margin-right: var(--spacing-xxs);
+        }
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+      }
+
+      &.challenger-side {
+        .avatar-circle {
+          background-color: var(--challenger-color, var(--primary-color));
+        }
+      }
+
+      &.opponent-side {
+        .avatar-circle {
+          background-color: var(--opponent-color, var(--accent-color));
+        }
+      }
+    }
+
+    .score-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 var(--spacing-sm);
+
+      .versus {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-color-secondary);
+      }
+    }
+  }
+}
+
+// Section headers
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color-primary);
+  margin: var(--spacing-sm) 0;
+
+  mat-icon {
+    margin-right: var(--spacing-xs);
+    color: var(--primary-color);
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+}
+
+// Details card
+.details-card {
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-md);
+  border: none;
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+
+      .detail-label {
+        font-size: var(--font-size-xs);
+        color: var(--text-color-secondary);
+        margin-bottom: var(--spacing-xxs);
+      }
+
+      .detail-value {
+        font-size: var(--font-size-sm);
+        color: var(--text-color-primary);
+        font-weight: var(--font-weight-medium);
+
+        &.winner-value {
+          color: var(--success-color);
+          font-weight: var(--font-weight-bold);
+        }
+
+        .mode-badge {
+          padding: var(--spacing-xxs) var(--spacing-xs);
+          border-radius: var(--border-radius-sm);
+          font-size: var(--font-size-xs);
+
+          &.ranked-text {
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+            color: var(--primary-color);
+          }
+
+          &.normal-text {
+            background-color: rgba(var(--neutral-color-rgb), 0.1);
+            color: var(--text-color-secondary);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Player stats section
+.stats-card {
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border: none;
+  transition: all 0.3s ease;
+
+  .player-stats-container {
+    display: flex;
+    flex-direction: column;
+
+    .player-stat-item {
+      display: flex;
+      padding: var(--spacing-md);
+
+      .stat-player {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+
+        .avatar-circle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: var(--primary-color);
+          color: white;
+          font-weight: var(--font-weight-bold);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .player-name {
+          font-size: var(--font-size-xs);
+          color: var(--text-color-primary);
+          text-align: center;
+          max-width: 80px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .stat-details {
+        flex: 1;
+        display: flex;
+        gap: var(--spacing-md);
+        align-items: center;
+        margin-left: var(--spacing-md);
+
+        .rating-info, .record-info {
+          display: flex;
+          flex-direction: column;
+
+          .rating-label, .record-label {
+            font-size: var(--font-size-xxs);
+            color: var(--text-color-secondary);
+            margin-bottom: var(--spacing-xxs);
+          }
+
+          .rating-value {
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-bold);
+            color: var(--primary-color);
+          }
+
+          .record-value {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xxs);
+            font-size: var(--font-size-sm);
+
+            .wins {
+              color: var(--success-color);
+              font-weight: var(--font-weight-medium);
+            }
+
+            .separator {
+              color: var(--text-color-secondary);
+            }
+
+            .losses {
+              color: var(--warning-color);
+              font-weight: var(--font-weight-medium);
+            }
+          }
+        }
+      }
+
+      &.challenger-stat {
+        .avatar-circle {
+          background-color: var(--challenger-color, var(--primary-color));
+        }
+      }
+
+      &.opponent-stat {
+        .avatar-circle {
+          background-color: var(--opponent-color, var(--accent-color));
+        }
+      }
+    }
+
+    // Team stats for doubles games
+    .team-stats {
+      padding: var(--spacing-md);
+
+      .team-title {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        color: var(--text-color-secondary);
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .team-players-stats {
+        display: flex;
+        gap: var(--spacing-md);
+
+        .player-stat-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background-color: rgba(var(--surface-color-rgb), 0.5);
+          border-radius: var(--border-radius-md);
+          padding: var(--spacing-sm);
+
+          .stat-player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: var(--spacing-xs);
+
+            .avatar-circle {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              background-color: var(--primary-color);
+              color: white;
+              font-weight: var(--font-weight-bold);
+              margin-bottom: var(--spacing-xxs);
+              font-size: var(--font-size-xs);
+            }
+
+            .player-name {
+              font-size: var(--font-size-xs);
+              color: var(--text-color-primary);
+              text-align: center;
+              max-width: 60px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+
+          .player-stats-compact {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-xxs);
+
+            .doubles-rating {
+              display: flex;
+              align-items: center;
+              color: var(--primary-color);
+              font-weight: var(--font-weight-bold);
+              font-size: var(--font-size-sm);
+
+              mat-icon {
+                font-size: 14px;
+                height: 14px;
+                width: 14px;
+                margin-right: var(--spacing-xxs);
+              }
+            }
+
+            .doubles-record {
+              font-size: var(--font-size-xs);
+
+              .wins {
+                color: var(--success-color);
+                font-weight: var(--font-weight-medium);
+              }
+
+              .separator {
+                color: var(--text-color-secondary);
+                margin: 0 var(--spacing-xxs);
+              }
+
+              .losses {
+                color: var(--warning-color);
+                font-weight: var(--font-weight-medium);
+              }
+            }
+          }
+        }
+      }
+
+      &.challenger-team-stats {
+        .avatar-circle {
+          background-color: var(--challenger-color, var(--primary-color));
+        }
+      }
+
+      &.opponent-team-stats {
+        .avatar-circle {
+          background-color: var(--opponent-color, var(--accent-color));
+        }
+      }
+    }
+  }
+}
+
+// Footer
+.sidebar-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  
+  button {
+    transition: all 0.2s ease;
+    min-width: 120px;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    mat-icon {
+      margin-right: var(--spacing-xs);
+    }
+    
+    &[color="primary"] {
+      border-width: 2px;
+    }
+  }
+}
+
+// Animation
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Responsive styles
+@media (max-width: 576px) {
+  .game-sidebar-container {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .score-container {
+    flex-direction: column;
+
+    .team-side {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .score-divider {
+      margin: var(--spacing-sm) 0;
+    }
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .team-players-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

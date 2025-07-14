@@ -1,0 +1,56 @@
+// Angular Material overrides for dark mode
+
+// This file contains critical overrides to make Angular Material
+// components work properly with dark mode
+
+// Sort headers need special treatment in dark mode
+.dark-theme {
+  .mat-sort-header-container,
+  .mat-sort-header-content,
+  .mat-sort-header-button {
+    color: white !important;
+  }
+
+  // Force arrow colors to be white
+  .mat-sort-header-arrow {
+    opacity: 1 !important;
+    color: white !important;
+  }
+
+  // All parts of the sort header arrow
+  .mat-sort-header-stem,
+  .mat-sort-header-indicator,
+  .mat-sort-header-pointer-left,
+  .mat-sort-header-pointer-right,
+  .mat-sort-header-pointer-middle {
+    background: white !important;
+    color: white !important;
+  }
+  
+  // Tab labels need to be white too
+  .mat-tab-label, 
+  .mat-tab-link {
+    color: white !important;
+    opacity: 0.7;
+    
+    &.mat-tab-label-active {
+      color: white !important;
+      opacity: 1;
+    }
+    
+    .mat-tab-label-content {
+      color: white !important;
+    }
+  }
+  
+  // Table headers need to be white
+  .mat-header-cell {
+    color: white !important;
+    font-weight: 500 !important;
+  }
+  
+  // Table cells need to be white  
+  .mat-cell {
+    color: white !important;
+  }
+}

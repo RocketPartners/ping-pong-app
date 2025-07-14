@@ -1,0 +1,66 @@
+{
+  "name": "Double Elimination Tournament - 3 Players",
+  "description": "Double elimination bracket for 3 players",
+  "tournamentType": "DOUBLE_ELIMINATION",
+  "gameType": "SINGLES",
+  "numberOfPlayers": 3,
+  "matches": [
+    {
+      "id": "W1R1",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "W1R2",
+      "loserNextMatchId": "L1R2",
+      "completed": false,
+      "bracketType": "WINNER"
+    },
+    {
+      "id": "W1R2",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "F1R3",
+      "loserNextMatchId": "L1R2",
+      "completed": false,
+      "bracketType": "WINNER"
+    },
+    {
+      "id": "L1R2",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "F1R3",
+      "loserNextMatchId": null,
+      "completed": false,
+      "bracketType": "LOSER"
+    },
+    {
+      "id": "F1R3",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": "F1R4",
+      "loserNextMatchId": "F1R4",
+      "completed": false,
+      "bracketType": "FINAL"
+    },
+    {
+      "id": "F1R4",
+      "team1Ids": [],
+      "team2Ids": [],
+      "winnerIds": [],
+      "loserIds": [],
+      "winnerNextMatchId": null,
+      "loserNextMatchId": null,
+      "completed": false,
+      "bracketType": "CHAMPIONSHIP"
+    }
+  ],
+  "status": "CREATED",
+  "currentRound": 0
+}

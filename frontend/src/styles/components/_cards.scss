@@ -1,0 +1,390 @@
+// src/styles/components/_cards.scss
+@use '../abstracts/tokens';
+@use '../abstracts/mixins';
+
+//----------------------------------------------
+// Base Card
+//----------------------------------------------
+.card {
+  @include mixins.card-container;
+
+  &.clickable {
+    cursor: pointer;
+  }
+
+  .card-header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.02);
+
+    .card-title {
+      margin: 0;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .card-subtitle {
+      margin: var(--spacing-xs) 0 0;
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+    }
+  }
+
+  .card-body {
+    padding: var(--spacing-md);
+  }
+
+  .card-footer {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+//----------------------------------------------
+// Achievement Cards
+//----------------------------------------------
+.achievement-card {
+  position: relative;
+  border-radius: var(--border-radius-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  // Border styles based on achievement category
+  &.achievement-easy {
+    @include mixins.achievement-card-variant('easy');
+  }
+
+  &.achievement-medium {
+    @include mixins.achievement-card-variant('medium');
+  }
+
+  &.achievement-hard {
+    @include mixins.achievement-card-variant('hard');
+  }
+
+  &.achievement-legendary {
+    @include mixins.achievement-card-variant('legendary');
+  }
+
+  // Size variations
+  &.achievement-card-small {
+    height: 80px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: var(--spacing-sm);
+  }
+
+  &.achievement-card-medium {
+    height: 180px;
+    width: 240px;
+  }
+
+  &.achievement-card-large {
+    height: 220px;
+    width: 300px;
+  }
+
+  .achievement-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    @include mixins.flex-center;
+
+    &.achievement-easy {
+      background-color: var(--rating-novice);
+    }
+
+    &.achievement-medium {
+      background-color: var(--rating-intermediate);
+    }
+
+    &.achievement-hard {
+      background-color: var(--rating-advanced);
+    }
+
+    &.achievement-legendary {
+      background: linear-gradient(135deg, #ffd700, #ff8f00);
+    }
+  }
+
+  .achievement-content {
+    padding: var(--spacing-md);
+
+    .achievement-title {
+      font-weight: var(--font-weight-medium);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .achievement-description {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      @include mixins.text-truncate-multiline(2);
+    }
+  }
+
+  .achievement-progress {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+
+    .progress-bar {
+      height: 6px;
+      background-color: var(--gray-200);
+      border-radius: 3px;
+      overflow: hidden;
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.3s ease;
+
+        &.achievement-easy {
+          background-color: var(--rating-novice);
+        }
+
+        &.achievement-medium {
+          background-color: var(--rating-intermediate);
+        }
+
+        &.achievement-hard {
+          background-color: var(--rating-advanced);
+        }
+
+        &.achievement-legendary {
+          background: linear-gradient(90deg, #ffd700, #ff8f00);
+        }
+      }
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-xs);
+      color: var(--text-secondary);
+      margin-top: var(--spacing-xs);
+    }
+  }
+}
+
+//----------------------------------------------
+// Player Cards
+//----------------------------------------------
+.player-card {
+  @include mixins.card-container;
+
+  .player-header {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(145deg, #f6f8fb, #f0f3f9);
+  }
+
+  .player-avatar {
+    @include mixins.avatar('md');
+    background-color: var(--primary-color);
+    margin-right: var(--spacing-md);
+  }
+
+  .player-info {
+    flex: 1;
+  }
+
+  .player-name {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    margin: 0;
+  }
+
+  .player-username {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-color);
+    margin: 0;
+  }
+
+  .player-stats {
+    display: flex;
+    flex-wrap: wrap;
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+
+    .stat-item {
+      flex: 1;
+      min-width: 80px;
+      text-align: center;
+
+      .stat-value {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-bold);
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .stat-label {
+        font-size: var(--font-size-xs);
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .player-badges {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+}
+
+//----------------------------------------------
+// Game Cards
+//----------------------------------------------
+.game-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &.win-game {
+    border-left: 4px solid var(--success-color);
+  }
+
+  &.loss-game {
+    border-left: 4px solid var(--warning-color);
+  }
+
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .game-type {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+  }
+
+  .game-date {
+    font-size: var(--font-size-xs);
+    color: var(--neutral-color);
+  }
+
+  .game-content {
+    padding: var(--spacing-md);
+    flex-grow: 1;
+
+    .player-vs-player,
+    .team-vs-team {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .player,
+    .team {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--spacing-sm);
+      border-radius: var(--border-radius-sm);
+      background-color: rgba(0, 0, 0, 0.02);
+
+      &.winner {
+        background-color: rgba(76, 175, 80, 0.1);
+        font-weight: var(--font-weight-medium);
+      }
+    }
+
+    .player-name,
+    .team-player {
+      text-align: center;
+      @include mixins.text-truncate;
+      width: 100%;
+      font-size: var(--font-size-sm);
+    }
+
+    .score {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-bold);
+      margin-top: var(--spacing-xs);
+    }
+
+    .vs-separator {
+      font-weight: var(--font-weight-medium);
+      color: var(--neutral-color);
+    }
+  }
+
+  .game-footer {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+//----------------------------------------------
+// Stat Cards
+//----------------------------------------------
+.stat-card {
+  @include mixins.card-container;
+  padding: var(--spacing-md);
+
+  .stat-value {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+
+  // Colored borders for different card types
+  &.primary-card {
+    border-top: 4px solid var(--primary-color);
+  }
+
+  &.success-card {
+    border-top: 4px solid var(--success-color);
+  }
+
+  &.warning-card {
+    border-top: 4px solid var(--warning-color);
+  }
+
+  &.accent-card {
+    border-top: 4px solid var(--accent-color);
+  }
+}
+
+// Card Grid Layouts
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}

@@ -1,0 +1,173 @@
+<div class="leaderboard-container white-text-container">
+  <!-- Header Section -->
+  <div class="leaderboard-header">
+    <div class="title-section">
+      <h1 class="main-title">Leaderboard</h1>
+      <p class="subtitle">Player rankings and statistics</p>
+    </div>
+
+    <div class="actions-section">
+      <!-- Search field -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search players</mat-label>
+        <input (keyup)="applyFilter($event)" matInput placeholder="Name or username">
+        <button (click)="clearFilter()" *ngIf="searchFilter" mat-icon-button matSuffix>
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon *ngIf="!searchFilter" matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Refresh button -->
+      <button (click)="refresh()" mat-icon-button matTooltip="Refresh leaderboard">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <mat-tab-group (selectedTabChange)="onTabChange($event)" animationDuration="300ms" class="leaderboard-tabs">
+    <mat-tab label="Singles Ranked">
+      <ng-container *ngTemplateOutlet="rankingsTable; context: {
+        dataSource: dataSources['SINGLES_RANKED'],
+        gameType: 'Singles Ranked'
+      }"></ng-container>
+    </mat-tab>
+
+    <mat-tab label="Doubles Ranked">
+      <ng-container *ngTemplateOutlet="rankingsTable; context: {
+        dataSource: dataSources['DOUBLES_RANKED'],
+        gameType: 'Doubles Ranked'
+      }"></ng-container>
+    </mat-tab>
+
+    <mat-tab label="Singles Normal">
+      <ng-container *ngTemplateOutlet="rankingsTable; context: {
+        dataSource: dataSources['SINGLES_NORMAL'],
+        gameType: 'Singles Normal'
+      }"></ng-container>
+    </mat-tab>
+
+    <mat-tab label="Doubles Normal">
+      <ng-container *ngTemplateOutlet="rankingsTable; context: {
+        dataSource: dataSources['DOUBLES_NORMAL'],
+        gameType: 'Doubles Normal'
+      }"></ng-container>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-overlay">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p class="loading-text">Loading players...</p>
+  </div>
+
+  <!-- Rankings Table Template -->
+  <ng-template #rankingsTable let-dataSource="dataSource" let-gameType="gameType">
+    <div class="table-container">
+      <h2 class="section-title">{{ gameType }} Rankings</h2>
+
+      <!-- No data message when filtered with no results -->
+      <div *ngIf="dataSource.filteredData?.length === 0" class="no-data-message">
+        <mat-icon>search_off</mat-icon>
+        <p>No players match your search criteria</p>
+        <button (click)="clearFilter()" color="primary" mat-button>Clear Filter</button>
+      </div>
+
+      <!-- No data message when no players at all -->
+      <div *ngIf="dataSource.data?.length === 0 && !loading" class="no-data-message">
+        <mat-icon>people_outline</mat-icon>
+        <p>No players found for {{ gameType }}</p>
+      </div>
+
+      <!-- Actual table with data -->
+      <table *ngIf="dataSource.data?.length > 0" [dataSource]="dataSource" class="rankings-table dark-headers" mat-table matSort>
+
+        <!-- Position Column -->
+        <ng-container matColumnDef="position">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Rank</th>
+          <td *matCellDef="let player" mat-cell>
+            <div class="position-cell">
+              <mat-icon *ngIf="player.position <= 3" [ngClass]="getMedalClass(player.position)">emoji_events</mat-icon>
+              <span>{{ player.position }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Player Column -->
+        <ng-container matColumnDef="player">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Player</th>
+          <td *matCellDef="let player" mat-cell>
+            <div class="player-cell">
+              <app-profile-avatar [player]="player.player" size="md"></app-profile-avatar>
+              <div class="player-info">
+                <div class="player-name">{{ player.player.firstName }} {{ player.player.lastName }}</div>
+                <div class="player-username">{{ player.player.username }}</div>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Rating Column -->
+        <ng-container matColumnDef="rating">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Rating</th>
+          <td *matCellDef="let player" mat-cell>
+            <span class="rating-value">{{ player.rating }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Win Rate Column -->
+        <ng-container matColumnDef="winRate">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Win Rate</th>
+          <td *matCellDef="let player" mat-cell>
+            <div class="win-rate-cell">
+              <div class="win-rate-bar">
+                <div [style.width.%]="player.winRate" class="win-rate-progress"></div>
+              </div>
+              <span>{{ player.winRate }}%</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Wins Column -->
+        <ng-container matColumnDef="wins">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Wins</th>
+          <td *matCellDef="let player" mat-cell> {{ player.wins }}</td>
+        </ng-container>
+
+        <!-- Losses Column -->
+        <ng-container matColumnDef="losses">
+          <th *matHeaderCellDef mat-header-cell mat-sort-header> Losses</th>
+          <td *matCellDef="let player" mat-cell> {{ player.losses }}</td>
+        </ng-container>
+
+        <!-- Styles Column -->
+        <ng-container matColumnDef="styles">
+          <th *matHeaderCellDef mat-header-cell> Top Styles</th>
+          <td *matCellDef="let player" mat-cell>
+            <div class="styles-container">
+              <div class="fanned-icons">
+                <ng-container *ngFor="let style of getTopStyles(player.player.playerStyles, 3); let i = index">
+                  <mat-icon 
+                    [matTooltip]="getStyleName(style.styleType) + ': ' + style.rating"
+                    [style.color]="getStyleColor(style.styleType)"
+                    [style.z-index]="3 - i"
+                    [style.left.px]="i * 16"
+                    [style.transform]="'rotate(' + (i * 5 - 5) + 'deg)'"
+                    class="fanned-style-icon">{{ getStyleIcon(style.styleType) }}</mat-icon>
+                </ng-container>
+              </div>
+              <span *ngIf="!player.player.playerStyles?.length" class="no-styles">-</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Table Rows -->
+        <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+        <tr (click)="navigateToPlayerStats(player.player)"
+            *matRowDef="let player; columns: displayedColumns;"
+            [ngClass]="{'top-three-row': player.position <= 3, 'first-place-row': player.position === 1}"
+            mat-row></tr>
+      </table>
+    </div>
+  </ng-template>
+</div>

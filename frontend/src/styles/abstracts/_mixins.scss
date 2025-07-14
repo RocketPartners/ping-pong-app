@@ -1,0 +1,481 @@
+// src/styles/abstracts/_mixins.scss
+@use '../abstracts/tokens' as tokens;
+@use 'sass:map';
+
+//----------------------------------------------
+// LAYOUT MIXINS
+//----------------------------------------------
+
+// Flex layout helpers
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: flex-start;
+}
+
+@mixin flex-end {
+  display: flex;
+  align-items: flex-end;
+}
+
+//----------------------------------------------
+// COMPONENT MIXINS
+//----------------------------------------------
+
+// Card container mixin
+@mixin card-container {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: transform var(--transition-speed-normal) var(--transition-timing-default),
+  box-shadow var(--transition-speed-normal) var(--transition-timing-default);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+// Flexible avatar mixin
+@mixin avatar($size: 'md') {
+  $sizes: (
+    'xs': 24px,
+    'sm': 32px,
+    'md': 40px,
+    'lg': 60px,
+    'xl': 140px, // Increased from 120px
+    'xxl': 180px  // Added an even larger size option
+  );
+
+  $icon-sizes: (
+    'xs': 16px,
+    'sm': 20px,
+    'md': 24px,
+    'lg': 36px,
+    'xl': 80px,
+    'xxl': 110px
+  );
+
+  $current-size: map.get($sizes, $size);
+  $icon-size: map.get($icon-sizes, $size);
+
+  width: $current-size;
+  height: $current-size;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: $current-size * 0.4;
+  font-weight: var(--font-weight-medium);
+  
+  // Scale icon size for material icons
+  .mat-icon {
+    font-size: $icon-size;
+    height: $icon-size;
+    width: $icon-size;
+    line-height: $icon-size;
+  }
+  
+  // Scale text size for initials
+  .initials {
+    font-size: $current-size * 0.4;
+    line-height: 1;
+  }
+}
+
+// Achievement card variant mixin
+@mixin achievement-card-variant($difficulty) {
+  @if $difficulty == 'easy' {
+    border-left: 4px solid var(--rating-novice);
+  } @else if $difficulty == 'medium' {
+    border-left: 4px solid var(--rating-intermediate);
+  } @else if $difficulty == 'hard' {
+    border-left: 4px solid var(--rating-advanced);
+  } @else if $difficulty == 'legendary' {
+    border-left: 4px solid var(--rating-expert);
+    background: linear-gradient(to right, rgba(255, 215, 0, 0.1), transparent);
+  }
+}
+
+// Section title styling
+@mixin section-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  position: relative;
+  padding-left: var(--spacing-md);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+  }
+}
+
+// Side drawer mixin
+@mixin side-drawer($position: 'right', $width: 480px) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: $width;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  background-color: var(--card-background);
+  z-index: var(--z-index-modal);
+  overflow: hidden;
+
+  @if $position == 'right' {
+    right: 0;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    animation: slide-in-right var(--transition-speed-normal) ease-out;
+  } @else if $position == 'left' {
+    left: 0;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    animation: slide-in-left var(--transition-speed-normal) ease-out;
+  }
+
+  .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+
+    h2 {
+      margin: 0;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+
+  .drawer-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+  }
+
+  .drawer-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+}
+
+//----------------------------------------------
+// TEXT MIXINS
+//----------------------------------------------
+
+// Text truncation with ellipsis
+@mixin text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Multi-line text truncation with ellipsis
+@mixin text-truncate-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Font sizing helper
+@mixin font-size($size, $weight: null) {
+  @if $size == 'xs' {
+    font-size: var(--font-size-xs);
+  } @else if $size == 'sm' {
+    font-size: var(--font-size-sm);
+  } @else if $size == 'md' {
+    font-size: var(--font-size-md);
+  } @else if $size == 'lg' {
+    font-size: var(--font-size-lg);
+  } @else if $size == 'xl' {
+    font-size: var(--font-size-xl);
+  } @else if $size == 'xxl' {
+    font-size: var(--font-size-xxl);
+  }
+
+  @if $weight == 'normal' {
+    font-weight: var(--font-weight-normal);
+  } @else if $weight == 'medium' {
+    font-weight: var(--font-weight-medium);
+  } @else if $weight == 'bold' {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+//----------------------------------------------
+// UI ELEMENT MIXINS
+//----------------------------------------------
+
+// Button styles
+@mixin button-base {
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-speed-fast) ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+@mixin button-primary {
+  @include button-base;
+  background-color: var(--primary-color);
+  color: white;
+
+  &:hover {
+    background-color: var(--primary-color-dark);
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background-color: var(--accent-color);
+  color: white;
+
+  &:hover {
+    background-color: var(--accent-color-dark);
+  }
+}
+
+@mixin button-success {
+  @include button-base;
+  background-color: var(--success-color);
+  color: white;
+
+  &:hover {
+    background-color: var(--success-color-dark);
+  }
+}
+
+@mixin button-warning {
+  @include button-base;
+  background-color: var(--warning-color);
+  color: white;
+
+  &:hover {
+    background-color: var(--warning-color-dark);
+  }
+}
+
+@mixin button-outline {
+  @include button-base;
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+
+  &:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+  }
+}
+
+// Badge styles
+@mixin badge-base {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 16px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+@mixin badge-primary {
+  @include badge-base;
+  background-color: var(--primary-color);
+  color: white;
+}
+
+@mixin badge-success {
+  @include badge-base;
+  background-color: var(--success-color);
+  color: white;
+}
+
+@mixin badge-warning {
+  @include badge-base;
+  background-color: var(--warning-color);
+  color: white;
+}
+
+@mixin badge-info {
+  @include badge-base;
+  background-color: var(--info-color);
+  color: white;
+}
+
+@mixin badge-neutral {
+  @include badge-base;
+  background-color: var(--neutral-color);
+  color: white;
+}
+
+// Form field styles
+@mixin form-field-base {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-md);
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+  }
+}
+
+//----------------------------------------------
+// RESPONSIVE MIXINS
+//----------------------------------------------
+
+@mixin responsive-xs {
+  @media (max-width: #{tokens.$breakpoint-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin responsive-sm {
+  @media (max-width: #{tokens.$breakpoint-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin responsive-md {
+  @media (max-width: #{tokens.$breakpoint-lg - 1px}) {
+    @content;
+  }
+}
+
+@mixin responsive-lg {
+  @media (max-width: #{tokens.$breakpoint-xl - 1px}) {
+    @content;
+  }
+}
+
+@mixin responsive-xl {
+  @media (max-width: #{tokens.$breakpoint-xxl - 1px}) {
+    @content;
+  }
+}
+
+@mixin responsive-min-xs {
+  @media (min-width: #{tokens.$breakpoint-xs}) {
+    @content;
+  }
+}
+
+@mixin responsive-min-sm {
+  @media (min-width: #{tokens.$breakpoint-sm}) {
+    @content;
+  }
+}
+
+@mixin responsive-min-md {
+  @media (min-width: #{tokens.$breakpoint-md}) {
+    @content;
+  }
+}
+
+@mixin responsive-min-lg {
+  @media (min-width: #{tokens.$breakpoint-lg}) {
+    @content;
+  }
+}
+
+@mixin responsive-min-xl {
+  @media (min-width: #{tokens.$breakpoint-xl}) {
+    @content;
+  }
+}
+
+//----------------------------------------------
+// ANIMATION MIXINS
+//----------------------------------------------
+
+@mixin keyframe-animation($name, $duration: 0.3s, $timing: ease, $iteration: 1, $direction: normal, $fill-mode: forwards) {
+  animation-name: $name;
+  animation-duration: $duration;
+  animation-timing-function: $timing;
+  animation-iteration-count: $iteration;
+  animation-direction: $direction;
+  animation-fill-mode: $fill-mode;
+}
+
+// Add the animations from the side-drawer mixin
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

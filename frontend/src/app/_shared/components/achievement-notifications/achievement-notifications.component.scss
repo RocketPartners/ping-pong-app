@@ -1,0 +1,107 @@
+@use '../../../../styles/abstracts/tokens' as tokens;
+@use '../../../../styles/abstracts/mixins' as mixins;
+
+.notification-wrapper {
+  display: inline-block;
+}
+
+/* Override default menu width */
+:host {
+  // Use selector targeting for component styling
+  .notification-wrapper ::ng-deep + .notifications-menu {
+    max-width: none !important;
+    width: 320px;
+
+    .mat-menu-content {
+      padding: 0 !important;
+    }
+  }
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.notifications-list {
+  max-height: 400px;
+  overflow-y: auto;
+
+  .notification-item {
+    display: flex;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .notification-icon {
+      margin-right: 12px;
+      color: tokens.$primary-color;
+
+      mat-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 24px;
+      }
+    }
+
+    .notification-content {
+      flex: 1;
+
+      .notification-title {
+        font-weight: 500;
+        margin-bottom: 4px;
+        color: rgba(0, 0, 0, 0.87);
+      }
+
+      .notification-description {
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.6);
+        margin-bottom: 4px;
+        white-space: normal;
+        line-height: 1.4;
+      }
+
+      .notification-timestamp {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.54);
+      }
+    }
+  }
+}
+
+.menu-footer {
+  padding: 8px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.empty-notifications {
+  padding: 24px 16px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.54);
+
+  mat-icon {
+    font-size: 32px;
+    height: 32px;
+    width: 32px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+  }
+}
