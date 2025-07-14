@@ -7,5 +7,5 @@ variable "aws_region" {
 variable "project_name" {
   description = "Project name"
   type        = string
-  default     = "launch-control"
+  default     = "ping-pong-app"
 }
