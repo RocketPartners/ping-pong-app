@@ -15,6 +15,14 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Reference launch-control infrastructure for VPC and ALB
+data "terraform_remote_state" "launch_control" {
+  backend = "local"
+  config = {
+    path = "../launch-control/infra/terraform.tfstate"
+  }
+}
+
 # S3 Bucket with basic security
 module "s3_bucket" {
   source               = "./modules/s3"
@@ -70,6 +78,53 @@ module "cloudfront" {
 
 resource "random_id" "bucket_suffix" {
   byte_length = 4
+}
+
+# Database password for ping-pong-app
+resource "random_password" "db_password" {
+  length  = 16
+  special = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+# RDS PostgreSQL for ping-pong-app
+module "rds_postgres" {
+  source = "./modules/rds"
+  
+  name                   = var.project_name
+  postgres_version       = "15.8"
+  db_instance_class      = var.db_instance_class
+  allocated_storage      = var.db_allocated_storage
+  max_allocated_storage  = var.db_max_allocated_storage
+  
+  database_name          = "pingpongdb"
+  master_username        = "postgres"
+  master_password        = random_password.db_password.result
+  
+  backup_retention_period = 1  # Minimum for cost optimization
+  skip_final_snapshot     = false
+  deletion_protection     = true
+  
+  performance_insights_enabled = var.enable_performance_insights
+  monitoring_interval          = var.db_monitoring_interval
+  
+  # Use launch-control's VPC
+  vpc_id             = data.terraform_remote_state.launch_control.outputs.vpc_id
+  private_subnet_ids = data.terraform_remote_state.launch_control.outputs.private_subnet_ids
+}
+
+# ECS Service for ping-pong-app using launch-control ALB
+module "ping_pong_service" {
+  depends_on = [module.ecs_cluster, module.ecr_backend, module.rds_postgres]
+  source      = "./modules/service"
+  project_name = var.project_name
+  db_password  = random_password.db_password.result
+  
+  # Pass launch-control infrastructure references
+  vpc_id                = data.terraform_remote_state.launch_control.outputs.vpc_id
+  private_subnet_ids    = data.terraform_remote_state.launch_control.outputs.private_subnet_ids
+  alb_listener_arn      = data.terraform_remote_state.launch_control.outputs.alb_listener_arn
+  alb_security_group_id = data.terraform_remote_state.launch_control.outputs.alb_security_group_id
 }
 
 # Outputs

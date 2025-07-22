@@ -24,10 +24,24 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      # Database configuration
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pingpongdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: devpass
       SPRING_PROFILES_ACTIVE: docker
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_key_change_in_production}
+      
+      # Email Configuration (optional for ping-pong-app)
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      
+      # Application URLs
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:4200}
+      APP_EMAIL_FROM: ${APP_EMAIL_FROM:-noreply@pingpongapp.com}
     env_file:
       - .env
     restart: unless-stopped
