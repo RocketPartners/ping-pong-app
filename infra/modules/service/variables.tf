@@ -40,3 +40,20 @@ variable "alb_security_group_id" {
   description = "ALB security group ID from launch-control infrastructure"
   type        = string
 }
+
+variable "google_client_secret" {
+  description = "Google OAuth client secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "microsoft_client_id" {
+  description = "Microsoft OAuth client ID"
+  type        = string
+}
+
+variable "microsoft_client_secret" {
+  description = "Microsoft OAuth client secret"
+  type        = string
+  sensitive   = true
+}

@@ -52,15 +52,15 @@ resource "aws_ecs_task_definition" "main" {
         },
         {
           name  = "GOOGLE_CLIENT_SECRET"
-          value = "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"
+          value = var.google_client_secret
         },
         {
           name  = "MICROSOFT_CLIENT_ID"
-          value = "ddd3e7d6-a819-4395-b377-5817034e8484"
+          value = var.microsoft_client_id
         },
         {
           name  = "MICROSOFT_CLIENT_SECRET"
-          value = "${var.microsoft_client_secret}"
+          value = var.microsoft_client_secret
         }
       ]
       portMappings = [
