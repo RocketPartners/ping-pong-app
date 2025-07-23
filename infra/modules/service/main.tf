@@ -28,7 +28,7 @@ resource "aws_ecs_task_definition" "main" {
       environment = [
         {
           name  = "DB_URL"
-          value = "jdbc:postgresql://launch-control-db.cwjqieyonana.us-east-1.rds.amazonaws.com:5432/agreementapp"
+          value = "jdbc:postgresql://${var.db_host}:5432/${var.db_name}"
         },
         {
           name  = "DB_USERNAME"
@@ -40,7 +40,7 @@ resource "aws_ecs_task_definition" "main" {
         },
         {
           name  = "FRONTEND_URL"
-          value = "https://launch-control.rcktapp.io"
+          value = "https://ping-pong.rcktapp.io"
         },
         {
           name  = "JWT_SECRET"
@@ -112,7 +112,7 @@ resource "aws_lb_target_group" "service_http" {
   name        = "${var.project_name}-tg"
   port        = 8080
   protocol    = "HTTP"
-  vpc_id      = data.aws_ssm_parameter.vpc_id.value
+  vpc_id      = var.vpc_id
   target_type = "ip" 
 
   health_check {
@@ -132,9 +132,9 @@ resource "aws_lb_target_group" "service_http" {
 }
 
 # Listener Rule
-resource "aws_lb_listener_rule" "https_rule" {
-  listener_arn = data.aws_ssm_parameter.https_listener_arn.value
-  priority     = 2
+resource "aws_lb_listener_rule" "host_based" {
+  listener_arn = var.alb_listener_arn
+  priority     = 3
 
   action {
     type             = "forward"
@@ -142,8 +142,8 @@ resource "aws_lb_listener_rule" "https_rule" {
   }
 
   condition {
-    path_pattern {
-      values = ["/api/*"]
+    host_header {
+      values = ["ping-pong.rcktapp.io"]
     }
   }
 }

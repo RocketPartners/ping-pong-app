@@ -21,6 +21,17 @@ variable "db_password" {
   sensitive   = true
 }
 
+variable "db_host" {
+  description = "Database host"
+  type        = string
+}
+
+variable "db_name" {
+  description = "Database name"
+  type        = string
+  default     = "pingpongdb"
+}
+
 variable "vpc_id" {
   description = "VPC ID from launch-control infrastructure"
   type        = string

@@ -119,6 +119,8 @@ module "ping_pong_service" {
   source      = "./modules/service"
   project_name = var.project_name
   db_password  = random_password.db_password.result
+  db_host      = module.rds_postgres.db_instance_endpoint
+  db_name      = module.rds_postgres.db_instance_name
   
   # Pass launch-control infrastructure references
   vpc_id                = data.terraform_remote_state.launch_control.outputs.vpc_id
