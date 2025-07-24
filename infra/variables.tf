@@ -39,3 +39,9 @@ variable "db_monitoring_interval" {
   type        = number
   default     = 0  # Disable to save costs
 }
+
+variable "google_client_secret" {
+  description = "Google OAuth client secret"
+  type        = string
+  sensitive   = true
+}

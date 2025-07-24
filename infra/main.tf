@@ -15,12 +15,27 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Reference launch-control infrastructure for VPC and ALB
-data "terraform_remote_state" "launch_control" {
-  backend = "local"
-  config = {
-    path = "../launch-control/infra/terraform.tfstate"
-  }
+# Reference launch-control infrastructure via SSM parameters
+data "aws_ssm_parameter" "launch_control_vpc_id" {
+  name = "/launch-control/vpc/vpc_id"
+}
+
+data "aws_ssm_parameter" "launch_control_private_subnet_ids" {
+  name = "/launch-control/vpc/private_subnet_ids"
+}
+
+data "aws_ssm_parameter" "launch_control_alb_listener_arn" {
+  name = "/launch-control/alb/https_listener_arn"
+}
+
+# Get ALB security group by name (consistent with launch-control naming)
+data "aws_security_group" "launch_control_alb" {
+  name = "launch-control-alb-sg"
+}
+
+locals {
+  # Parse comma-separated subnet IDs from SSM
+  private_subnet_ids = split(",", data.aws_ssm_parameter.launch_control_private_subnet_ids.value)
 }
 
 # S3 Bucket with basic security
@@ -109,8 +124,8 @@ module "rds_postgres" {
   monitoring_interval          = var.db_monitoring_interval
   
   # Use launch-control's VPC
-  vpc_id             = data.terraform_remote_state.launch_control.outputs.vpc_id
-  private_subnet_ids = data.terraform_remote_state.launch_control.outputs.private_subnet_ids
+  vpc_id             = data.aws_ssm_parameter.launch_control_vpc_id.value
+  private_subnet_ids = local.private_subnet_ids
 }
 
 # ECS Service for ping-pong-app using launch-control ALB
@@ -123,10 +138,13 @@ module "ping_pong_service" {
   db_name      = module.rds_postgres.db_instance_name
   
   # Pass launch-control infrastructure references
-  vpc_id                = data.terraform_remote_state.launch_control.outputs.vpc_id
-  private_subnet_ids    = data.terraform_remote_state.launch_control.outputs.private_subnet_ids
-  alb_listener_arn      = data.terraform_remote_state.launch_control.outputs.alb_listener_arn
-  alb_security_group_id = data.terraform_remote_state.launch_control.outputs.alb_security_group_id
+  vpc_id                = data.aws_ssm_parameter.launch_control_vpc_id.value
+  private_subnet_ids    = local.private_subnet_ids
+  alb_listener_arn      = data.aws_ssm_parameter.launch_control_alb_listener_arn.value
+  alb_security_group_id = data.aws_security_group.launch_control_alb.id
+  
+  # OAuth secrets
+  google_client_secret = var.google_client_secret
 }
 
 # Outputs

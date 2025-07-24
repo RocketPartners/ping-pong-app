@@ -92,3 +92,13 @@ variable "monitoring_interval" {
     error_message = "Monitoring interval must be one of: 0, 1, 5, 10, 15, 30, 60."
   }
 }
+
+variable "vpc_id" {
+  description = "VPC ID where RDS will be deployed"
+  type        = string
+}
+
+variable "private_subnet_ids" {
+  description = "Private subnet IDs for RDS subnet group"
+  type        = list(string)
+}

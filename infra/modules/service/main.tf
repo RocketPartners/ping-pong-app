@@ -53,14 +53,6 @@ resource "aws_ecs_task_definition" "main" {
         {
           name  = "GOOGLE_CLIENT_SECRET"
           value = var.google_client_secret
-        },
-        {
-          name  = "MICROSOFT_CLIENT_ID"
-          value = var.microsoft_client_id
-        },
-        {
-          name  = "MICROSOFT_CLIENT_SECRET"
-          value = var.microsoft_client_secret
         }
       ]
       portMappings = [

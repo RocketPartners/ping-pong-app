@@ -1,19 +1,6 @@
-data "aws_ssm_parameter" "vpc_id" {
-  name = "/${var.name}/vpc/vpc_id"
-}
-
-data "aws_ssm_parameter" "private_subnet_ids" {
-  name = "/${var.name}/vpc/private_subnet_ids"
-}
-
-locals {
-  private_subnet_ids = split(",", data.aws_ssm_parameter.private_subnet_ids.value)
-}
-
-
 resource "aws_db_subnet_group" "main" {
   name       = "${var.name}-db-subnet-group"
-  subnet_ids = local.private_subnet_ids
+  subnet_ids = var.private_subnet_ids
 
   tags = {
     Name = "${var.name}-db-subnet-group"
@@ -23,7 +10,7 @@ resource "aws_db_subnet_group" "main" {
 resource "aws_security_group" "rds" {
   name        = "${var.name}-rds-sg"
   description = "Security group for RDS PostgreSQL database"
-  vpc_id      = data.aws_ssm_parameter.vpc_id.value
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port       = 5432
