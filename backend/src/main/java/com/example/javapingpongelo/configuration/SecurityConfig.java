@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers("/verify-email").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/health").permitAll()
+                        .requestMatchers("/api/actuator/health").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         // Restrict test endpoints to dev environments only
                         .requestMatchers("/test/**", "/api/test/**").hasRole("ADMIN")
                         .requestMatchers("/api/invitations/validate").permitAll()

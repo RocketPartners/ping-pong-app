@@ -134,8 +134,7 @@ module "ping_pong_service" {
   source      = "./modules/service"
   project_name = var.project_name
   db_password  = random_password.db_password.result
-  db_host      = module.rds_postgres.db_instance_endpoint
-  db_name      = module.rds_postgres.db_instance_name
+  db_url       = module.rds_postgres.connection_string
   
   # Pass launch-control infrastructure references
   vpc_id                = data.aws_ssm_parameter.launch_control_vpc_id.value
@@ -145,6 +144,7 @@ module "ping_pong_service" {
   
   # OAuth secrets
   google_client_secret = var.google_client_secret
+  mail_password        = var.mail_password
 }
 
 # Outputs

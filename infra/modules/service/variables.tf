@@ -21,15 +21,10 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "db_host" {
-  description = "Database host"
+variable "db_url" {
+  description = "Database connection URL"
   type        = string
-}
-
-variable "db_name" {
-  description = "Database name"
-  type        = string
-  default     = "pingpongdb"
+  sensitive   = true
 }
 
 variable "vpc_id" {
@@ -54,6 +49,12 @@ variable "alb_security_group_id" {
 
 variable "google_client_secret" {
   description = "Google OAuth client secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "mail_password" {
+  description = "Gmail app password for email service"
   type        = string
   sensitive   = true
 }

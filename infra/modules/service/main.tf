@@ -6,6 +6,9 @@ locals {
   ecr_repository_url = "231544473980.dkr.ecr.us-east-1.amazonaws.com/${local.ecr_repository_name}"
 }
 
+# TODO: Move mail password to AWS Secrets Manager when permissions are available
+# For now using environment variable as temporary solution
+
 
 
 # ECR Repo, ECS Cluster, Task Def, Service, TG, attach to Listener
@@ -27,15 +30,15 @@ resource "aws_ecs_task_definition" "main" {
       essential = true
       environment = [
         {
-          name  = "DB_URL"
-          value = "jdbc:postgresql://${var.db_host}:5432/${var.db_name}"
+          name  = "SPRING_DATASOURCE_URL"
+          value = var.db_url
         },
         {
-          name  = "DB_USERNAME"
+          name  = "SPRING_DATASOURCE_USERNAME"
           value = "postgres"
         },
         {
-          name  = "DB_PASSWORD"
+          name  = "SPRING_DATASOURCE_PASSWORD"
           value = var.db_password
         },
         {
@@ -53,6 +56,14 @@ resource "aws_ecs_task_definition" "main" {
         {
           name  = "GOOGLE_CLIENT_SECRET"
           value = var.google_client_secret
+        },
+        {
+          name  = "MAIL_USERNAME"
+          value = "ping.pong.elo.rocket@gmail.com"
+        },
+        {
+          name  = "MAIL_PASSWORD"
+          value = var.mail_password
         }
       ]
       portMappings = [
@@ -109,7 +120,7 @@ resource "aws_lb_target_group" "service_http" {
 
   health_check {
     protocol = "HTTP"
-    path     = "/api/actuator/health"
+    path     = "/actuator/health"
     matcher  = "200-399"
     interval = 60
     timeout  = 15
@@ -135,7 +146,7 @@ resource "aws_lb_listener_rule" "host_based" {
 
   condition {
     host_header {
-      values = ["ping-pong.rcktapp.io"]
+      values = ["ping-pong.rcktapp.io", "ping-pong-api.rcktapp.io"]
     }
   }
 }
