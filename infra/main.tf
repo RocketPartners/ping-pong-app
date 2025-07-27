@@ -15,6 +15,12 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Provider for ACM certificates (CloudFront requires certificates in us-east-1)
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}
+
 # Reference launch-control infrastructure via SSM parameters
 data "aws_ssm_parameter" "launch_control_vpc_id" {
   name = "/launch-control/vpc/vpc_id"
@@ -78,7 +84,7 @@ module "s3_frontend" {
   source                   = "./modules/s3"
   bucket_name              = "${var.project_name}-frontend-${random_id.bucket_suffix.hex}"
   enable_website           = true
-  enable_cloudfront_policy = true
+  enable_cloudfront_policy = false  # We'll create this separately
   block_public_access      = true
 }
 
@@ -89,6 +95,12 @@ module "cloudfront" {
   s3_bucket_id          = module.s3_frontend.bucket_id
   project_name          = var.project_name
   price_class           = "PriceClass_100"  # Cheapest
+  domain_name           = "ping-pong.rcktapp.io"
+  hosted_zone_id        = data.aws_route53_zone.this.zone_id
+
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
 }
 
 resource "random_id" "bucket_suffix" {
@@ -145,6 +157,32 @@ module "ping_pong_service" {
   # OAuth secrets
   google_client_secret = var.google_client_secret
   mail_password        = var.mail_password
+}
+
+# S3 bucket policy for CloudFront access (created after CloudFront distribution)
+resource "aws_s3_bucket_policy" "frontend_cloudfront" {
+  bucket     = module.s3_frontend.bucket_id
+  depends_on = [module.cloudfront]
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowCloudFrontServicePrincipal"
+        Effect    = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${module.s3_frontend.bucket_arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = module.cloudfront.distribution_arn
+          }
+        }
+      }
+    ]
+  })
 }
 
 # Route53 DNS records for ping-pong application

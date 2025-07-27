@@ -38,3 +38,9 @@ variable "enable_cloudfront_policy" {
   type        = bool
   default     = false
 }
+
+variable "cloudfront_distribution_arn" {
+  description = "CloudFront distribution ARN for bucket policy"
+  type        = string
+  default     = ""
+}
