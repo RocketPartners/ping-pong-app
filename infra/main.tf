@@ -107,7 +107,7 @@ module "rds_postgres" {
   source = "./modules/rds"
   
   name                   = var.project_name
-  postgres_version       = "15.8"
+  postgres_version       = "15.12"
   db_instance_class      = var.db_instance_class
   allocated_storage      = var.db_allocated_storage
   max_allocated_storage  = var.db_max_allocated_storage
@@ -158,15 +158,15 @@ data "aws_lb" "launch_control_alb" {
   name = "launch-control-alb"
 }
 
-# Main ping-pong application domain
+# Main ping-pong application domain - points to CloudFront for frontend
 resource "aws_route53_record" "ping_pong_main" {
   zone_id = data.aws_route53_zone.this.zone_id
   name    = "ping-pong"
   type    = "A"
   
   alias {
-    name                   = data.aws_lb.launch_control_alb.dns_name
-    zone_id                = data.aws_lb.launch_control_alb.zone_id
+    name                   = module.cloudfront.distribution_domain_name
+    zone_id                = module.cloudfront.distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
