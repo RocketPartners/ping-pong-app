@@ -147,6 +147,43 @@ module "ping_pong_service" {
   mail_password        = var.mail_password
 }
 
+# Route53 DNS records for ping-pong application
+data "aws_route53_zone" "this" {
+  name         = "rcktapp.io."
+  private_zone = false
+}
+
+# Get the shared launch-control ALB by name
+data "aws_lb" "launch_control_alb" {
+  name = "launch-control-alb"
+}
+
+# Main ping-pong application domain
+resource "aws_route53_record" "ping_pong_main" {
+  zone_id = data.aws_route53_zone.this.zone_id
+  name    = "ping-pong"
+  type    = "A"
+  
+  alias {
+    name                   = data.aws_lb.launch_control_alb.dns_name
+    zone_id                = data.aws_lb.launch_control_alb.zone_id
+    evaluate_target_health = false
+  }
+}
+
+# API endpoint domain
+resource "aws_route53_record" "ping_pong_api" {
+  zone_id = data.aws_route53_zone.this.zone_id
+  name    = "ping-pong-api"
+  type    = "A"
+  
+  alias {
+    name                   = data.aws_lb.launch_control_alb.dns_name
+    zone_id                = data.aws_lb.launch_control_alb.zone_id
+    evaluate_target_health = false
+  }
+}
+
 # Outputs
 output "s3_bucket_name" {
   value = module.s3_bucket.bucket_id
