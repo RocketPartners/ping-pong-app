@@ -48,6 +48,7 @@ terraform.tfvars
 # Java
 *.class
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -71,3 +72,5 @@ temp/
 data/
 application-*.properties
 !application-sample.properties
+!application-docker.properties
+!application-production.properties
