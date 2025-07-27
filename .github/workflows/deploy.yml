@@ -1,0 +1,114 @@
+name: Deploy Ping Pong App
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'frontend/**'
+      - 'backend/**'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: ping-pong-app-backend
+  ECS_CLUSTER: ping-pong-app
+  ECS_SERVICE: ping-pong-app-service
+  S3_FRONTEND_BUCKET: ping-pong-app-frontend-788a00f9
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push Docker image
+      working-directory: ./backend
+      run: |
+        IMAGE_TAG=${{ github.sha }}
+        docker buildx build \
+          --platform linux/amd64 \
+          --push \
+          -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG \
+          -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest \
+          .
+
+    - name: Update ECS service (if exists)
+      run: |
+        # Check if ECS service exists
+        if aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} 2>/dev/null | grep -q "ACTIVE"; then
+          echo "ECS service exists, forcing new deployment"
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment
+        else
+          echo "ECS service does not exist yet - will be created later"
+        fi
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm ci --legacy-peer-deps
+
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+
+    - name: Deploy to S3
+      working-directory: ./frontend
+      run: |
+        aws s3 sync dist/frontend/browser/ s3://${{ env.S3_FRONTEND_BUCKET }}/ --delete
+        
+    - name: Invalidate CloudFront (if exists)
+      run: |
+        # Get CloudFront distribution ID if it exists
+        DISTRIBUTION_ID=$(aws cloudfront list-distributions \
+          --query "DistributionList.Items[?Origins.Items[0].DomainName==\`${{ env.S3_FRONTEND_BUCKET }}.s3.us-east-1.amazonaws.com\`].Id" \
+          --output text)
+        
+        if [ ! -z "$DISTRIBUTION_ID" ] && [ "$DISTRIBUTION_ID" != "None" ]; then
+          echo "Invalidating CloudFront distribution: $DISTRIBUTION_ID"
+          aws cloudfront create-invalidation \
+            --distribution-id $DISTRIBUTION_ID \
+            --paths "/*"
+        else
+          echo "No CloudFront distribution found"
+        fi

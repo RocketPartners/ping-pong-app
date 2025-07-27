@@ -39,7 +39,7 @@ ENV SPRING_PROFILES_ACTIVE=docker
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+  CMD curl -f http://localhost:8080/api/actuator/health || exit 1
 
 # Run the application
 CMD ["java", "-jar", "app.jar"]
