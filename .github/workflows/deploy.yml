@@ -6,6 +6,7 @@ on:
     paths: 
       - 'frontend/**'
       - 'backend/**'
+      - 'infra/**'
   workflow_dispatch:
 
 env:
@@ -16,9 +17,57 @@ env:
   S3_FRONTEND_BUCKET: ping-pong-app-frontend-788a00f9
 
 jobs:
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'infra/') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.5.0
+
+    - name: Terraform Init
+      working-directory: ./infra
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: ./infra
+      run: |
+        terraform plan -out=tfplan \
+          -var="google_client_secret=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+          -var="mail_password=${{ secrets.MAIL_PASSWORD }}"
+
+    - name: Terraform Apply
+      working-directory: ./infra
+      run: terraform apply -auto-approve tfplan || true
+
+    - name: Infrastructure Summary
+      working-directory: ./infra
+      run: |
+        echo "## Infrastructure Deployment Complete 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**ECS Cluster:** $(terraform output -raw ecs_cluster_name)" >> $GITHUB_STEP_SUMMARY
+        echo "**Backend ECR:** $(terraform output -raw ecr_backend_url)" >> $GITHUB_STEP_SUMMARY
+        echo "**Frontend S3:** $(terraform output -raw frontend_s3_bucket)" >> $GITHUB_STEP_SUMMARY
+        echo "**CloudFront:** $(terraform output -raw frontend_cloudfront_domain)" >> $GITHUB_STEP_SUMMARY
+
   deploy-backend:
     name: Deploy Backend
     runs-on: ubuntu-latest
+    if: always() && (needs.deploy-infrastructure.result == 'success' || needs.deploy-infrastructure.result == 'skipped')
+    needs: [deploy-infrastructure]
     
     steps:
     - name: Checkout code
@@ -65,6 +114,8 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend
     runs-on: ubuntu-latest
+    if: always() && (needs.deploy-infrastructure.result == 'success' || needs.deploy-infrastructure.result == 'skipped')
+    needs: [deploy-infrastructure]
     
     steps:
     - name: Checkout code
