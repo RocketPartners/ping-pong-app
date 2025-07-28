@@ -21,7 +21,7 @@ public class UserDetailConfig {
             return User
                     .withUsername(username)
                     .password(player.getPassword())
-                    .authorities("USER") // Add roles if needed
+                    .authorities("ROLE_" + player.getRole()) // Use player's role
                     .build();
         };
     }

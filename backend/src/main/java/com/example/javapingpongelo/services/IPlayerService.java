@@ -119,4 +119,14 @@ public interface IPlayerService {
      * Get the highest value for each player style and who holds it
      */
     List<PlayerStyleTopDTO> getHighestStyleRatings();
+
+    /**
+     * Promote a player to admin role by email
+     */
+    void promotePlayerToAdmin(String email);
+
+    /**
+     * Demote a player from admin role by email
+     */
+    void demotePlayerFromAdmin(String email);
 }

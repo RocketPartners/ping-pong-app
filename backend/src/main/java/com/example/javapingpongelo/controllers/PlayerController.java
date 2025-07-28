@@ -178,23 +178,42 @@ public class PlayerController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/temp/delete-by-email")
-    public ResponseEntity<Void> tempDeletePlayerByEmail(@RequestParam("email") String email, @RequestParam("secret") String secret) {
-        // Temporary endpoint with basic security - remove after use
-        if (!"temp-delete-secret-key".equals(secret)) {
+    @PostMapping("/admin/promote")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> promotePlayerToAdmin(@RequestParam("email") String email) {
+        log.info("Admin request to promote player to admin: {}", email);
+        
+        playerService.promotePlayerToAdmin(email);
+        return ResponseEntity.ok(new ApiResponse(true, "Player promoted to admin successfully"));
+    }
+
+    @PostMapping("/admin/demote")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> demotePlayerFromAdmin(@RequestParam("email") String email) {
+        log.info("Admin request to demote player from admin: {}", email);
+        
+        playerService.demotePlayerFromAdmin(email);
+        return ResponseEntity.ok(new ApiResponse(true, "Player demoted from admin successfully"));
+    }
+
+    @PostMapping("/bootstrap/create-first-admin")
+    public ResponseEntity<ApiResponse> createFirstAdmin(@RequestParam("email") String email, @RequestParam("secret") String secret) {
+        // Bootstrap endpoint to create the first admin - only works if no admins exist
+        if (!"bootstrap-admin-secret-2025".equals(secret)) {
             throw new BadRequestException("Invalid secret");
         }
         
-        log.info("Temporary delete request for email: {}", email);
-
-        Player player = playerService.findPlayerByEmail(email);
-        if (player == null) {
-            throw new ResourceNotFoundException("Player not found with email: " + email);
+        // Check if any admin already exists
+        List<Player> allPlayers = playerService.findAllPlayers();
+        boolean adminExists = allPlayers.stream().anyMatch(p -> "ADMIN".equals(p.getRole()));
+        
+        if (adminExists) {
+            throw new BadRequestException("Admin user already exists. Use the regular admin promotion endpoint.");
         }
-
-        log.info("Deleting player: {} {} ({})", player.getFirstName(), player.getLastName(), player.getEmail());
-        playerService.deletePlayer(player.getPlayerId());
-        return ResponseEntity.noContent().build();
+        
+        log.info("Bootstrap request to create first admin: {}", email);
+        playerService.promotePlayerToAdmin(email);
+        return ResponseEntity.ok(new ApiResponse(true, "First admin created successfully"));
     }
 
     /**

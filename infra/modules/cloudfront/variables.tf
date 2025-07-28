@@ -42,3 +42,13 @@ variable "min_ttl" {
   type        = number
   default     = 0
 }
+
+variable "domain_name" {
+  description = "Custom domain name for the CloudFront distribution"
+  type        = string
+}
+
+variable "hosted_zone_id" {
+  description = "Route53 hosted zone ID for domain validation"
+  type        = string
+}

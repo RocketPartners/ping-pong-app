@@ -541,4 +541,28 @@ public class PlayerServiceImpl implements IPlayerService {
     private boolean usernameExists(String username) {
         return playerRepository.findByUsername(username) != null;
     }
+
+    @Override
+    public void promotePlayerToAdmin(String email) {
+        Player player = playerRepository.findByEmail(email);
+        if (player == null) {
+            throw new ResourceNotFoundException("Player not found with email: " + email);
+        }
+        
+        log.info("Promoting player to admin: {} {} ({})", player.getFirstName(), player.getLastName(), player.getEmail());
+        player.setRole("ADMIN");
+        playerRepository.save(player);
+    }
+
+    @Override
+    public void demotePlayerFromAdmin(String email) {
+        Player player = playerRepository.findByEmail(email);
+        if (player == null) {
+            throw new ResourceNotFoundException("Player not found with email: " + email);
+        }
+        
+        log.info("Demoting player from admin: {} {} ({})", player.getFirstName(), player.getLastName(), player.getEmail());
+        player.setRole("USER");
+        playerRepository.save(player);
+    }
 }

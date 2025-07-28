@@ -66,7 +66,7 @@ public class EmailSenderImpl implements EmailSender {
             helper.setTo(email);
             helper.setSubject("You're Invited to Join Ping Pong Elo");
             
-            String registrationUrl = baseUrl + "/register?code=" + invitationCode;
+            String registrationUrl = frontendUrl + "/register?code=" + invitationCode;
             
             StringBuilder emailContent = new StringBuilder();
             emailContent.append("<div>");

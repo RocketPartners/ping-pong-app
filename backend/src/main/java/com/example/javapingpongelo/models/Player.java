@@ -92,6 +92,10 @@ public class Player {
     @Column
     private String invitationCode;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private String role = "USER";
+
     // Ratings - initialized to 1000
     @Builder.Default
     private int singlesRankedRating = 1000;
