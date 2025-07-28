@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/test/**", "/api/test/**").hasRole("ADMIN")
                         .requestMatchers("/api/invitations/validate").permitAll()
                         .requestMatchers("/api/invitations/**").hasRole("ADMIN")
+                        .requestMatchers("/api/players/bootstrap/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
