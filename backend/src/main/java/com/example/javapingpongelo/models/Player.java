@@ -92,7 +92,7 @@ public class Player {
     @Column
     private String invitationCode;
 
-    @Column(nullable = false)
+    @Column(name = "role", nullable = true)
     @Builder.Default
     private String role = "USER";
 
@@ -338,5 +338,6 @@ public class Player {
     public boolean isEmailVerified() {
         return emailVerified != null && emailVerified;
     }
+
 
 }

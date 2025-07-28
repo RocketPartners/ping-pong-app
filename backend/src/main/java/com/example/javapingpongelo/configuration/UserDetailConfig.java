@@ -18,10 +18,11 @@ public class UserDetailConfig {
                 throw new UsernameNotFoundException("User not found: " + username);
             }
 
+            String role = player.getRole() != null ? player.getRole() : "USER";
             return User
                     .withUsername(username)
                     .password(player.getPassword())
-                    .authorities("ROLE_" + player.getRole()) // Use player's role
+                    .authorities("ROLE_" + role) // Use player's role
                     .build();
         };
     }
