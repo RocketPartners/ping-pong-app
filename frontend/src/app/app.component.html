@@ -54,20 +54,6 @@
       <span>Achievements</span>
     </button>
 
-    <button mat-menu-item routerLink="/tournaments">
-      <mat-icon>emoji_events</mat-icon>
-      <span>Tournaments</span>
-    </button>
-
-    <button mat-menu-item routerLink="/live-matches">
-      <mat-icon>live_tv</mat-icon>
-      <span>Live Matches</span>
-    </button>
-
-    <button mat-menu-item routerLink="/slack-integration">
-      <mat-icon>chat</mat-icon>
-      <span>Slack Integration</span>
-    </button>
 
     <mat-divider></mat-divider>
     <button (click)="logout()" mat-menu-item>
@@ -102,25 +88,10 @@
         <span matListItemTitle>Create Match</span>
       </a>
 
-      <a mat-list-item routerLink="/live-matches" routerLinkActive="active-route">
-        <mat-icon matListItemIcon>live_tv</mat-icon>
-        <span matListItemTitle>Live Matches</span>
-      </a>
-
-      <a mat-list-item routerLink="/slack-integration" routerLinkActive="active-route">
-        <mat-icon matListItemIcon>chat</mat-icon>
-        <span matListItemTitle>Slack Integration</span>
-      </a>
-
       <!-- Add achievements menu item to sidebar -->
       <a mat-list-item routerLink="/achievements" routerLinkActive="active-route">
         <mat-icon matListItemIcon>emoji_events</mat-icon>
         <span matListItemTitle>Achievements</span>
-      </a>
-
-      <a mat-list-item routerLink="/tournaments" routerLinkActive="active-route">
-        <mat-icon matListItemIcon>emoji_events</mat-icon>
-        <span matListItemTitle>Tournaments</span>
       </a>
 
       <a mat-list-item routerLink="/statistics" routerLinkActive="active-route">
