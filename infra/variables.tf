@@ -51,3 +51,9 @@ variable "mail_password" {
   type        = string
   sensitive   = true
 }
+
+variable "slack_bot_token" {
+  description = "Slack bot token for posting messages"
+  type        = string
+  sensitive   = true
+}

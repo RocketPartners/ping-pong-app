@@ -68,6 +68,14 @@ resource "aws_ecs_task_definition" "main" {
         {
           name  = "MAIL_PASSWORD"
           value = var.mail_password
+        },
+        {
+          name  = "SLACK_BOT_TOKEN"
+          value = var.slack_bot_token
+        },
+        {
+          name  = "SLACK_RESULTS_CHANNEL"
+          value = "#ping-pong-results"
         }
       ]
       portMappings = [

@@ -47,7 +47,8 @@ jobs:
       run: |
         terraform plan -out=tfplan \
           -var="google_client_secret=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
-          -var="mail_password=${{ secrets.MAIL_PASSWORD }}"
+          -var="mail_password=${{ secrets.MAIL_PASSWORD }}" \
+          -var="slack_bot_token=${{ secrets.SLACK_BOT_TOKEN }}"
 
     - name: Terraform Apply
       working-directory: ./infra

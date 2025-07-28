@@ -157,6 +157,7 @@ module "ping_pong_service" {
   # OAuth secrets
   google_client_secret = var.google_client_secret
   mail_password        = var.mail_password
+  slack_bot_token      = var.slack_bot_token
 }
 
 # S3 bucket policy for CloudFront access (created after CloudFront distribution)
