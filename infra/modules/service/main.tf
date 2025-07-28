@@ -46,6 +46,10 @@ resource "aws_ecs_task_definition" "main" {
           value = "https://ping-pong.rcktapp.io"
         },
         {
+          name  = "ALLOWED_ORIGINS"
+          value = "https://ping-pong.rcktapp.io"
+        },
+        {
           name  = "JWT_SECRET"
           value = "your-jwt-secret-key-that-should-be-at-least-64-characters-long-for-hs512-algorithm-compatibility"
         },
@@ -120,7 +124,7 @@ resource "aws_lb_target_group" "service_http" {
 
   health_check {
     protocol = "HTTP"
-    path     = "/actuator/health"
+    path     = "/api/actuator/health"
     matcher  = "200-399"
     interval = 60
     timeout  = 15
