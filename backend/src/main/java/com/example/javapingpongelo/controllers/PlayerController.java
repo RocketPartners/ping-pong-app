@@ -178,6 +178,25 @@ public class PlayerController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/temp/delete-by-email")
+    public ResponseEntity<Void> tempDeletePlayerByEmail(@RequestParam("email") String email, @RequestParam("secret") String secret) {
+        // Temporary endpoint with basic security - remove after use
+        if (!"temp-delete-secret-key".equals(secret)) {
+            throw new BadRequestException("Invalid secret");
+        }
+        
+        log.info("Temporary delete request for email: {}", email);
+
+        Player player = playerService.findPlayerByEmail(email);
+        if (player == null) {
+            throw new ResourceNotFoundException("Player not found with email: " + email);
+        }
+
+        log.info("Deleting player: {} {} ({})", player.getFirstName(), player.getLastName(), player.getEmail());
+        playerService.deletePlayer(player.getPlayerId());
+        return ResponseEntity.noContent().build();
+    }
+
     /**
      * Get all achievements for a player
      */
