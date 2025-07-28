@@ -35,8 +35,8 @@ public class EmailService {
     @Value("${app.email.from:noreply@example.com}")
     private String fromEmail;
 
-    @Value("${app.baseUrl:http://localhost:8080}")
-    private String baseUrl;
+    @Value("${FRONTEND_URL:http://localhost:4200}")
+    private String frontendUrl;
 
     /**
      * Send a password reset email
@@ -58,7 +58,7 @@ public class EmailService {
     }
 
     private String getEmailContent(String token) {
-        String resetUrl = baseUrl + "/reset-password?token=" + token;
+        String resetUrl = frontendUrl + "/reset-password?token=" + token;
 
         return "<div>" +
                 "<h2>Password Reset Request</h2>" +
@@ -87,7 +87,7 @@ public class EmailService {
         context.setVariable("player", player);
         context.setVariable("games", games);
         context.setVariable("confirmations", confirmations);
-        context.setVariable("baseUrl", baseUrl);
+        context.setVariable("baseUrl", frontendUrl);
 
         // Add game mappings for easier access in the template
         Map<String, Game> gameMap = new HashMap<>();
