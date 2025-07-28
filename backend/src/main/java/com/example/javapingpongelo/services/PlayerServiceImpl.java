@@ -8,6 +8,8 @@ import com.example.javapingpongelo.models.dto.PlayerStyleTopDTO;
 import com.example.javapingpongelo.models.exceptions.BadRequestException;
 import com.example.javapingpongelo.models.exceptions.ResourceNotFoundException;
 import com.example.javapingpongelo.repositories.PlayerRepository;
+import com.example.javapingpongelo.repositories.EmailVerificationTokenRepository;
+import com.example.javapingpongelo.repositories.PasswordResetTokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,12 @@ public class PlayerServiceImpl implements IPlayerService {
     
     @Autowired
     private DomainRestrictionConfig domainRestrictionConfig;
+    
+    @Autowired
+    private EmailVerificationTokenRepository emailVerificationTokenRepository;
+    
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
     
     @Autowired
     private InvitationService invitationService;
@@ -290,12 +298,14 @@ public class PlayerServiceImpl implements IPlayerService {
                 throw new ResourceNotFoundException("Player not found with id: " + id);
             }
 
-            // Before deleting, you might want to handle references to this player
-            // For example:
-            // 1. Delete or anonymize games/matches associated with this player
-            // 2. Or throw an exception if this player has games/matches
+            // Clean up associated tokens first to avoid foreign key constraint violations
+            log.info("Cleaning up verification tokens for player: {}", player.getEmail());
+            emailVerificationTokenRepository.deleteByPlayer(player);
+            
+            log.info("Cleaning up password reset tokens for player: {}", player.getEmail());
+            passwordResetTokenRepository.deleteByPlayerId(id);
 
-            // For this implementation, we'll assume the deletion is allowed
+            // Now delete the player
             playerRepository.deleteById(id);
             log.info("Successfully deleted player with ID: {}", id);
         }
