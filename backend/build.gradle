@@ -64,6 +64,10 @@ dependencies {
 
     // Email
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    
+    // Slack integration
+    implementation 'com.slack.api:slack-api-client:1.29.2'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // Utilities
     implementation 'org.apache.commons:commons-lang3:3.14.0'

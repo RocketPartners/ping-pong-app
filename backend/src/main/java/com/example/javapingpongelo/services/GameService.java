@@ -28,6 +28,9 @@ public class GameService {
     GameRepository gameRepository;
 
     @Autowired
+    private SlackService slackService;
+
+    @Autowired
     IPlayerService playerService;
 
     @Autowired
@@ -102,6 +105,23 @@ public class GameService {
         }
         else {
             processDoublesGameElo(game);
+        }
+        
+        // Post game result to Slack after ELO processing
+        postGameResultToSlack(game);
+    }
+    
+    private void postGameResultToSlack(Game game) {
+        try {
+            Player challenger = playerService.findPlayerById(game.getChallengerId());
+            Player opponent = playerService.findPlayerById(game.getOpponentId());
+            
+            if (challenger != null && opponent != null) {
+                slackService.postGameResult(game, challenger, opponent);
+            }
+        } catch (Exception e) {
+            log.error("Error posting game result to Slack for game: {}", game.getGameId(), e);
+            // Don't let Slack errors break the game processing
         }
     }
 
