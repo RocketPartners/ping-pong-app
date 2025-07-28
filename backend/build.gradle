@@ -39,6 +39,9 @@ dependencies {
 
     // Data access
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc' // For Flyway
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'org.hibernate.orm:hibernate-envers'
     implementation 'org.postgresql:postgresql'
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")

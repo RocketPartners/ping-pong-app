@@ -92,7 +92,7 @@ public class Player {
     @Column
     private String invitationCode;
 
-    @Column(name = "role", nullable = true)
+    @Column(name = "role", nullable = false)
     @Builder.Default
     private String role = "USER";
 
