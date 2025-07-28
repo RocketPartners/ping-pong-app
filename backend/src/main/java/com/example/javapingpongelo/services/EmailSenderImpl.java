@@ -24,8 +24,8 @@ public class EmailSenderImpl implements EmailSender {
     @Value("${app.email.from:noreply@example.com}")
     private String fromEmail;
     
-    @Value("${app.baseUrl:http://localhost:8080}")
-    private String baseUrl;
+    @Value("${FRONTEND_URL:http://localhost:4200}")
+    private String frontendUrl;
 
     @Override
     public void sendVerificationEmail(String email, String fullName, String token) {
@@ -41,7 +41,7 @@ public class EmailSenderImpl implements EmailSender {
             
             Context context = new Context();
             context.setVariable("playerName", fullName);
-            context.setVariable("verificationUrl", baseUrl + "/verify-email?token=" + token);
+            context.setVariable("verificationUrl", frontendUrl + "/verify-email?token=" + token);
             
             String emailContent = emailTemplateEngine.process("email-verification", context);
             
