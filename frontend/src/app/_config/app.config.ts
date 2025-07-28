@@ -1,3 +1,5 @@
+import { environment } from '../../environments/environment';
+
 /**
  * Application Configuration
  * 
@@ -5,7 +7,7 @@
  */
 export const AppConfig = {
   // API Configuration
-  apiUrl: 'http://localhost:8080',
+  apiUrl: environment.apiUrl,
   
   // App Information
   version: '1.1.0', // Incrementing for our improvements
