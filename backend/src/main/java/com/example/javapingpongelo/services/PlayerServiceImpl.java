@@ -135,6 +135,11 @@ public class PlayerServiceImpl implements IPlayerService {
     }
 
     @Override
+    public Player findPlayerByEmail(String email) {
+        return playerRepository.findByEmail(email);
+    }
+
+    @Override
     public Player findPlayerById(UUID id) {
         return playerRepository.findById(id).orElseThrow();
     }

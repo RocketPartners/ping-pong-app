@@ -41,6 +41,11 @@ public interface IPlayerService {
     Player findPlayerByUsername(String username);
 
     /**
+     * Find a player by email
+     */
+    Player findPlayerByEmail(String email);
+
+    /**
      * Find a player by ID
      */
     Player findPlayerById(UUID id);

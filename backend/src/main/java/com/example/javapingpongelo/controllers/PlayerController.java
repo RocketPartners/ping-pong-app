@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -159,6 +160,21 @@ public class PlayerController {
         }
 
         playerService.deletePlayer(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/admin/delete-by-email")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deletePlayerByEmail(@RequestParam("email") String email) {
+        log.info("Admin request to delete player by email: {}", email);
+
+        Player player = playerService.findPlayerByEmail(email);
+        if (player == null) {
+            throw new ResourceNotFoundException("Player not found with email: " + email);
+        }
+
+        log.info("Deleting player: {} {} ({})", player.getFirstName(), player.getLastName(), player.getEmail());
+        playerService.deletePlayer(player.getPlayerId());
         return ResponseEntity.noContent().build();
     }
 
