@@ -2,7 +2,8 @@ package com.example.javapingpongelo.services;
 
 import com.example.javapingpongelo.models.Game;
 import com.example.javapingpongelo.models.Player;
-// Achievement functionality will be added later
+import com.example.javapingpongelo.models.Challenge;
+import com.example.javapingpongelo.models.ChallengeStatus;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
@@ -408,6 +409,95 @@ public class SlackService {
             log.info("Posted weekly recap to Slack");
         } catch (Exception e) {
             log.error("Error posting weekly recap", e);
+        }
+    }
+    
+    // Challenge system methods
+    public void postChallengeNotification(Challenge challenge, Player challenger, Player challenged) {
+        if (methods == null) return;
+        
+        try {
+            List<LayoutBlock> blocks = new ArrayList<>();
+            
+            blocks.add(SectionBlock.builder()
+                .text(MarkdownTextObject.builder()
+                    .text(String.format("⚔️ *New Challenge!*\n" +
+                        "🏓 *%s* has challenged *%s* to a %s game!\n" +
+                        "💬 \"%s\"",
+                        challenger.getFullName(),
+                        challenged.getFullName(),
+                        challenge.isRanked() ? "ranked" : "casual",
+                        challenge.getMessage() != null ? challenge.getMessage() : "Let's play!"
+                    ))
+                    .build())
+                .build());
+            
+            ChatPostMessageResponse response = methods.chatPostMessage(req -> req
+                .channel(challengesChannel)
+                .text(String.format("%s challenged %s to a game", challenger.getFullName(), challenged.getFullName()))
+                .blocks(blocks)
+            );
+            
+            if (response.isOk()) {
+                log.info("Posted challenge notification to Slack: {}", challenge.getChallengeId());
+            } else {
+                log.error("Failed to post challenge to Slack: {}", response.getError());
+            }
+        } catch (Exception e) {
+            log.error("Error posting challenge notification", e);
+        }
+    }
+    
+    public void updateChallengeMessage(Challenge challenge, Player challenger, Player challenged, String status) {
+        if (methods == null) return;
+        
+        try {
+            String emoji = switch (status.toLowerCase()) {
+                case "accepted" -> "✅";
+                case "declined" -> "❌";
+                case "expired" -> "⏰";
+                case "completed" -> "🏆";
+                default -> "📝";
+            };
+            
+            String message = String.format("%s Challenge %s: %s vs %s",
+                emoji,
+                status,
+                challenger.getFullName(),
+                challenged.getFullName()
+            );
+            
+            methods.chatPostMessage(req -> req
+                .channel(challengesChannel)
+                .text(message)
+            );
+            
+            log.info("Posted challenge update to Slack: {} - {}", challenge.getChallengeId(), status);
+        } catch (Exception e) {
+            log.error("Error posting challenge update", e);
+        }
+    }
+    
+    public void postChallengeReminder(Challenge challenge, Player challenger, Player challenged) {
+        if (methods == null) return;
+        
+        try {
+            String message = String.format("⏰ *Challenge Reminder*\n" +
+                "🏓 %s, you have a pending challenge from *%s*!\n" +
+                "⚡️ This challenge will expire soon - respond now!",
+                challenged.getFullName(),
+                challenger.getFullName()
+            );
+            
+            methods.chatPostMessage(req -> req
+                .channel(challengesChannel)
+                .text(String.format("Challenge reminder: %s vs %s", challenger.getFullName(), challenged.getFullName()))
+                .text(message)
+            );
+            
+            log.info("Posted challenge reminder to Slack: {}", challenge.getChallengeId());
+        } catch (Exception e) {
+            log.error("Error posting challenge reminder", e);
         }
     }
 }

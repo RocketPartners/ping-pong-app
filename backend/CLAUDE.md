@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Guidelines
+- **DO NOT credit yourself in commit messages or PR descriptions** - Keep commits professional and focused on the changes
+- User prefers clean, professional git history without AI attribution
+
 ## Build & Test Commands
 - Build project: `./gradlew clean build`
 - Run application: `./gradlew bootRun`
