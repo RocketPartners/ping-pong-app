@@ -1,0 +1,66 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'infra/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual deployment'
+        required: false
+        default: 'Manual infrastructure deployment'
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.5.0
+
+    - name: Terraform Init
+      working-directory: ./infra
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: ./infra
+      run: |
+        terraform plan -out=tfplan \
+          -var="google_client_secret=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+          -var="mail_password=${{ secrets.MAIL_PASSWORD }}" \
+          -var="slack_bot_token=${{ secrets.SLACK_BOT_TOKEN }}"
+
+    - name: Terraform Apply
+      working-directory: ./infra
+      run: terraform apply -auto-approve tfplan
+
+    - name: Infrastructure Summary
+      working-directory: ./infra
+      run: |
+        echo "## Infrastructure Deployment Complete 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**ECS Cluster:** $(terraform output -raw ecs_cluster_name)" >> $GITHUB_STEP_SUMMARY
+        echo "**Backend ECR:** $(terraform output -raw ecr_backend_url)" >> $GITHUB_STEP_SUMMARY
+        echo "**Frontend S3:** $(terraform output -raw frontend_s3_bucket)" >> $GITHUB_STEP_SUMMARY
+        echo "**CloudFront:** $(terraform output -raw frontend_cloudfront_domain)" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          echo "**Reason:** ${{ github.event.inputs.reason }}" >> $GITHUB_STEP_SUMMARY
+        fi
