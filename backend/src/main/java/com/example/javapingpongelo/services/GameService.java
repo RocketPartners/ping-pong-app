@@ -44,6 +44,9 @@ public class GameService {
 
     @Autowired
     private GameConfirmationService gameConfirmationService;
+    
+    @Autowired
+    private SlackHelperMethods slackHelper;
 
     /**
      * Save games and return the saved game entities
@@ -109,6 +112,11 @@ public class GameService {
         
         // Post game result to Slack after ELO processing
         postGameResultToSlack(game);
+        
+        // Check for win streaks and post notifications
+        if (slackHelper != null) {
+            slackHelper.checkAndNotifyWinStreaks(game);
+        }
     }
     
     private void postGameResultToSlack(Game game) {
