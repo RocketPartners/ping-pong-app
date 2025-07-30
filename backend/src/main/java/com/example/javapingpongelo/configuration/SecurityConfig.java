@@ -47,6 +47,8 @@ public class SecurityConfig {
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/api/actuator/health").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        // Slack integration endpoints - no authentication required
+                        .requestMatchers("/api/slack/**").permitAll()
                         // Restrict test endpoints to dev environments only
                         .requestMatchers("/test/**", "/api/test/**").hasRole("ADMIN")
                         .requestMatchers("/api/invitations/validate").permitAll()
