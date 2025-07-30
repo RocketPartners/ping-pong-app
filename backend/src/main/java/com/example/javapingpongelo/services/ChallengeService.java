@@ -2,8 +2,10 @@ package com.example.javapingpongelo.services;
 
 import com.example.javapingpongelo.models.Challenge;
 import com.example.javapingpongelo.models.ChallengeStatus;
+import com.example.javapingpongelo.models.Game;
 import com.example.javapingpongelo.models.Player;
 import com.example.javapingpongelo.repositories.ChallengeRepository;
+import com.example.javapingpongelo.repositories.GameRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,9 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +25,9 @@ public class ChallengeService {
     
     @Autowired
     private ChallengeRepository challengeRepository;
+    
+    @Autowired
+    private GameRepository gameRepository;
     
     @Autowired
     private IPlayerService playerService;
@@ -180,27 +184,210 @@ public class ChallengeService {
     }
     
     /**
-     * Get smart matchmaking suggestions based on ELO
+     * Get smart matchmaking suggestions based on ELO (default: singles ranked)
      */
     public List<Player> getMatchmakingSuggestions(UUID playerId, int maxSuggestions) {
+        return getMatchmakingSuggestions(playerId, maxSuggestions, "singles-ranked");
+    }
+    
+    /**
+     * Get smart matchmaking suggestions based on game type
+     */
+    public List<Player> getMatchmakingSuggestions(UUID playerId, int maxSuggestions, String gameType) {
         Player player = playerService.findPlayerById(playerId);
         if (player == null) {
             return List.of();
         }
         
-        double playerElo = player.getSinglesRankedRating();
+        GameTypeConfig config = parseGameType(gameType);
+        double playerElo = config.getRating(player);
         List<Player> allPlayers = playerService.findAllPlayers();
         
+        // For doubles, we want to suggest both teammates and opponents
+        if (config.isDoubles()) {
+            return getDoublesMatchmakingSuggestions(player, allPlayers, config, maxSuggestions);
+        } else {
+            return getSinglesMatchmakingSuggestions(player, allPlayers, config, maxSuggestions);
+        }
+    }
+    
+    private List<Player> getSinglesMatchmakingSuggestions(Player player, List<Player> allPlayers, GameTypeConfig config, int maxSuggestions) {
+        double playerElo = config.getRating(player);
+        
         return allPlayers.stream()
-            .filter(p -> !p.getPlayerId().equals(playerId)) // Exclude self
-            .filter(p -> Math.abs(p.getSinglesRankedRating() - playerElo) <= 200) // Within 200 ELO
+            .filter(p -> !p.getPlayerId().equals(player.getPlayerId())) // Exclude self
+            .filter(p -> Math.abs(config.getRating(p) - playerElo) <= 200) // Within 200 ELO
             .sorted((p1, p2) -> {
-                double diff1 = Math.abs(p1.getSinglesRankedRating() - playerElo);
-                double diff2 = Math.abs(p2.getSinglesRankedRating() - playerElo);
+                double diff1 = Math.abs(config.getRating(p1) - playerElo);
+                double diff2 = Math.abs(config.getRating(p2) - playerElo);
                 return Double.compare(diff1, diff2);
             })
             .limit(maxSuggestions)
             .collect(Collectors.toList());
+    }
+    
+    private List<Player> getDoublesMatchmakingSuggestions(Player player, List<Player> allPlayers, GameTypeConfig config, int maxSuggestions) {
+        // For doubles, suggest good teammates first, then opponents
+        List<Player> teammates = getTeammateSuggestions(player, allPlayers, config, maxSuggestions / 2);
+        List<Player> opponents = getOpponentSuggestions(player, allPlayers, config, maxSuggestions / 2);
+        
+        List<Player> suggestions = new ArrayList<>();
+        suggestions.addAll(teammates);
+        suggestions.addAll(opponents);
+        
+        return suggestions.stream()
+            .distinct()
+            .limit(maxSuggestions)
+            .collect(Collectors.toList());
+    }
+    
+    private List<Player> getTeammateSuggestions(Player player, List<Player> allPlayers, GameTypeConfig config, int maxSuggestions) {
+        // Get players who have been teammates before, prioritized by success rate
+        Map<UUID, TeammateStats> teammateHistory = getTeammateHistory(player.getPlayerId(), config);
+        
+        return allPlayers.stream()
+            .filter(p -> !p.getPlayerId().equals(player.getPlayerId()))
+            .filter(p -> Math.abs(config.getRating(p) - config.getRating(player)) <= 300) // Wider range for teammates
+            .sorted((p1, p2) -> {
+                TeammateStats stats1 = teammateHistory.get(p1.getPlayerId());
+                TeammateStats stats2 = teammateHistory.get(p2.getPlayerId());
+                
+                // Prioritize by: 1. Past success rate, 2. Games played together, 3. ELO similarity
+                if (stats1 != null && stats2 != null) {
+                    int successComparison = Double.compare(stats2.getWinRate(), stats1.getWinRate());
+                    if (successComparison != 0) return successComparison;
+                    
+                    int gamesComparison = Integer.compare(stats2.getGamesPlayed(), stats1.getGamesPlayed());
+                    if (gamesComparison != 0) return gamesComparison;
+                }
+                
+                // If one has history and other doesn't, prioritize the one with history
+                if (stats1 != null && stats2 == null) return -1;
+                if (stats1 == null && stats2 != null) return 1;
+                
+                // Fall back to ELO similarity
+                double eloDiff1 = Math.abs(config.getRating(p1) - config.getRating(player));
+                double eloDiff2 = Math.abs(config.getRating(p2) - config.getRating(player));
+                return Double.compare(eloDiff1, eloDiff2);
+            })
+            .limit(maxSuggestions)
+            .collect(Collectors.toList());
+    }
+    
+    private List<Player> getOpponentSuggestions(Player player, List<Player> allPlayers, GameTypeConfig config, int maxSuggestions) {
+        // Similar ELO players who haven't been teammates
+        Map<UUID, TeammateStats> teammateHistory = getTeammateHistory(player.getPlayerId(), config);
+        double playerElo = config.getRating(player);
+        
+        return allPlayers.stream()
+            .filter(p -> !p.getPlayerId().equals(player.getPlayerId()))
+            .filter(p -> !teammateHistory.containsKey(p.getPlayerId())) // Prefer non-teammates as opponents
+            .filter(p -> Math.abs(config.getRating(p) - playerElo) <= 200)
+            .sorted((p1, p2) -> {
+                double diff1 = Math.abs(config.getRating(p1) - playerElo);
+                double diff2 = Math.abs(config.getRating(p2) - playerElo);
+                return Double.compare(diff1, diff2);
+            })
+            .limit(maxSuggestions)
+            .collect(Collectors.toList());
+    }
+    
+    private Map<UUID, TeammateStats> getTeammateHistory(UUID playerId, GameTypeConfig config) {
+        List<Game> playerGames = gameRepository.findByPlayerIdAndGameType(playerId, config.isSingles(), config.isRanked());
+        Map<UUID, TeammateStats> teammateStats = new HashMap<>();
+        
+        for (Game game : playerGames) {
+            if (!game.isDoublesGame()) continue;
+            
+            // Determine which team the player was on
+            List<UUID> playerTeam = null;
+            if (game.getChallengerTeam().contains(playerId)) {
+                playerTeam = game.getChallengerTeam();
+            } else if (game.getOpponentTeam().contains(playerId)) {
+                playerTeam = game.getOpponentTeam();
+            }
+            
+            if (playerTeam == null) continue;
+            
+            // Find teammate(s)
+            for (UUID teammateId : playerTeam) {
+                if (!teammateId.equals(playerId)) {
+                    TeammateStats stats = teammateStats.computeIfAbsent(teammateId, k -> new TeammateStats());
+                    stats.addGame(didPlayerWin(game, playerId));
+                }
+            }
+        }
+        
+        return teammateStats;
+    }
+    
+    private boolean didPlayerWin(Game game, UUID playerId) {
+        if (game.getChallengerTeam().contains(playerId)) {
+            return !game.isOpponentWin();
+        } else {
+            return game.isOpponentWin();
+        }
+    }
+    
+    private GameTypeConfig parseGameType(String gameType) {
+        if (gameType == null) return GameTypeConfig.SINGLES_RANKED;
+        
+        switch (gameType.toLowerCase().trim()) {
+            case "singles-normal":
+            case "singles-casual":
+            case "sn":
+                return GameTypeConfig.SINGLES_NORMAL;
+            case "doubles-ranked":
+            case "doubles":
+            case "dr":
+                return GameTypeConfig.DOUBLES_RANKED;
+            case "doubles-normal":
+            case "doubles-casual":
+            case "dn":
+                return GameTypeConfig.DOUBLES_NORMAL;
+            default:
+                return GameTypeConfig.SINGLES_RANKED;
+        }
+    }
+    
+    private enum GameTypeConfig {
+        SINGLES_RANKED("Singles Ranked", true, true, Player::getSinglesRankedRating),
+        SINGLES_NORMAL("Singles Normal", true, false, Player::getSinglesNormalRating),
+        DOUBLES_RANKED("Doubles Ranked", false, true, Player::getDoublesRankedRating),
+        DOUBLES_NORMAL("Doubles Normal", false, false, Player::getDoublesNormalRating);
+        
+        private final String displayName;
+        private final boolean singles;
+        private final boolean ranked;
+        private final Function<Player, Integer> ratingExtractor;
+        
+        GameTypeConfig(String displayName, boolean singles, boolean ranked, Function<Player, Integer> ratingExtractor) {
+            this.displayName = displayName;
+            this.singles = singles;
+            this.ranked = ranked;
+            this.ratingExtractor = ratingExtractor;
+        }
+        
+        public String getDisplayName() { return displayName; }
+        public boolean isSingles() { return singles; }
+        public boolean isDoubles() { return !singles; }
+        public boolean isRanked() { return ranked; }
+        public int getRating(Player player) { return ratingExtractor.apply(player); }
+    }
+    
+    private static class TeammateStats {
+        private int gamesPlayed = 0;
+        private int gamesWon = 0;
+        
+        public void addGame(boolean won) {
+            gamesPlayed++;
+            if (won) gamesWon++;
+        }
+        
+        public int getGamesPlayed() { return gamesPlayed; }
+        public double getWinRate() { 
+            return gamesPlayed > 0 ? (double) gamesWon / gamesPlayed : 0.0; 
+        }
     }
     
     /**

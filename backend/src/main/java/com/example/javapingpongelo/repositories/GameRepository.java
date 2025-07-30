@@ -100,4 +100,15 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
      * Find all games with pagination support
      */
     Page<Game> findAll(Pageable pageable);
+    
+    /**
+     * Find games by player ID and game type
+     */
+    @Query("SELECT g FROM Game g WHERE " +
+            "(g.challengerId = :playerId OR g.opponentId = :playerId OR " +
+            ":playerId MEMBER OF g.challengerTeam OR :playerId MEMBER OF g.opponentTeam) AND " +
+            "g.singlesGame = :isSingles AND g.ratedGame = :isRanked")
+    List<Game> findByPlayerIdAndGameType(@Param("playerId") UUID playerId, 
+                                         @Param("isSingles") boolean isSingles, 
+                                         @Param("isRanked") boolean isRanked);
 }

@@ -173,33 +173,77 @@ public class SlackCommandController {
     
     /**
      * Handle /matchmaking slash command for ELO-based suggestions
+     * Usage: /matchmaking [type]  
+     * Types: singles-ranked, singles-normal, doubles-ranked, doubles-normal
      */
     @PostMapping("/command/matchmaking")
     public ResponseEntity<Map<String, Object>> handleMatchmakingCommand(@RequestParam Map<String, String> params) {
         try {
             String userId = params.get("user_id");
             String userName = params.get("user_name");
+            String text = params.get("text");
+            
+            log.info("Processing /matchmaking command from user: {} with text: '{}'", userName, text);
             
             Player player = findPlayerBySlackIdentifier(userId, userName);
             if (player == null) {
                 return ResponseEntity.ok(createEphemeralResponse("❌ You need to be registered in the ping pong system first!"));
             }
             
-            List<Player> suggestions = challengeService.getMatchmakingSuggestions(player.getPlayerId(), 5);
-            
-            if (suggestions.isEmpty()) {
-                return ResponseEntity.ok(createEphemeralResponse("🤔 No suitable opponents found near your skill level"));
+            // Parse the game type from command text
+            String gameType = "singles-ranked"; // default
+            if (text != null && !text.trim().isEmpty()) {
+                gameType = text.trim().toLowerCase();
             }
             
-            StringBuilder response = new StringBuilder(String.format(
-                "🎯 **Suggested Opponents** (Your ELO: %d)\\n\\n", player.getSinglesRankedRating()));
+            List<Player> suggestions = challengeService.getMatchmakingSuggestions(player.getPlayerId(), 8, gameType);
             
-            for (int i = 0; i < suggestions.size(); i++) {
-                Player suggested = suggestions.get(i);
-                double eloDiff = Math.abs(suggested.getSinglesRankedRating() - player.getSinglesRankedRating());
+            if (suggestions.isEmpty()) {
+                return ResponseEntity.ok(createEphemeralResponse("🤔 No suitable players found for " + getMatchmakingGameTypeDisplay(gameType)));
+            }
+            
+            String gameTypeDisplay = getMatchmakingGameTypeDisplay(gameType);
+            int playerRating = getPlayerRatingForType(player, gameType);
+            
+            StringBuilder response = new StringBuilder();
+            
+            if (gameType.contains("doubles")) {
+                response.append(String.format("🎯 **%s Suggestions** (Your ELO: %d)\\n\\n", gameTypeDisplay, playerRating));
+                response.append("👥 **Good Teammates:**\\n");
                 
-                response.append(String.format("%d. **%s** (%d ELO, ±%.0f)\\n",
-                    i + 1, suggested.getFullName(), suggested.getSinglesRankedRating(), eloDiff));
+                int teammateCount = 0;
+                for (int i = 0; i < suggestions.size() && teammateCount < 4; i++) {
+                    Player suggested = suggestions.get(i);
+                    int suggestedRating = getPlayerRatingForType(suggested, gameType);
+                    double eloDiff = Math.abs(suggestedRating - playerRating);
+                    
+                    response.append(String.format("%d. **%s** (%d ELO, ±%.0f)\\n",
+                        teammateCount + 1, suggested.getFullName(), suggestedRating, eloDiff));
+                    teammateCount++;
+                }
+                
+                response.append("\\n⚔️ **Potential Opponents:**\\n");
+                int opponentCount = 0;
+                for (int i = teammateCount; i < suggestions.size() && opponentCount < 4; i++) {
+                    Player suggested = suggestions.get(i);
+                    int suggestedRating = getPlayerRatingForType(suggested, gameType);
+                    double eloDiff = Math.abs(suggestedRating - playerRating);
+                    
+                    response.append(String.format("%d. **%s** (%d ELO, ±%.0f)\\n",
+                        opponentCount + 1, suggested.getFullName(), suggestedRating, eloDiff));
+                    opponentCount++;
+                }
+            } else {
+                response.append(String.format("🎯 **%s Opponents** (Your ELO: %d)\\n\\n", gameTypeDisplay, playerRating));
+                
+                for (int i = 0; i < suggestions.size(); i++) {
+                    Player suggested = suggestions.get(i);
+                    int suggestedRating = getPlayerRatingForType(suggested, gameType);
+                    double eloDiff = Math.abs(suggestedRating - playerRating);
+                    
+                    response.append(String.format("%d. **%s** (%d ELO, ±%.0f)\\n",
+                        i + 1, suggested.getFullName(), suggestedRating, eloDiff));
+                }
             }
             
             response.append("\\n💡 Use `/challenge @player` to challenge someone!");
@@ -209,6 +253,28 @@ public class SlackCommandController {
         } catch (Exception e) {
             log.error("Error processing matchmaking command", e);
             return ResponseEntity.ok(createEphemeralResponse("❌ Error getting suggestions: " + e.getMessage()));
+        }
+    }
+    
+    private String getMatchmakingGameTypeDisplay(String type) {
+        switch (type.toLowerCase().trim()) {
+            case "singles-normal": case "singles-casual": case "sn": return "Singles Normal";
+            case "doubles-ranked": case "doubles": case "dr": return "Doubles Ranked";
+            case "doubles-normal": case "doubles-casual": case "dn": return "Doubles Normal";
+            default: return "Singles Ranked";
+        }
+    }
+    
+    private int getPlayerRatingForType(Player player, String gameType) {
+        switch (gameType.toLowerCase().trim()) {
+            case "singles-normal": case "singles-casual": case "sn": 
+                return player.getSinglesNormalRating();
+            case "doubles-ranked": case "doubles": case "dr": 
+                return player.getDoublesRankedRating();
+            case "doubles-normal": case "doubles-casual": case "dn": 
+                return player.getDoublesNormalRating();
+            default: 
+                return player.getSinglesRankedRating();
         }
     }
     
