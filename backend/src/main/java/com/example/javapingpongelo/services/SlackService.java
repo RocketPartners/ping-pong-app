@@ -265,15 +265,25 @@ public class SlackService {
     }
     
     // Leaderboard functionality
-    public void postDailyLeaderboard() {
-        if (methods == null) return;
+    public boolean postDailyLeaderboard() {
+        if (methods == null) {
+            log.error("Slack methods not initialized");
+            return false;
+        }
         
         try {
+            log.info("Fetching top players for leaderboard");
             List<Player> topPlayers = playerService.findAllPlayers().stream()
                 .sorted((p1, p2) -> Double.compare(p2.getSinglesRankedRating(), p1.getSinglesRankedRating()))
                 .limit(10)
                 .collect(Collectors.toList());
             
+            if (topPlayers.isEmpty()) {
+                log.warn("No players found for leaderboard");
+                return false;
+            }
+            
+            log.info("Building leaderboard with {} players", topPlayers.size());
             List<LayoutBlock> blocks = new ArrayList<>();
             
             blocks.add(SectionBlock.builder()
@@ -296,15 +306,23 @@ public class SlackService {
                     .build())
                 .build());
             
-            methods.chatPostMessage(req -> req
+            log.info("Posting leaderboard to Slack channel: {}", resultsChannel);
+            ChatPostMessageResponse response = methods.chatPostMessage(req -> req
                 .channel(resultsChannel)
                 .text("Daily Leaderboard")
                 .blocks(blocks)
             );
             
-            log.info("Posted daily leaderboard to Slack");
+            if (response.isOk()) {
+                log.info("Successfully posted daily leaderboard to Slack");
+                return true;
+            } else {
+                log.error("Failed to post leaderboard to Slack: {}", response.getError());
+                return false;
+            }
         } catch (Exception e) {
             log.error("Error posting daily leaderboard", e);
+            return false;
         }
     }
     
@@ -390,7 +408,10 @@ public class SlackService {
     // Scheduled reports
     @Scheduled(cron = "0 0 18 * * MON-FRI") // 6 PM on weekdays
     public void postDailyActivity() {
-        postDailyLeaderboard();
+        boolean success = postDailyLeaderboard();
+        if (!success) {
+            log.warn("Scheduled daily leaderboard posting failed");
+        }
     }
     
     @Scheduled(cron = "0 0 9 * * MON") // 9 AM on Mondays

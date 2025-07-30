@@ -134,8 +134,13 @@ public class SlackCommandController {
     @PostMapping("/command/leaderboard")
     public ResponseEntity<Map<String, Object>> handleLeaderboardCommand(@RequestParam Map<String, String> params) {
         try {
-            slackService.postDailyLeaderboard();
-            return ResponseEntity.ok(createResponse("📊 Leaderboard posted!"));
+            log.info("Processing /leaderboard command from user: {}", params.get("user_name"));
+            boolean success = slackService.postDailyLeaderboard();
+            if (success) {
+                return ResponseEntity.ok(createEphemeralResponse("📊 Leaderboard has been posted to the channel!"));
+            } else {
+                return ResponseEntity.ok(createEphemeralResponse("❌ Failed to post leaderboard - check logs for details"));
+            }
         } catch (Exception e) {
             log.error("Error processing leaderboard command", e);
             return ResponseEntity.ok(createEphemeralResponse("❌ Error posting leaderboard: " + e.getMessage()));
