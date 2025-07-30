@@ -24,7 +24,9 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -266,15 +268,31 @@ public class SlackService {
     
     // Leaderboard functionality
     public boolean postDailyLeaderboard() {
+        return postLeaderboard("singles-ranked");
+    }
+    
+    public boolean postLeaderboard(String type) {
         if (methods == null) {
             log.error("Slack methods not initialized");
             return false;
         }
         
+        // Parse leaderboard type
+        LeaderboardType leaderboardType = parseLeaderboardType(type);
+        if (leaderboardType == null) {
+            log.error("Invalid leaderboard type: {}", type);
+            return false;
+        }
+        
+        // Handle "all" type specially
+        if (leaderboardType == LeaderboardType.ALL) {
+            return postAllLeaderboards();
+        }
+        
         try {
-            log.info("Fetching top players for leaderboard");
+            log.info("Fetching top players for {} leaderboard", type);
             List<Player> topPlayers = playerService.findAllPlayers().stream()
-                .sorted((p1, p2) -> Double.compare(p2.getSinglesRankedRating(), p1.getSinglesRankedRating()))
+                .sorted(leaderboardType.getComparator())
                 .limit(10)
                 .collect(Collectors.toList());
             
@@ -283,12 +301,12 @@ public class SlackService {
                 return false;
             }
             
-            log.info("Building leaderboard with {} players", topPlayers.size());
+            log.info("Building {} leaderboard with {} players", type, topPlayers.size());
             List<LayoutBlock> blocks = new ArrayList<>();
             
             blocks.add(SectionBlock.builder()
                 .text(MarkdownTextObject.builder()
-                    .text("🏆 *Daily Leaderboard - Top 10 Players*")
+                    .text(String.format("🏆 *%s Leaderboard - Top 10 Players*", leaderboardType.getDisplayName()))
                     .build())
                 .build());
             
@@ -296,8 +314,9 @@ public class SlackService {
             for (int i = 0; i < topPlayers.size(); i++) {
                 Player player = topPlayers.get(i);
                 String medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : String.format("%d.", i + 1);
+                int rating = leaderboardType.getRating(player);
                 leaderboard.append(String.format("%s %s - %d ELO\n", 
-                    medal, player.getFullName(), player.getSinglesRankedRating()));
+                    medal, player.getFullName(), rating));
             }
             
             blocks.add(SectionBlock.builder()
@@ -306,24 +325,91 @@ public class SlackService {
                     .build())
                 .build());
             
-            log.info("Posting leaderboard to Slack channel: {}", resultsChannel);
+            log.info("Posting {} leaderboard to Slack channel: {}", type, resultsChannel);
             ChatPostMessageResponse response = methods.chatPostMessage(req -> req
                 .channel(resultsChannel)
-                .text("Daily Leaderboard")
+                .text(leaderboardType.getDisplayName() + " Leaderboard")
                 .blocks(blocks)
             );
             
             if (response.isOk()) {
-                log.info("Successfully posted daily leaderboard to Slack");
+                log.info("Successfully posted {} leaderboard to Slack", type);
                 return true;
             } else {
-                log.error("Failed to post leaderboard to Slack: {}", response.getError());
+                log.error("Failed to post {} leaderboard to Slack: {}", type, response.getError());
                 return false;
             }
         } catch (Exception e) {
-            log.error("Error posting daily leaderboard", e);
+            log.error("Error posting {} leaderboard", type, e);
             return false;
         }
+    }
+    
+    private LeaderboardType parseLeaderboardType(String type) {
+        if (type == null) return LeaderboardType.SINGLES_RANKED;
+        
+        switch (type.toLowerCase().trim()) {
+            case "singles-ranked":
+            case "singles":
+            case "ranked":
+            case "sr":
+                return LeaderboardType.SINGLES_RANKED;
+            case "singles-normal":
+            case "singles-casual":
+            case "sn":
+                return LeaderboardType.SINGLES_NORMAL;
+            case "doubles-ranked":
+            case "doubles":
+            case "dr":
+                return LeaderboardType.DOUBLES_RANKED;
+            case "doubles-normal":
+            case "doubles-casual":
+            case "dn":
+                return LeaderboardType.DOUBLES_NORMAL;
+            case "all":
+                return LeaderboardType.ALL;
+            default:
+                return null;
+        }
+    }
+    
+    public boolean postAllLeaderboards() {
+        boolean allSuccess = true;
+        allSuccess &= postLeaderboard("singles-ranked");
+        allSuccess &= postLeaderboard("singles-normal");
+        allSuccess &= postLeaderboard("doubles-ranked");
+        allSuccess &= postLeaderboard("doubles-normal");
+        return allSuccess;
+    }
+    
+    private enum LeaderboardType {
+        SINGLES_RANKED("Singles Ranked", 
+            (p1, p2) -> Integer.compare(p2.getSinglesRankedRating(), p1.getSinglesRankedRating()),
+            Player::getSinglesRankedRating),
+        SINGLES_NORMAL("Singles Normal", 
+            (p1, p2) -> Integer.compare(p2.getSinglesNormalRating(), p1.getSinglesNormalRating()),
+            Player::getSinglesNormalRating),
+        DOUBLES_RANKED("Doubles Ranked", 
+            (p1, p2) -> Integer.compare(p2.getDoublesRankedRating(), p1.getDoublesRankedRating()),
+            Player::getDoublesRankedRating),
+        DOUBLES_NORMAL("Doubles Normal", 
+            (p1, p2) -> Integer.compare(p2.getDoublesNormalRating(), p1.getDoublesNormalRating()),
+            Player::getDoublesNormalRating),
+        ALL("All Categories", null, null);
+        
+        private final String displayName;
+        private final Comparator<Player> comparator;
+        private final Function<Player, Integer> ratingExtractor;
+        
+        LeaderboardType(String displayName, Comparator<Player> comparator, Function<Player, Integer> ratingExtractor) {
+            this.displayName = displayName;
+            this.comparator = comparator;
+            this.ratingExtractor = ratingExtractor;
+        }
+        
+        public String getDisplayName() { return displayName; }
+        public Comparator<Player> getComparator() { return comparator; }
+        public int getRating(Player player) { return ratingExtractor.apply(player); }
     }
     
     // Player achievements

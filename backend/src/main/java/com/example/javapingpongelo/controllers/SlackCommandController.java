@@ -130,20 +130,43 @@ public class SlackCommandController {
     
     /**
      * Handle /leaderboard slash command
+     * Usage: /leaderboard [type]
+     * Types: singles-ranked, singles-normal, doubles-ranked, doubles-normal, all
      */
     @PostMapping("/command/leaderboard")
     public ResponseEntity<Map<String, Object>> handleLeaderboardCommand(@RequestParam Map<String, String> params) {
         try {
-            log.info("Processing /leaderboard command from user: {}", params.get("user_name"));
-            boolean success = slackService.postDailyLeaderboard();
+            String userName = params.get("user_name");
+            String text = params.get("text");
+            
+            log.info("Processing /leaderboard command from user: {} with text: '{}'", userName, text);
+            
+            // Parse the leaderboard type from command text
+            String leaderboardType = "singles-ranked"; // default
+            if (text != null && !text.trim().isEmpty()) {
+                leaderboardType = text.trim().toLowerCase();
+            }
+            
+            boolean success = slackService.postLeaderboard(leaderboardType);
             if (success) {
-                return ResponseEntity.ok(createEphemeralResponse("📊 Leaderboard has been posted to the channel!"));
+                String typeDisplay = getLeaderboardTypeDisplay(leaderboardType);
+                return ResponseEntity.ok(createEphemeralResponse("📊 " + typeDisplay + " leaderboard has been posted to the channel!"));
             } else {
                 return ResponseEntity.ok(createEphemeralResponse("❌ Failed to post leaderboard - check logs for details"));
             }
         } catch (Exception e) {
             log.error("Error processing leaderboard command", e);
             return ResponseEntity.ok(createEphemeralResponse("❌ Error posting leaderboard: " + e.getMessage()));
+        }
+    }
+    
+    private String getLeaderboardTypeDisplay(String type) {
+        switch (type.toLowerCase().trim()) {
+            case "singles-normal": case "singles-casual": case "sn": return "Singles Normal";
+            case "doubles-ranked": case "doubles": case "dr": return "Doubles Ranked";
+            case "doubles-normal": case "doubles-casual": case "dn": return "Doubles Normal";
+            case "all": return "All";
+            default: return "Singles Ranked";
         }
     }
     
