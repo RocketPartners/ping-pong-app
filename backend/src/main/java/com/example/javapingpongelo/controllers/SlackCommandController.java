@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/slack")
@@ -234,17 +235,143 @@ public class SlackCommandController {
     // Helper methods
     
     private Player findPlayerBySlackIdentifier(String slackUserId, String slackUserName) {
-        // Try to find by Slack user ID first, then by username
-        // This would need to be implemented based on how you store Slack user mappings
         List<Player> allPlayers = playerService.findAllPlayers();
         
-        // For now, find by username match (case insensitive)
-        return allPlayers.stream()
-            .filter(p -> p.getFullName().toLowerCase().contains(slackUserName.toLowerCase()) ||
-                        p.getFirstName().toLowerCase().equals(slackUserName.toLowerCase()) ||
-                        p.getLastName().toLowerCase().equals(slackUserName.toLowerCase()))
+        if (slackUserName == null || slackUserName.trim().isEmpty()) {
+            log.warn("Empty Slack username provided");
+            return null;
+        }
+        
+        String normalizedSlackName = normalizeString(slackUserName);
+        log.info("Attempting to match Slack user '{}' (normalized: '{}') to registered players", slackUserName, normalizedSlackName);
+        
+        // Strategy 1: Exact matches (case insensitive)
+        Player exactMatch = allPlayers.stream()
+            .filter(p -> {
+                String firstName = normalizeString(p.getFirstName());
+                String lastName = normalizeString(p.getLastName());
+                String fullName = normalizeString(p.getFullName());
+                
+                return normalizedSlackName.equals(firstName) ||
+                       normalizedSlackName.equals(lastName) ||
+                       normalizedSlackName.equals(fullName);
+            })
             .findFirst()
             .orElse(null);
+        
+        if (exactMatch != null) {
+            log.info("Found exact match: {} for Slack user {}", exactMatch.getFullName(), slackUserName);
+            return exactMatch;
+        }
+        
+        // Strategy 2: Partial matches - Slack name contains player name or vice versa
+        Player partialMatch = allPlayers.stream()
+            .filter(p -> {
+                String firstName = normalizeString(p.getFirstName());
+                String lastName = normalizeString(p.getLastName());
+                String fullName = normalizeString(p.getFullName());
+                
+                return normalizedSlackName.contains(firstName) ||
+                       normalizedSlackName.contains(lastName) ||
+                       firstName.contains(normalizedSlackName) ||
+                       lastName.contains(normalizedSlackName) ||
+                       fullName.contains(normalizedSlackName) ||
+                       normalizedSlackName.contains(fullName);
+            })
+            .findFirst()
+            .orElse(null);
+        
+        if (partialMatch != null) {
+            log.info("Found partial match: {} for Slack user {}", partialMatch.getFullName(), slackUserName);
+            return partialMatch;
+        }
+        
+        // Strategy 3: Handle common username patterns (first.last, firstlast, etc.)
+        Player patternMatch = findByUsernamePatterns(allPlayers, normalizedSlackName);
+        if (patternMatch != null) {
+            log.info("Found pattern match: {} for Slack user {}", patternMatch.getFullName(), slackUserName);
+            return patternMatch;
+        }
+        
+        // Strategy 4: Fuzzy matching - similar sounding names
+        Player fuzzyMatch = findBySimilarity(allPlayers, normalizedSlackName);
+        if (fuzzyMatch != null) {
+            log.info("Found fuzzy match: {} for Slack user {}", fuzzyMatch.getFullName(), slackUserName);
+            return fuzzyMatch;
+        }
+        
+        log.warn("No match found for Slack user '{}'. Available players: {}", 
+            slackUserName, 
+            allPlayers.stream().map(Player::getFullName).collect(Collectors.joining(", ")));
+        return null;
+    }
+    
+    private String normalizeString(String input) {
+        if (input == null) return "";
+        return input.toLowerCase()
+                   .replaceAll("[^a-z0-9]", "") // Remove all non-alphanumeric characters
+                   .trim();
+    }
+    
+    private Player findByUsernamePatterns(List<Player> players, String normalizedSlackName) {
+        return players.stream()
+            .filter(p -> {
+                String firstName = normalizeString(p.getFirstName());
+                String lastName = normalizeString(p.getLastName());
+                
+                // Check patterns like: first.last, first_last, firstlast, lastfirst, etc.
+                String[] commonPatterns = {
+                    firstName + lastName,           // johnsmith
+                    lastName + firstName,           // smithjohn  
+                    firstName + "." + lastName,     // john.smith (normalized removes dots)
+                    firstName + "_" + lastName,     // john_smith (normalized removes underscores)
+                    lastName + "." + firstName,     // smith.john
+                    lastName + "_" + firstName,     // smith_john
+                    firstName.substring(0, Math.min(firstName.length(), 3)) + lastName, // johsmith
+                    firstName + lastName.substring(0, Math.min(lastName.length(), 3))  // johnsmi
+                };
+                
+                for (String pattern : commonPatterns) {
+                    if (normalizedSlackName.equals(normalizeString(pattern))) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            .findFirst()
+            .orElse(null);
+    }
+    
+    private Player findBySimilarity(List<Player> players, String normalizedSlackName) {
+        // Simple similarity check - if slack name and player name share significant characters
+        return players.stream()
+            .filter(p -> {
+                String firstName = normalizeString(p.getFirstName());
+                String lastName = normalizeString(p.getLastName());
+                
+                // Check if they share at least 3 characters and slack name is at least 60% similar
+                return (calculateSimilarity(normalizedSlackName, firstName) > 0.6 && firstName.length() >= 3) ||
+                       (calculateSimilarity(normalizedSlackName, lastName) > 0.6 && lastName.length() >= 3) ||
+                       (calculateSimilarity(normalizedSlackName, firstName + lastName) > 0.7);
+            })
+            .findFirst()
+            .orElse(null);
+    }
+    
+    private double calculateSimilarity(String s1, String s2) {
+        if (s1.isEmpty() || s2.isEmpty()) return 0.0;
+        
+        int maxLength = Math.max(s1.length(), s2.length());
+        int commonChars = 0;
+        
+        // Count common characters
+        for (char c : s1.toCharArray()) {
+            if (s2.indexOf(c) >= 0) {
+                commonChars++;
+            }
+        }
+        
+        return (double) commonChars / maxLength;
     }
     
     private Player findPlayerBySlackMention(String mention) {
