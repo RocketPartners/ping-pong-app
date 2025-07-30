@@ -168,13 +168,13 @@ public class SlackCommandController {
             }
             
             StringBuilder response = new StringBuilder(String.format(
-                "🎯 **Suggested Opponents** (Your ELO: %.0f)\\n\\n", player.getSinglesRankedRating()));
+                "🎯 **Suggested Opponents** (Your ELO: %d)\\n\\n", player.getSinglesRankedRating()));
             
             for (int i = 0; i < suggestions.size(); i++) {
                 Player suggested = suggestions.get(i);
                 double eloDiff = Math.abs(suggested.getSinglesRankedRating() - player.getSinglesRankedRating());
                 
-                response.append(String.format("%d. **%s** (%.0f ELO, ±%.0f)\\n",
+                response.append(String.format("%d. **%s** (%d ELO, ±%.0f)\\n",
                     i + 1, suggested.getFullName(), suggested.getSinglesRankedRating(), eloDiff));
             }
             

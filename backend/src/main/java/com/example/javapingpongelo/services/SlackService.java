@@ -296,7 +296,7 @@ public class SlackService {
             for (int i = 0; i < topPlayers.size(); i++) {
                 Player player = topPlayers.get(i);
                 String medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : String.format("%d.", i + 1);
-                leaderboard.append(String.format("%s %s - %.0f ELO\n", 
+                leaderboard.append(String.format("%s %s - %d ELO\n", 
                     medal, player.getFullName(), player.getSinglesRankedRating()));
             }
             
