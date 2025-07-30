@@ -12,7 +12,6 @@ CREATE TABLE challenge (
     slack_channel_id VARCHAR(50),
     challenger_slack_id VARCHAR(50),
     challenged_slack_id VARCHAR(50),
-    slack_message_ts VARCHAR(50),
     decline_reason TEXT,
     completed_game_id UUID,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
