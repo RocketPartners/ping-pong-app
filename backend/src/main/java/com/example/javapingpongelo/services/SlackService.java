@@ -4,6 +4,7 @@ import com.example.javapingpongelo.models.Game;
 import com.example.javapingpongelo.models.Player;
 import com.example.javapingpongelo.models.Challenge;
 import com.example.javapingpongelo.models.ChallengeStatus;
+import com.example.javapingpongelo.repositories.GameRepository;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
@@ -34,7 +35,8 @@ public class SlackService {
     private IPlayerService playerService;
     
     @Autowired
-    private GameService gameService;
+    private GameRepository gameRepository;
+    
     
     private final DecimalFormat eloFormat = new DecimalFormat("+#;-#");
     private final DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm");
@@ -229,7 +231,7 @@ public class SlackService {
     
     private String getHeadToHeadRecord(Player player1, Player player2, boolean isRanked) {
         try {
-            List<Game> player1Games = gameService.findByPlayerId(player1.getPlayerId());
+            List<Game> player1Games = gameRepository.findByPlayerId(player1.getPlayerId());
             int player1Wins = 0;
             int player2Wins = 0;
             
