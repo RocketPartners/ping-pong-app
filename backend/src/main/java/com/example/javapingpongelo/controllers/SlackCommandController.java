@@ -57,9 +57,9 @@ public class SlackCommandController {
                 return ResponseEntity.ok(createEphemeralResponse("❌ " + commandData.getError()));
             }
             
-            // Find challenged player
-            Player challenged = findPlayerBySlackMention(commandData.getTargetUser());
-            if (challenged == null) {
+            // Find challenged player and extract Slack user ID if possible
+            PlayerLookupResult lookupResult = findPlayerBySlackMentionWithId(commandData.getTargetUser());
+            if (lookupResult.player == null) {
                 return ResponseEntity.ok(createEphemeralResponse("❌ Could not find player: " + commandData.getTargetUser() + 
                     "\\n💡 Try: `/challenge @username`, `/challenge First Last`, or `/challenge <@U123|username>`"));
             }
@@ -67,16 +67,16 @@ public class SlackCommandController {
             // Create the challenge
             Challenge challenge = challengeService.createChallenge(
                 challenger.getPlayerId(),
-                challenged.getPlayerId(),
+                lookupResult.player.getPlayerId(),
                 commandData.getMessage(),
                 commandData.isRanked(),
                 commandData.isSingles(),
                 channelId,
                 userId,
-                commandData.getTargetUserId()
+                lookupResult.slackUserId
             );
             
-            return ResponseEntity.ok(createResponse("🏓 Challenge sent to " + challenged.getFullName() + "!"));
+            return ResponseEntity.ok(createResponse("🏓 Challenge sent to " + lookupResult.player.getFullName() + "!"));
             
         } catch (Exception e) {
             log.error("Error processing challenge command", e);
@@ -547,5 +547,39 @@ public class SlackCommandController {
         public void setError(String error) { this.error = error; }
         
         public boolean hasError() { return error != null; }
+    }
+    
+    // Helper class for player lookup with Slack ID
+    private static class PlayerLookupResult {
+        public final Player player;
+        public final String slackUserId;
+        
+        public PlayerLookupResult(Player player, String slackUserId) {
+            this.player = player;
+            this.slackUserId = slackUserId;
+        }
+    }
+    
+    private PlayerLookupResult findPlayerBySlackMentionWithId(String mention) {
+        if (mention == null || mention.trim().isEmpty()) {
+            return new PlayerLookupResult(null, null);
+        }
+        
+        // Strategy 1: Handle Slack mention format <@U123456|username>
+        Pattern mentionPattern = Pattern.compile("<@([UW][A-Z0-9]+)\\|?([^>]*)>");
+        Matcher matcher = mentionPattern.matcher(mention);
+        
+        if (matcher.find()) {
+            String userId = matcher.group(1);
+            String username = matcher.group(2);
+            
+            log.info("Found Slack mention format: userId={}, username={}", userId, username);
+            Player player = findPlayerBySlackIdentifier(userId, username);
+            return new PlayerLookupResult(player, userId);
+        }
+        
+        // Strategy 2 & 3: Handle @username format or plain text (no user ID available)
+        Player player = findPlayerBySlackMention(mention);
+        return new PlayerLookupResult(player, null);
     }
 }

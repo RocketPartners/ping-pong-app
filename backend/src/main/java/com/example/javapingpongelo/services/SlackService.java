@@ -526,32 +526,66 @@ public class SlackService {
         if (methods == null) return;
         
         try {
+            String gameType = String.format("%s %s", 
+                challenge.isSingles() ? "Singles" : "Doubles",
+                challenge.isRanked() ? "Ranked" : "Normal");
+            
             List<LayoutBlock> blocks = new ArrayList<>();
             
             blocks.add(SectionBlock.builder()
                 .text(MarkdownTextObject.builder()
                     .text(String.format("⚔️ *New Challenge!*\n" +
-                        "🏓 *%s* has challenged *%s* to a %s game!\n" +
-                        "💬 \"%s\"",
+                        "🏓 *%s* has challenged you to a %s game!\n" +
+                        "💬 \"%s\"\n\n" +
+                        "⏰ Challenge expires in 24 hours\n" +
+                        "✅ Accept or ❌ Decline using the ping pong app",
                         challenger.getFullName(),
-                        challenged.getFullName(),
-                        challenge.isRanked() ? "ranked" : "casual",
+                        gameType,
                         challenge.getMessage() != null ? challenge.getMessage() : "Let's play!"
                     ))
                     .build())
                 .build());
             
-            ChatPostMessageResponse response = methods.chatPostMessage(req -> req
-                .channel(challengesChannel)
-                .text(String.format("%s challenged %s to a game", challenger.getFullName(), challenged.getFullName()))
-                .blocks(blocks)
-            );
-            
-            if (response.isOk()) {
-                log.info("Posted challenge notification to Slack: {}", challenge.getChallengeId());
-            } else {
-                log.error("Failed to post challenge to Slack: {}", response.getError());
+            // Try to send DM to challenged player first
+            boolean dmSent = false;
+            if (challenge.getChallengedSlackId() != null) {
+                try {
+                    ChatPostMessageResponse dmResponse = methods.chatPostMessage(req -> req
+                        .channel(challenge.getChallengedSlackId()) // DM to user
+                        .text(String.format("%s challenged you to a %s game!", challenger.getFullName(), gameType))
+                        .blocks(blocks)
+                    );
+                    
+                    if (dmResponse.isOk()) {
+                        log.info("Sent challenge DM to {}: {}", challenged.getFullName(), challenge.getChallengeId());
+                        dmSent = true;
+                    } else {
+                        log.warn("Failed to send challenge DM: {}", dmResponse.getError());
+                    }
+                } catch (Exception e) {
+                    log.warn("Error sending challenge DM, will fallback to channel", e);
+                }
             }
+            
+            // Fallback: post to the channel where command was used
+            if (!dmSent) {
+                String targetChannel = challenge.getSlackChannelId() != null ? 
+                    challenge.getSlackChannelId() : resultsChannel;
+                
+                ChatPostMessageResponse response = methods.chatPostMessage(req -> req
+                    .channel(targetChannel)
+                    .text(String.format("%s challenged %s to a %s game!", 
+                        challenger.getFullName(), challenged.getFullName(), gameType))
+                    .blocks(blocks)
+                );
+                
+                if (response.isOk()) {
+                    log.info("Posted challenge notification to channel {}: {}", targetChannel, challenge.getChallengeId());
+                } else {
+                    log.error("Failed to post challenge to channel {}: {}", targetChannel, response.getError());
+                }
+            }
+            
         } catch (Exception e) {
             log.error("Error posting challenge notification", e);
         }
