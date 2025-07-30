@@ -60,7 +60,8 @@ public class SlackCommandController {
             // Find challenged player
             Player challenged = findPlayerBySlackMention(commandData.getTargetUser());
             if (challenged == null) {
-                return ResponseEntity.ok(createEphemeralResponse("❌ Could not find player: " + commandData.getTargetUser()));
+                return ResponseEntity.ok(createEphemeralResponse("❌ Could not find player: " + commandData.getTargetUser() + 
+                    "\\n💡 Try: `/challenge @username`, `/challenge First Last`, or `/challenge <@U123|username>`"));
             }
             
             // Create the challenge
@@ -441,19 +442,32 @@ public class SlackCommandController {
     }
     
     private Player findPlayerBySlackMention(String mention) {
-        // Extract user ID from mention format <@U123456|username>
-        Pattern pattern = Pattern.compile("<@([UW][A-Z0-9]+)\\|?([^>]*)>");
-        Matcher matcher = pattern.matcher(mention);
+        if (mention == null || mention.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Strategy 1: Handle Slack mention format <@U123456|username>
+        Pattern mentionPattern = Pattern.compile("<@([UW][A-Z0-9]+)\\|?([^>]*)>");
+        Matcher matcher = mentionPattern.matcher(mention);
         
         if (matcher.find()) {
             String userId = matcher.group(1);
             String username = matcher.group(2);
             
-            // Find player by the username part for now
+            log.info("Found Slack mention format: userId={}, username={}", userId, username);
             return findPlayerBySlackIdentifier(userId, username);
         }
         
-        return null;
+        // Strategy 2: Handle @username format (without brackets)
+        if (mention.startsWith("@")) {
+            String username = mention.substring(1); // Remove @ prefix
+            log.info("Found @username format: {}", username);
+            return findPlayerBySlackIdentifier(null, username);
+        }
+        
+        // Strategy 3: Handle plain text name (display name or username)
+        log.info("Treating as plain text name: {}", mention);
+        return findPlayerBySlackIdentifier(null, mention);
     }
     
     private ChallengeCommandData parseChallengeCommand(String text) {
