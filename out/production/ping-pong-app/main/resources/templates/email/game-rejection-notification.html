@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Game Result Rejected</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .header {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .content {
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .game-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .game-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .game-details {
+            margin-bottom: 10px;
+        }
+
+        .alert-box {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Game Result Rejected</h1>
+    </div>
+    <div class="content">
+        <p>Hello <span th:text="${player.firstName}">Player</span>,</p>
+
+        <div class="alert-box">
+            <p><strong><span th:text="${rejectingPlayer.fullName}">Other Player</span> has rejected the following game
+                result.</strong></p>
+            <p>The game has been removed from the system and any ELO changes have been reversed.</p>
+        </div>
+
+        <div class="game-card">
+            <div class="game-header">
+                <span th:text="${gameType}">Game Type</span>
+                - <span th:text="${#dates.format(game.datePlayed, 'MMM dd, yyyy HH:mm')}">Date</span>
+            </div>
+
+            <div class="game-details">
+                <!-- Singles Game -->
+                <div th:if="${game.singlesGame}">
+                    <p>
+                        <strong>Challenger:</strong>
+                        <span th:if="${playerInfoMap.containsKey(game.challengerId)}"
+                              th:text="${playerInfoMap.get(game.challengerId).displayName}">Challenger Name (username)</span>
+                        <span th:text="${game.challengerId}"
+                              th:unless="${playerInfoMap.containsKey(game.challengerId)}">Challenger ID</span>
+                        <span th:text="${game.challengerWin ? '(Winner)' : ''}"></span>
+                    </p>
+                    <p>
+                        <strong>Opponent:</strong>
+                        <span th:if="${playerInfoMap.containsKey(game.opponentId)}"
+                              th:text="${playerInfoMap.get(game.opponentId).displayName}">Opponent Name (username)</span>
+                        <span th:text="${game.opponentId}"
+                              th:unless="${playerInfoMap.containsKey(game.opponentId)}">Opponent ID</span>
+                        <span th:text="${game.opponentWin ? '(Winner)' : ''}"></span>
+                    </p>
+                    <p>
+                        <strong>Score:</strong> <span th:text="${game.challengerTeamScore}">0</span> - <span
+                            th:text="${game.opponentTeamScore}">0</span>
+                    </p>
+                </div>
+
+                <!-- Doubles Game -->
+                <div th:if="${game.doublesGame}">
+                    <p>
+                        <strong>Challenger Team:</strong>
+                        <span th:text="${game.challengerTeamWin ? '(Winner)' : ''}"></span>
+                    </p>
+                    <ul style="margin-top: 5px; margin-bottom: 10px;">
+                        <li th:each="playerId : ${game.challengerTeam}">
+                                <span th:if="${playerInfoMap.containsKey(playerId)}"
+                                      th:text="${playerInfoMap.get(playerId).displayName}">Player Name (username)</span>
+                            <span th:text="${playerId}"
+                                  th:unless="${playerInfoMap.containsKey(playerId)}">Player ID</span>
+                        </li>
+                    </ul>
+
+                    <p>
+                        <strong>Opponent Team:</strong>
+                        <span th:text="${game.opponentTeamWin ? '(Winner)' : ''}"></span>
+                    </p>
+                    <ul style="margin-top: 5px; margin-bottom: 10px;">
+                        <li th:each="playerId : ${game.opponentTeam}">
+                                <span th:if="${playerInfoMap.containsKey(playerId)}"
+                                      th:text="${playerInfoMap.get(playerId).displayName}">Player Name (username)</span>
+                            <span th:text="${playerId}"
+                                  th:unless="${playerInfoMap.containsKey(playerId)}">Player ID</span>
+                        </li>
+                    </ul>
+
+                    <p>
+                        <strong>Score:</strong> <span th:text="${game.challengerTeamScore}">0</span> - <span
+                            th:text="${game.opponentTeamScore}">0</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <p>If you believe this rejection was made in error, please contact <span th:text="${rejectingPlayer.fullName}">Other Player</span>
+            directly to discuss.</p>
+
+        <p>Thank you,<br>The PingPong ELO Team</p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p>If you need assistance, please contact support.</p>
+    </div>
+</div>
+</body>
+</html>

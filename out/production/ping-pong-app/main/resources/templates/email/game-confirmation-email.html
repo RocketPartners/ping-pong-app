@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Game Results Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .header {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .content {
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .game-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .game-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .game-details {
+            margin-bottom: 10px;
+        }
+
+        .elo-change {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-reject {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .timer {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Game Results Confirmation</h1>
+    </div>
+    <div class="content">
+        <p>Hello <span th:text="${player.firstName}">Player</span>,</p>
+
+        <p>The following game results have been recorded in the system. Please review the details and take action if
+            needed.</p>
+
+        <div class="game-card" th:each="confirmation : ${confirmations}">
+            <div class="game-header">
+                    <span th:with="game=${gameMap.get(confirmation.gameId.toString())}">
+                        <span th:text="${gameTypeMap.get(confirmation.gameId.toString())}">Game Type</span>
+                        - <span th:text="${#dates.format(game.datePlayed, 'MMM dd, yyyy HH:mm')}">Date</span>
+                    </span>
+            </div>
+
+            <div class="game-details" th:with="game=${gameMap.get(confirmation.gameId.toString())}">
+                <!-- Singles Game -->
+                <div th:if="${game.singlesGame}">
+                    <p>
+                        <strong>Challenger:</strong>
+                        <span th:if="${playerInfoMap.containsKey(game.challengerId)}"
+                              th:text="${playerInfoMap.get(game.challengerId).displayName}">Challenger Name (username)</span>
+                        <span th:text="${game.challengerId}"
+                              th:unless="${playerInfoMap.containsKey(game.challengerId)}">Challenger ID</span>
+                        <span th:text="${game.challengerWin ? '(Winner)' : ''}"></span>
+                    </p>
+                    <p>
+                        <strong>Opponent:</strong>
+                        <span th:if="${playerInfoMap.containsKey(game.opponentId)}"
+                              th:text="${playerInfoMap.get(game.opponentId).displayName}">Opponent Name (username)</span>
+                        <span th:text="${game.opponentId}"
+                              th:unless="${playerInfoMap.containsKey(game.opponentId)}">Opponent ID</span>
+                        <span th:text="${game.opponentWin ? '(Winner)' : ''}"></span>
+                    </p>
+                    <p>
+                        <strong>Score:</strong> <span th:text="${game.challengerTeamScore}">0</span> - <span
+                            th:text="${game.opponentTeamScore}">0</span>
+                    </p>
+                </div>
+
+                <!-- Doubles Game -->
+                <div th:if="${game.doublesGame}">
+                    <p>
+                        <strong>Challenger Team:</strong>
+                        <span th:text="${game.challengerTeamWin ? '(Winner)' : ''}"></span>
+                    </p>
+                    <ul style="margin-top: 5px; margin-bottom: 10px;">
+                        <li th:each="playerId : ${game.challengerTeam}">
+                                <span th:if="${playerInfoMap.containsKey(playerId)}"
+                                      th:text="${playerInfoMap.get(playerId).displayName}">Player Name (username)</span>
+                            <span th:text="${playerId}"
+                                  th:unless="${playerInfoMap.containsKey(playerId)}">Player ID</span>
+                        </li>
+                    </ul>
+
+                    <p>
+                        <strong>Opponent Team:</strong>
+                        <span th:text="${game.opponentTeamWin ? '(Winner)' : ''}"></span>
+                    </p>
+                    <ul style="margin-top: 5px; margin-bottom: 10px;">
+                        <li th:each="playerId : ${game.opponentTeam}">
+                                <span th:if="${playerInfoMap.containsKey(playerId)}"
+                                      th:text="${playerInfoMap.get(playerId).displayName}">Player Name (username)</span>
+                            <span th:text="${playerId}"
+                                  th:unless="${playerInfoMap.containsKey(playerId)}">Player ID</span>
+                        </li>
+                    </ul>
+
+                    <p>
+                        <strong>Score:</strong> <span th:text="${game.challengerTeamScore}">0</span> - <span
+                            th:text="${game.opponentTeamScore}">0</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="elo-change">
+                <p>
+                    ELO Impact:
+                    <span th:class="${eloDiff > 0 ? 'elo-positive' : (eloDiff < 0 ? 'elo-negative' : 'elo-neutral')}"
+                          th:with="eloDiff=${eloDiffMap.get(confirmation.confirmationToken)}">
+                            <span th:text="${eloDiff > 0 ? '+' + eloDiff : eloDiff}">0</span>
+                            (<span th:text="${confirmation.originalElo}">1000</span> → <span
+                            th:text="${confirmation.newElo}">1000</span>)
+                        </span>
+                </p>
+            </div>
+
+            <div class="action-buttons">
+                <a class="btn btn-reject"
+                   th:href="${baseUrl + '/api/game-confirmations/reject?token=' + confirmation.confirmationToken}">Reject
+                    This Result</a>
+            </div>
+
+            <div class="timer">
+                <p>You have 48 hours to reject this result if you believe it's incorrect.
+                    Expires: <span th:text="${#temporals.format(confirmation.expirationDate, 'MMM dd, yyyy HH:mm')}">Expiration</span>
+                </p>
+            </div>
+        </div>
+
+        <p>If you do not take action, these results will be automatically confirmed after 48 hours.</p>
+
+        <p>Thank you,<br>The PingPong ELO Team</p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p>If you need assistance, please contact support.</p>
+    </div>
+</div>
+</body>
+</html>
