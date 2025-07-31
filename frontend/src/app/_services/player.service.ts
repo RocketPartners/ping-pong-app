@@ -93,6 +93,15 @@ export class PlayerService extends BaseHttpService {
   }
 
   /**
+   * Create an anonymous player for games
+   * @param name Name for the anonymous player
+   * @returns Observable of created anonymous player
+   */
+  createAnonymousPlayer(name: string): Observable<Player | null> {
+    return this.post<Player | null>(`${this.endpoint}/anonymous`, { name });
+  }
+
+  /**
    * Update an existing player
    * @param player Player data with ID
    * @returns Observable of update result

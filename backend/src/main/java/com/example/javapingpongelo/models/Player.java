@@ -95,6 +95,10 @@ public class Player {
     @Column(name = "role", nullable = false)
     @Builder.Default
     private String role = "USER";
+    
+    @Column(name = "is_anonymous")
+    @Builder.Default
+    private Boolean isAnonymous = false;
 
     // Ratings - initialized to 1000
     @Builder.Default

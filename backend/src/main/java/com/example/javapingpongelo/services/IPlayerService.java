@@ -129,4 +129,14 @@ public interface IPlayerService {
      * Demote a player from admin role by email
      */
     void demotePlayerFromAdmin(String email);
+
+    /**
+     * Create an anonymous player for games
+     */
+    Player createAnonymousPlayer(String name);
+
+    /**
+     * Check if a player name is already taken
+     */
+    boolean isNameTaken(String name);
 }

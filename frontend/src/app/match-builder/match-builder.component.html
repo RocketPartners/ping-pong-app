@@ -174,15 +174,28 @@
                       </mat-autocomplete>
                       <mat-icon matSuffix>search</mat-icon>
                     </mat-form-field>
+                    <button mat-stroked-button color="accent" class="anonymous-player-btn" 
+                            (click)="createAnonymousPlayer('player1')" 
+                            [disabled]="matchConfigForm.get('matchMode')?.value === 'Ranked'"
+                            [matTooltip]="matchConfigForm.get('matchMode')?.value === 'Ranked' 
+                              ? 'Guest players can only be used in Normal games' 
+                              : 'Create a guest player for someone who doesn\'t use the app'">
+                      <mat-icon>person_add</mat-icon>
+                      Create Guest
+                    </button>
                   </div>
                 </div>
 
 
-                <div *ngIf="selectedPlayers.player1" class="player-card opponent-player">
+                <div *ngIf="selectedPlayers.player1" class="player-card opponent-player" 
+                     [class.anonymous-player]="selectedPlayers.player1.isAnonymous">
 
                   <div class="player-info">
                     <div class="player-names">
-                      <h4 class="player-username">{{ selectedPlayers.player1.username }}</h4>
+                      <h4 class="player-username">
+                        <mat-icon *ngIf="selectedPlayers.player1.isAnonymous" class="guest-icon" matTooltip="Guest Player">face</mat-icon>
+                        {{ selectedPlayers.player1.username }}
+                      </h4>
                       <span
                         class="player-fullname">{{ selectedPlayers.player1.firstName }} {{ selectedPlayers.player1.lastName }}</span>
                     </div>
@@ -228,6 +241,15 @@
                       </mat-autocomplete>
                       <mat-icon matSuffix>search</mat-icon>
                     </mat-form-field>
+                    <button mat-stroked-button color="accent" class="anonymous-player-btn" 
+                            (click)="createAnonymousPlayer('player1')" 
+                            [disabled]="matchConfigForm.get('matchMode')?.value === 'Ranked'"
+                            [matTooltip]="matchConfigForm.get('matchMode')?.value === 'Ranked' 
+                              ? 'Guest players can only be used in Normal games' 
+                              : 'Create a guest player for someone who doesn\'t use the app'">
+                      <mat-icon>person_add</mat-icon>
+                      Create Guest
+                    </button>
                   </div>
                   <!-- Spacer div to match the height of the second search box on Team 2 -->
                   <div class="search-box-spacer-doubles"></div>
@@ -256,10 +278,14 @@
                   <!-- Teammate -->
                   <div class="team-connector-line"></div>
 
-                  <div *ngIf="selectedPlayers.player1" class="player-card your-team">
+                  <div *ngIf="selectedPlayers.player1" class="player-card your-team"
+                       [class.anonymous-player]="selectedPlayers.player1.isAnonymous">
                     <div class="player-info">
                       <div class="player-names">
-                        <h4 class="player-username">{{ selectedPlayers.player1.username }}</h4>
+                        <h4 class="player-username">
+                          <mat-icon *ngIf="selectedPlayers.player1.isAnonymous" class="guest-icon" matTooltip="Guest Player">face</mat-icon>
+                          {{ selectedPlayers.player1.username }}
+                        </h4>
                         <span
                           class="player-fullname">{{ selectedPlayers.player1.firstName }} {{ selectedPlayers.player1.lastName }}</span>
                       </div>
@@ -313,6 +339,15 @@
                         </mat-autocomplete>
                         <mat-icon matSuffix>search</mat-icon>
                       </mat-form-field>
+                      <button mat-stroked-button color="accent" class="anonymous-player-btn" 
+                              (click)="createAnonymousPlayer('player2')" 
+                              [disabled]="matchConfigForm.get('matchMode')?.value === 'Ranked'"
+                              [matTooltip]="matchConfigForm.get('matchMode')?.value === 'Ranked' 
+                                ? 'Guest players can only be used in Normal games' 
+                                : 'Create a guest player for someone who doesn\'t use the app'">
+                        <mat-icon>person_add</mat-icon>
+                        Create Guest
+                      </button>
                     </div>
 
                     <div class="search-field-container">
@@ -327,16 +362,29 @@
                         </mat-autocomplete>
                         <mat-icon matSuffix>search</mat-icon>
                       </mat-form-field>
+                      <button mat-stroked-button color="accent" class="anonymous-player-btn" 
+                              (click)="createAnonymousPlayer('player3')" 
+                              [disabled]="matchConfigForm.get('matchMode')?.value === 'Ranked'"
+                              [matTooltip]="matchConfigForm.get('matchMode')?.value === 'Ranked' 
+                                ? 'Guest players can only be used in Normal games' 
+                                : 'Create a guest player for someone who doesn\'t use the app'">
+                        <mat-icon>person_add</mat-icon>
+                        Create Guest
+                      </button>
                     </div>
                   </div>
                 </div>
 
                 <div class="team-cards">
                   <!-- Opponent 1 -->
-                  <div *ngIf="selectedPlayers.player2" class="player-card opponent-player">
+                  <div *ngIf="selectedPlayers.player2" class="player-card opponent-player"
+                       [class.anonymous-player]="selectedPlayers.player2.isAnonymous">
                     <div class="player-info">
                       <div class="player-names">
-                        <h4 class="player-username">{{ selectedPlayers.player2.username }}</h4>
+                        <h4 class="player-username">
+                          <mat-icon *ngIf="selectedPlayers.player2.isAnonymous" class="guest-icon" matTooltip="Guest Player">face</mat-icon>
+                          {{ selectedPlayers.player2.username }}
+                        </h4>
                         <span
                           class="player-fullname">{{ selectedPlayers.player2.firstName }} {{ selectedPlayers.player2.lastName }}</span>
                       </div>
@@ -361,10 +409,14 @@
                   <div class="team-connector-line"></div>
 
                   <!-- Opponent 2 -->
-                  <div *ngIf="selectedPlayers.player3" class="player-card opponent-player">
+                  <div *ngIf="selectedPlayers.player3" class="player-card opponent-player"
+                       [class.anonymous-player]="selectedPlayers.player3.isAnonymous">
                     <div class="player-info">
                       <div class="player-names">
-                        <h4 class="player-username">{{ selectedPlayers.player3.username }}</h4>
+                        <h4 class="player-username">
+                          <mat-icon *ngIf="selectedPlayers.player3.isAnonymous" class="guest-icon" matTooltip="Guest Player">face</mat-icon>
+                          {{ selectedPlayers.player3.username }}
+                        </h4>
                         <span
                           class="player-fullname">{{ selectedPlayers.player3.firstName }} {{ selectedPlayers.player3.lastName }}</span>
                       </div>

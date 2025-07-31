@@ -523,5 +523,53 @@ public class PlayerController {
         List<PlayerStyleTopDTO> highest = playerService.getHighestStyleRatings();
         return ResponseEntity.ok(highest);
     }
+    
+    /**
+     * Create an anonymous player for games
+     */
+    @PostMapping("/anonymous")
+    public ResponseEntity<PlayerDTO> createAnonymousPlayer(@RequestBody CreateAnonymousPlayerRequest request) {
+        log.info("Request to create anonymous player: {}", request.getName());
+        
+        try {
+            // Validate name
+            if (request.getName() == null || request.getName().trim().isEmpty()) {
+                throw new BadRequestException("Anonymous player name is required");
+            }
+            
+            String name = request.getName().trim();
+            if (name.length() < 2 || name.length() > 50) {
+                throw new BadRequestException("Anonymous player name must be between 2 and 50 characters");
+            }
+            
+            // Check if name already exists (case insensitive)
+            if (playerService.isNameTaken(name)) {
+                throw new BadRequestException("A player with this name already exists");
+            }
+            
+            Player anonymousPlayer = playerService.createAnonymousPlayer(name);
+            PlayerDTO playerDTO = PlayerDTO.fromEntity(anonymousPlayer, new ArrayList<>());
+            
+            log.info("Created anonymous player: {} with ID: {}", name, anonymousPlayer.getPlayerId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(playerDTO);
+            
+        } catch (BadRequestException e) {
+            log.warn("Failed to create anonymous player: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error creating anonymous player", e);
+            throw new BadRequestException("Failed to create anonymous player: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Request DTO for creating anonymous players
+     */
+    public static class CreateAnonymousPlayerRequest {
+        private String name;
+        
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+    }
 
 }

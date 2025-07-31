@@ -178,6 +178,59 @@ export class MatchBuilderComponent implements OnInit, OnDestroy {
     this.playerSelectForm.get(position)?.updateValueAndValidity();
   }
 
+  createAnonymousPlayer(position: string): void {
+    // Check if ranked mode is selected
+    const matchMode = this.matchConfigForm.get('matchMode')?.value;
+    if (matchMode === 'Ranked') {
+      this.snackBar.open('Guest players can only be used in Normal games, not Ranked games', 'OK', {
+        duration: 5000,
+        panelClass: ['warning-snackbar']
+      });
+      return;
+    }
+
+    // Prompt for name
+    const name = prompt('Enter the name for the guest player:');
+    if (!name || name.trim().length === 0) {
+      return;
+    }
+
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2 || trimmedName.length > 50) {
+      this.snackBar.open('Guest player name must be between 2 and 50 characters', 'OK', {
+        duration: 4000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // Create the anonymous player
+    this.playerService.createAnonymousPlayer(trimmedName).subscribe({
+      next: (player) => {
+        if (player) {
+          // Add player to the service
+          this.matchService.addPlayer(player, position);
+          // Update form state
+          this.playerSelectForm.get(position)?.setValue(player.username);
+          this.playerSelectForm.get(position)?.markAsPristine();
+          this.playerSelectForm.get(position)?.updateValueAndValidity();
+          
+          this.snackBar.open(`Guest player "${player.firstName}" created successfully`, 'OK', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+        }
+      },
+      error: (error) => {
+        const errorMessage = error.error?.message || 'Failed to create guest player';
+        this.snackBar.open(errorMessage, 'OK', {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+
   isPlayerSelectionValid(): boolean {
     const matchType = this.matchConfigForm.get('matchType')?.value;
 

@@ -68,6 +68,9 @@ public class GameService {
             }
 
             try {
+                // Validate anonymous players can only play normal games
+                validateAnonymousPlayerRules(game);
+                
                 // Save the game
                 Game savedGame = gameRepository.save(game);
                 savedGames.add(savedGame);
@@ -655,6 +658,37 @@ public class GameService {
         }
         catch (Exception e) {
             log.warn("Error updating game history for player {} on game delete", playerId, e);
+        }
+    }
+
+    /**
+     * Validate that anonymous players can only participate in normal games
+     */
+    private void validateAnonymousPlayerRules(Game game) {
+        if (game == null) {
+            return;
+        }
+
+        // Check if this is a ranked game
+        if (game.isRatedGame()) {
+            // Check all players involved in the game
+            List<UUID> allPlayerIds = new ArrayList<>();
+            
+            if (game.isSinglesGame()) {
+                allPlayerIds.add(game.getChallengerId());
+                allPlayerIds.add(game.getOpponentId());
+            } else {
+                allPlayerIds.addAll(game.getChallengerTeam());
+                allPlayerIds.addAll(game.getOpponentTeam());
+            }
+
+            // Check if any player is anonymous
+            for (UUID playerId : allPlayerIds) {
+                Player player = playerService.findPlayerById(playerId);
+                if (player != null && player.getIsAnonymous() != null && player.getIsAnonymous()) {
+                    throw new BadRequestException("Anonymous players can only participate in normal (non-ranked) games");
+                }
+            }
         }
     }
 }

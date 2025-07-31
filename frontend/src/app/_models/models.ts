@@ -37,6 +37,7 @@ export interface Player {
   updated: Date;
   profileImage: string;
   token?: string;
+  isAnonymous?: boolean;
 
   // Calculated properties
   fullName?: string;

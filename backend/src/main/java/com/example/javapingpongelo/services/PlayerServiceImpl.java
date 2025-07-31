@@ -575,4 +575,43 @@ public class PlayerServiceImpl implements IPlayerService {
         player.setRole("USER");
         playerRepository.save(player);
     }
+
+    @Override
+    public Player createAnonymousPlayer(String name) {
+        log.info("Creating anonymous player with name: {}", name);
+        
+        String uniqueUsername = name.toLowerCase().replaceAll("\\s+", "_") + "_" + System.currentTimeMillis();
+        String uniqueEmail = "anonymous_" + System.currentTimeMillis() + "@guest.local";
+        
+        Player anonymousPlayer = Player.builder()
+                .firstName(name)
+                .lastName("(Guest)")
+                .username(uniqueUsername)
+                .email(uniqueEmail)
+                .password(passwordEncoder.encode("anonymous_password_" + System.currentTimeMillis()))
+                .isAnonymous(true)
+                .role("USER")
+                .emailVerified(false)
+                .build();
+        
+        anonymousPlayer.initializeStyleRatings();
+        Player savedPlayer = playerRepository.save(anonymousPlayer);
+        log.info("Created anonymous player: {} with ID: {}", name, savedPlayer.getPlayerId());
+        
+        return savedPlayer;
+    }
+
+    @Override
+    public boolean isNameTaken(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return false;
+        }
+        
+        String trimmedName = name.trim();
+        
+        // Check for exact first name match (case insensitive)
+        List<Player> players = playerRepository.findAll();
+        return players.stream()
+                .anyMatch(player -> trimmedName.equalsIgnoreCase(player.getFirstName()));
+    }
 }
