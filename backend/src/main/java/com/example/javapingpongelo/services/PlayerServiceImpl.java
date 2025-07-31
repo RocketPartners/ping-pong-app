@@ -149,6 +149,9 @@ public class PlayerServiceImpl implements IPlayerService {
 
     @Override
     public Player findPlayerById(UUID id) {
+        if (id == null) {
+            return null;
+        }
         return playerRepository.findById(id).orElseThrow();
     }
 

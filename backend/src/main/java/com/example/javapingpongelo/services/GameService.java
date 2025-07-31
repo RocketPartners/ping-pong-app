@@ -318,18 +318,24 @@ public class GameService {
     private List<Player> getPlayersForDoubles(Game game) {
         List<Player> players = new ArrayList<>();
         if (game.isChallengerTeamWin()) {
-            players.add(playerService.findPlayerById(game.getChallengerTeam().get(0)));
-            players.add(playerService.findPlayerById(game.getChallengerTeam().get(1)));
-            players.add(playerService.findPlayerById(game.getOpponentTeam().get(0)));
-            players.add(playerService.findPlayerById(game.getOpponentTeam().get(1)));
+            addPlayerIfNotNull(players, playerService.findPlayerById(game.getChallengerTeam().get(0)));
+            addPlayerIfNotNull(players, playerService.findPlayerById(game.getChallengerTeam().get(1)));
+            addPlayerIfNotNull(players, playerService.findPlayerById(game.getOpponentTeam().get(0)));
+            addPlayerIfNotNull(players, playerService.findPlayerById(game.getOpponentTeam().get(1)));
         }
         else {
-            players.add(playerService.findPlayerById(game.getOpponentTeam().get(0)));
-            players.add(playerService.findPlayerById(game.getOpponentTeam().get(1)));
-            players.add(playerService.findPlayerById(game.getChallengerTeam().get(0)));
-            players.add(playerService.findPlayerById(game.getChallengerTeam().get(1)));
+            addPlayerIfNotNull(players, playerService.findPlayerById(game.getOpponentTeam().get(0)));
+            addPlayerIfNotNull(players, playerService.findPlayerById(game.getOpponentTeam().get(1)));
+            addPlayerIfNotNull(players, playerService.findPlayerById(game.getChallengerTeam().get(0)));
+            addPlayerIfNotNull(players, playerService.findPlayerById(game.getChallengerTeam().get(1)));
         }
         return players;
+    }
+
+    private void addPlayerIfNotNull(List<Player> players, Player player) {
+        if (player != null) {
+            players.add(player);
+        }
     }
 
 
