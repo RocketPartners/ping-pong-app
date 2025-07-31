@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -88,6 +89,10 @@ public class SlackService {
             } else {
                 postDoublesGameResult(game);
             }
+            
+            // Check for completed challenges and post results to challenge threads
+            checkAndPostChallengeResults(game);
+            
         } catch (Exception e) {
             log.error("Error posting game result to Slack", e);
         }
@@ -644,6 +649,166 @@ public class SlackService {
             }
         } catch (Exception e) {
             log.error("Error posting challenge response", e);
+        }
+    }
+    
+    /**
+     * Check if a game completes any accepted challenges and post results to challenge threads
+     */
+    private void checkAndPostChallengeResults(Game game) {
+        if (methods == null) return;
+        
+        try {
+            log.info("Checking for completed challenges for game: {}", game.getGameId());
+            
+            // Get all player IDs involved in the game
+            List<UUID> gamePlayerIds = new ArrayList<>();
+            gamePlayerIds.add(game.getChallengerId());
+            gamePlayerIds.add(game.getOpponentId());
+            if (game.getChallengerTeam() != null) {
+                gamePlayerIds.addAll(game.getChallengerTeam());
+            }
+            if (game.getOpponentTeam() != null) {
+                gamePlayerIds.addAll(game.getOpponentTeam());
+            }
+            
+            // Find accepted challenges between any of these players within the last 24 hours
+            LocalDateTime oneDayAgo = LocalDateTime.now().minusHours(24);
+            List<Challenge> acceptedChallenges = challengeRepository.findAcceptedChallengesInTimeRange(
+                gamePlayerIds, oneDayAgo, LocalDateTime.now());
+            
+            for (Challenge challenge : acceptedChallenges) {
+                // Check if this game involves the challenge participants
+                if (isGameForChallenge(game, challenge)) {
+                    log.info("Found matching challenge for game: challenge={}, game={}", challenge.getChallengeId(), game.getGameId());
+                    postChallengeGameResult(game, challenge);
+                    
+                    // Mark challenge as completed
+                    challenge.setStatus(ChallengeStatus.COMPLETED);
+                    challenge.setCompletedGameId(game.getGameId());
+                    challengeRepository.save(challenge);
+                    
+                    log.info("Marked challenge as completed: {}", challenge.getChallengeId());
+                }
+            }
+            
+        } catch (Exception e) {
+            log.error("Error checking for completed challenges", e);
+        }
+    }
+    
+    /**
+     * Check if a game involves the players from a specific challenge
+     */
+    private boolean isGameForChallenge(Game game, Challenge challenge) {
+        List<UUID> gamePlayerIds = new ArrayList<>();
+        gamePlayerIds.add(game.getChallengerId());
+        gamePlayerIds.add(game.getOpponentId());
+        if (game.getChallengerTeam() != null) {
+            gamePlayerIds.addAll(game.getChallengerTeam());
+        }
+        if (game.getOpponentTeam() != null) {
+            gamePlayerIds.addAll(game.getOpponentTeam());
+        }
+        
+        // Check if both challenge participants are in the game
+        boolean challengerInGame = gamePlayerIds.contains(challenge.getChallengerId());
+        boolean challengedInGame = gamePlayerIds.contains(challenge.getChallengedId());
+        
+        // For singles challenges, both players must be in the game
+        if (challenge.isSingles()) {
+            return challengerInGame && challengedInGame && game.isSinglesGame();
+        }
+        
+        // For doubles challenges, it's more complex - we need to check team composition
+        // For now, just check if both players are in the game and it's a doubles game
+        return challengerInGame && challengedInGame && game.isDoublesGame();
+    }
+    
+    /**
+     * Post game result as threaded reply to challenge message
+     */
+    private void postChallengeGameResult(Game game, Challenge challenge) {
+        if (methods == null || challenge.getSlackMessageTs() == null) return;
+        
+        try {
+            // Get player details
+            Player challenger = playerService.findPlayerById(challenge.getChallengerId());
+            Player challenged = playerService.findPlayerById(challenge.getChallengedId());
+            
+            // Determine winner and scores
+            String winnerName, loserName;
+            int winnerScore, loserScore;
+            
+            if (game.isSinglesGame()) {
+                boolean challengerWon = game.isChallengerWin();
+                winnerName = challengerWon ? challenger.getFullName() : challenged.getFullName();
+                loserName = challengerWon ? challenged.getFullName() : challenger.getFullName();
+                winnerScore = challengerWon ? game.getChallengerTeamScore() : game.getOpponentTeamScore();
+                loserScore = challengerWon ? game.getOpponentTeamScore() : game.getChallengerTeamScore();
+            } else {
+                // For doubles, determine which team each player was on
+                boolean challengerOnWinningTeam = isPlayerOnWinningTeam(game, challenge.getChallengerId());
+                boolean challengedOnWinningTeam = isPlayerOnWinningTeam(game, challenge.getChallengedId());
+                
+                if (challengerOnWinningTeam == challengedOnWinningTeam) {
+                    // Both players on same team - they were teammates, not opponents
+                    String teamResult = challengerOnWinningTeam ? "won" : "lost";
+                    winnerName = String.format("%s & %s", challenger.getFullName(), challenged.getFullName());
+                    loserName = "their opponents";
+                    winnerScore = challengerOnWinningTeam ? game.getChallengerTeamScore() : game.getOpponentTeamScore();
+                    loserScore = challengerOnWinningTeam ? game.getOpponentTeamScore() : game.getChallengerTeamScore();
+                } else {
+                    // Players were on opposing teams
+                    winnerName = challengerOnWinningTeam ? challenger.getFullName() : challenged.getFullName();
+                    loserName = challengerOnWinningTeam ? challenged.getFullName() : challenger.getFullName();
+                    winnerScore = challengerOnWinningTeam ? game.getChallengerTeamScore() : game.getOpponentTeamScore();
+                    loserScore = challengerOnWinningTeam ? game.getOpponentTeamScore() : game.getChallengerTeamScore();
+                }
+            }
+            
+            String gameType = String.format("%s %s", 
+                game.isSinglesGame() ? "Singles" : "Doubles",
+                game.isRatedGame() ? "Ranked" : "Normal");
+            
+            String resultMessage = String.format("🏆 **Game Complete!**\n" +
+                "🏓 %s defeated %s **%d-%d** in %s\n" +
+                "⏰ Played at %s",
+                winnerName, loserName, winnerScore, loserScore, gameType,
+                LocalDateTime.now().format(timeFormat));
+            
+            // Determine which channel to post to
+            String channelId = challenge.getSlackChannelId() != null ? 
+                challenge.getSlackChannelId() : resultsChannel;
+            
+            ChatPostMessageResponse response = methods.chatPostMessage(req -> req
+                .channel(channelId)
+                .threadTs(challenge.getSlackMessageTs()) // Thread to original challenge
+                .text(resultMessage)
+            );
+            
+            if (response.isOk()) {
+                log.info("Posted challenge game result to thread: challenge={}, game={}", challenge.getChallengeId(), game.getGameId());
+            } else {
+                log.error("Failed to post challenge game result: {}", response.getError());
+            }
+            
+        } catch (Exception e) {
+            log.error("Error posting challenge game result", e);
+        }
+    }
+    
+    /**
+     * Determine if a player was on the winning team
+     */
+    private boolean isPlayerOnWinningTeam(Game game, UUID playerId) {
+        boolean playerOnChallengerTeam = game.getChallengerId().equals(playerId) || 
+            (game.getChallengerTeam() != null && game.getChallengerTeam().contains(playerId));
+        
+        if (playerOnChallengerTeam) {
+            return game.isChallengerWin();
+        } else {
+            return game.isOpponentWin();
         }
     }
     

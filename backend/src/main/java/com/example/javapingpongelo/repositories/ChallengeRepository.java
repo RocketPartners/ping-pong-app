@@ -51,4 +51,14 @@ public interface ChallengeRepository extends JpaRepository<Challenge, UUID> {
     // Find challenges that need game reminders
     @Query("SELECT c FROM Challenge c WHERE c.status = 'ACCEPTED' AND c.respondedAt < :reminderTime")
     List<Challenge> findAcceptedChallengesNeedingReminder(@Param("reminderTime") LocalDateTime reminderTime);
+    
+    /**
+     * Find accepted challenges involving any of the given players within a time range
+     */
+    @Query("SELECT c FROM Challenge c WHERE c.status = 'ACCEPTED' AND " +
+           "(c.challengerId IN :playerIds OR c.challengedId IN :playerIds) AND " +
+           "c.respondedAt >= :startTime AND c.respondedAt <= :endTime")
+    List<Challenge> findAcceptedChallengesInTimeRange(@Param("playerIds") List<UUID> playerIds, 
+                                                     @Param("startTime") LocalDateTime startTime, 
+                                                     @Param("endTime") LocalDateTime endTime);
 }
