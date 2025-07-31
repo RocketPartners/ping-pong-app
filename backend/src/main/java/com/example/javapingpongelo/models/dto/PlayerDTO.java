@@ -93,6 +93,7 @@ public class PlayerDTO {
     private Date created;
 
     private Date updated;
+    private Boolean isAnonymous;
 
     // Calculated fields
     private String fullName;
@@ -149,6 +150,7 @@ public class PlayerDTO {
                         .playerStyles(player.getStyleRatings() != null ? player.getStyleRatings() : new ArrayList<>())
                         .created(player.getCreated())
                         .updated(player.getUpdated())
+                        .isAnonymous(player.getIsAnonymous())
                         .fullName(player.getFullName())
                         .overallRating(player.getOverallRating())
                         .totalMatchesPlayed(player.getTotalMatchesPlayed())
