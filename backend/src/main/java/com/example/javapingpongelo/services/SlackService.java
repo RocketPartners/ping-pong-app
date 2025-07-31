@@ -4,6 +4,7 @@ import com.example.javapingpongelo.models.Game;
 import com.example.javapingpongelo.models.Player;
 import com.example.javapingpongelo.models.Challenge;
 import com.example.javapingpongelo.models.ChallengeStatus;
+import com.example.javapingpongelo.repositories.ChallengeRepository;
 import com.example.javapingpongelo.repositories.GameRepository;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
@@ -11,6 +12,8 @@ import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.block.SectionBlock;
 import com.slack.api.model.block.DividerBlock;
+import com.slack.api.model.block.ActionsBlock;
+import com.slack.api.model.block.element.ButtonElement;
 import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.block.composition.PlainTextObject;
 import jakarta.annotation.PostConstruct;
@@ -24,6 +27,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
@@ -38,6 +42,9 @@ public class SlackService {
     
     @Autowired
     private GameRepository gameRepository;
+    
+    @Autowired
+    private ChallengeRepository challengeRepository;
     
     
     private final DecimalFormat eloFormat = new DecimalFormat("+#;-#");
@@ -537,13 +544,30 @@ public class SlackService {
                     .text(String.format("⚔️ *New Challenge!*\n" +
                         "🏓 *%s* has challenged you to a %s game!\n" +
                         "💬 \"%s\"\n\n" +
-                        "⏰ Challenge expires in 24 hours\n" +
-                        "✅ Accept or ❌ Decline using the ping pong app",
+                        "⏰ Challenge expires in 24 hours",
                         challenger.getFullName(),
                         gameType,
                         challenge.getMessage() != null ? challenge.getMessage() : "Let's play!"
                     ))
                     .build())
+                .build());
+            
+            // Add interactive buttons
+            blocks.add(ActionsBlock.builder()
+                .elements(Arrays.asList(
+                    ButtonElement.builder()
+                        .text(PlainTextObject.builder().text("✅ Accept").build())
+                        .style("primary")
+                        .actionId("challenge_accept")
+                        .value(challenge.getChallengeId().toString())
+                        .build(),
+                    ButtonElement.builder()
+                        .text(PlainTextObject.builder().text("❌ Decline").build())
+                        .style("danger")
+                        .actionId("challenge_decline")
+                        .value(challenge.getChallengeId().toString())
+                        .build()
+                ))
                 .build());
             
             // Try to send DM to challenged player first
@@ -558,6 +582,9 @@ public class SlackService {
                     
                     if (dmResponse.isOk()) {
                         log.info("Sent challenge DM to {}: {}", challenged.getFullName(), challenge.getChallengeId());
+                        // Store message timestamp for threading replies
+                        challenge.setSlackMessageTs(dmResponse.getMessage().getTs());
+                        challengeRepository.save(challenge);
                         dmSent = true;
                     } else {
                         log.warn("Failed to send challenge DM: {}", dmResponse.getError());
@@ -581,6 +608,9 @@ public class SlackService {
                 
                 if (response.isOk()) {
                     log.info("Posted challenge notification to channel {}: {}", targetChannel, challenge.getChallengeId());
+                    // Store message timestamp for threading replies
+                    challenge.setSlackMessageTs(response.getMessage().getTs());
+                    challengeRepository.save(challenge);
                 } else {
                     log.error("Failed to post challenge to channel {}: {}", targetChannel, response.getError());
                 }
@@ -588,6 +618,32 @@ public class SlackService {
             
         } catch (Exception e) {
             log.error("Error posting challenge notification", e);
+        }
+    }
+    
+    /**
+     * Post challenge response as threaded reply
+     */
+    public void postChallengeResponse(Challenge challenge, Player respondingPlayer, String action, String channelId, String messageTs) {
+        if (methods == null) return;
+        
+        try {
+            String emoji = "accepted".equals(action) ? "✅" : "❌";
+            String message = String.format("%s **%s** %s the challenge!", emoji, respondingPlayer.getFullName(), action);
+            
+            ChatPostMessageResponse response = methods.chatPostMessage(req -> req
+                .channel(channelId)
+                .threadTs(messageTs) // This makes it a threaded reply
+                .text(message)
+            );
+            
+            if (response.isOk()) {
+                log.info("Posted challenge response to thread: {} {} challenge {}", respondingPlayer.getFullName(), action, challenge.getChallengeId());
+            } else {
+                log.error("Failed to post challenge response: {}", response.getError());
+            }
+        } catch (Exception e) {
+            log.error("Error posting challenge response", e);
         }
     }
     

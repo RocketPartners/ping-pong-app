@@ -100,6 +100,13 @@ public class ChallengeService {
     }
     
     /**
+     * Find challenge by ID
+     */
+    public Challenge findById(UUID challengeId) {
+        return challengeRepository.findById(challengeId).orElse(null);
+    }
+    
+    /**
      * Accept a challenge
      */
     @Transactional

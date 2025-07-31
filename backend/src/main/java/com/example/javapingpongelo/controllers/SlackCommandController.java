@@ -285,18 +285,70 @@ public class SlackCommandController {
     @PostMapping("/interactive")
     public ResponseEntity<Map<String, Object>> handleInteractiveAction(@RequestBody String payload) {
         try {
-            // Parse Slack interactive payload
-            // This would contain button click data, user info, etc.
             log.info("Interactive action received: {}", payload);
             
-            // TODO: Parse payload and handle accept/decline actions
-            // For now, return empty response
-            return ResponseEntity.ok(Map.of());
+            // Parse Slack interactive payload (URL-encoded JSON)
+            String decodedPayload = java.net.URLDecoder.decode(payload.substring(8), "UTF-8"); // Remove "payload="
+            log.info("Decoded payload: {}", decodedPayload);
+            
+            // Parse JSON payload
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode payloadJson = mapper.readTree(decodedPayload);
+            
+            String actionId = payloadJson.get("actions").get(0).get("action_id").asText();
+            String challengeId = payloadJson.get("actions").get(0).get("value").asText();
+            String userId = payloadJson.get("user").get("id").asText();
+            String userName = payloadJson.get("user").get("name").asText();
+            String channelId = payloadJson.get("channel").get("id").asText();
+            String messageTs = payloadJson.get("message").get("ts").asText();
+            
+            log.info("Button clicked: actionId={}, challengeId={}, userId={}, userName={}", actionId, challengeId, userId, userName);
+            
+            // Find the player who clicked the button
+            Player player = findPlayerBySlackIdentifier(userId, userName);
+            if (player == null) {
+                log.warn("Could not find player for user: {} ({})", userName, userId);
+                return ResponseEntity.ok(createSlackResponse("❌ You need to be registered in the ping pong system first!"));
+            }
+            
+            // Find the challenge
+            UUID challengeUuid = UUID.fromString(challengeId);
+            Challenge challenge = challengeService.findById(challengeUuid);
+            if (challenge == null) {
+                log.warn("Challenge not found: {}", challengeId);
+                return ResponseEntity.ok(createSlackResponse("❌ Challenge not found or expired"));
+            }
+            
+            // Verify the player is the challenged player
+            if (!challenge.getChallengedId().equals(player.getPlayerId())) {
+                log.warn("Player {} attempted to respond to challenge {} but is not the challenged player", player.getPlayerId(), challengeId);
+                return ResponseEntity.ok(createSlackResponse("❌ You can only respond to challenges directed at you"));
+            }
+            
+            // Handle the action
+            if ("challenge_accept".equals(actionId)) {
+                challengeService.acceptChallenge(challengeUuid, player.getPlayerId());
+                slackService.postChallengeResponse(challenge, player, "accepted", channelId, messageTs);
+                return ResponseEntity.ok(createSlackResponse("✅ Challenge accepted! Good luck!"));
+            } else if ("challenge_decline".equals(actionId)) {
+                challengeService.declineChallenge(challengeUuid, player.getPlayerId(), "Declined via Slack");
+                slackService.postChallengeResponse(challenge, player, "declined", channelId, messageTs);
+                return ResponseEntity.ok(createSlackResponse("❌ Challenge declined"));
+            }
+            
+            return ResponseEntity.ok(createSlackResponse("❓ Unknown action"));
             
         } catch (Exception e) {
             log.error("Error processing interactive action", e);
-            return ResponseEntity.ok(Map.of());
+            return ResponseEntity.ok(createSlackResponse("❌ Error processing your response: " + e.getMessage()));
         }
+    }
+    
+    private Map<String, Object> createSlackResponse(String text) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("text", text);
+        response.put("response_type", "ephemeral");
+        return response;
     }
     
     // Helper methods
