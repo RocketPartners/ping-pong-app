@@ -82,13 +82,13 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Game Type</mat-label>
-                <mat-select formControlName="gameType">
-                  <mat-option *ngFor="let type of gameTypes" [value]="type.value">
-                    {{ type.label }}
+                <mat-label>Seeding Method</mat-label>
+                <mat-select formControlName="seedingMethod">
+                  <mat-option *ngFor="let method of seedingMethods" [value]="method.value">
+                    {{ method.label }}
                   </mat-option>
                 </mat-select>
-                <mat-hint>Whether players compete individually or in pairs</mat-hint>
+                <mat-hint>How players will be seeded in the bracket</mat-hint>
               </mat-form-field>
             </div>
           </div>

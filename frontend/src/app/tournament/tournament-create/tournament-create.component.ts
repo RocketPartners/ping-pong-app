@@ -9,7 +9,7 @@ import {map, startWith} from 'rxjs/operators';
 import {TournamentService} from '../../_services/tournament.service';
 import {PlayerService} from '../../_services/player.service';
 import {AccountService} from '../../_services/account.service';
-import {GameType, TeamPair, TournamentRequestDTO, TournamentType} from '../../_models/tournament';
+import {CreateTournamentRequest, TournamentType, SeedingMethod, GameType} from '../../_models/tournament-new';
 import {Player} from '../../_models/models';
 
 @Component({
@@ -28,7 +28,7 @@ export class TournamentCreateComponent implements OnInit {
   // Data
   players: Player[] = [];
   selectedPlayers: Player[] = [];
-  teamPairs: TeamPair[] = [];
+  // teamPairs: TeamPair[] = []; // Removed for now
 
   // For autocomplete
   filteredPlayers: Observable<Player[]>;
@@ -43,14 +43,16 @@ export class TournamentCreateComponent implements OnInit {
   // Enum mappings for dropdown options
   tournamentTypes = [
     {value: TournamentType.SINGLE_ELIMINATION, label: 'Single Elimination'},
-    {value: TournamentType.DOUBLE_ELIMINATION, label: 'Double Elimination'},
-    {value: TournamentType.ROUND_ROBIN, label: 'Round Robin'}
+    {value: TournamentType.DOUBLE_ELIMINATION, label: 'Double Elimination'}
   ];
 
-  gameTypes = [
-    {value: GameType.SINGLES, label: 'Singles'},
-    {value: GameType.DOUBLES, label: 'Doubles'}
+  // Seeding method options
+  seedingMethods = [
+    {value: SeedingMethod.RANDOM, label: 'Random Seeding'},
+    {value: SeedingMethod.RATING_BASED, label: 'Rating-Based Seeding'},
+    {value: SeedingMethod.MANUAL, label: 'Manual Seeding'}
   ];
+
   protected readonly Math = Math;
 
   constructor(
@@ -64,7 +66,7 @@ export class TournamentCreateComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: [''],
       tournamentType: [TournamentType.SINGLE_ELIMINATION, Validators.required],
-      gameType: [GameType.SINGLES, Validators.required],
+      seedingMethod: [SeedingMethod.RANDOM, Validators.required],
       startDate: [this.minDate, Validators.required]
     });
 
@@ -146,36 +148,18 @@ export class TournamentCreateComponent implements OnInit {
     }
 
     // Create tournament request
-    const tournamentRequest: TournamentRequestDTO = {
+    const tournamentRequest: CreateTournamentRequest = {
       name: formValue.name,
       description: formValue.description,
       tournamentType: formValue.tournamentType,
-      gameType: formValue.gameType,
+      gameType: GameType.SINGLES,
+      seedingMethod: formValue.seedingMethod,
       organizerId: currentPlayer.playerId,
-      startDate: formValue.startDate,
       playerIds: this.selectedPlayers.map(p => p.playerId),
-      teamPairs: [], // Will be populated for doubles tournaments
-      seedingMethod: "RANDOM"
+      startDate: formValue.startDate
     };
 
-    // For doubles tournaments, create team pairs
-    if (formValue.gameType === GameType.DOUBLES) {
-      if (this.selectedPlayers.length % 2 !== 0) {
-        this.error = 'Doubles tournaments require an even number of players.';
-        this.loading = false;
-        return;
-      }
-
-      // For now, automatically pair consecutive players
-      for (let i = 0; i < this.selectedPlayers.length; i += 2) {
-        if (i + 1 < this.selectedPlayers.length) {
-          tournamentRequest.teamPairs!.push({
-            player1Id: this.selectedPlayers[i].playerId,
-            player2Id: this.selectedPlayers[i + 1].playerId
-          });
-        }
-      }
-    }
+    // TODO: Add doubles tournament support if needed
 
     this.tournamentService.createTournament(tournamentRequest).subscribe({
       next: (createdTournament) => {
@@ -193,20 +177,14 @@ export class TournamentCreateComponent implements OnInit {
   }
 
   canCreateTournament(): boolean {
-    const minPlayers = this.tournamentForm.get('gameType')?.value === GameType.DOUBLES ? 4 : 2;
+    const minPlayers = 2; // Simplified for now
     const validPlayerCount = this.selectedPlayers.length >= minPlayers;
 
-    if (this.tournamentForm.get('gameType')?.value === GameType.DOUBLES) {
-      return this.tournamentForm.valid && validPlayerCount && this.selectedPlayers.length % 2 === 0;
-    }
-
+    // Simplified for now - no doubles support
     return this.tournamentForm.valid && validPlayerCount;
   }
 
   getPlayerCountRequirement(): string {
-    if (this.tournamentForm.get('gameType')?.value === GameType.DOUBLES) {
-      return 'at least 4 players (even number required)';
-    }
     return 'at least 2 players';
   }
 

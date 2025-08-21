@@ -1,0 +1,64 @@
+<!-- src/app/tournament/simple-bracket/simple-bracket.component.html -->
+<div class="simple-bracket">
+  <!-- Show message if no bracket data -->
+  <div *ngIf="bracketRounds.length === 0" class="no-bracket">
+    <mat-icon>sports_tennis</mat-icon>
+    <h3>No Bracket Data</h3>
+    <p>Tournament bracket will appear here once the tournament starts.</p>
+  </div>
+
+  <!-- Show bracket rounds -->
+  <div *ngIf="bracketRounds.length > 0" class="bracket-container">
+    <div class="bracket-rounds">
+      <div *ngFor="let round of bracketRounds; let roundIndex = index" class="bracket-round">
+        <div class="round-header">
+          <h4>Round {{ roundIndex + 1 }}</h4>
+        </div>
+        
+        <div class="round-matches">
+          <div *ngFor="let match of round" 
+               class="match-card" 
+               [ngClass]="getMatchStatusClass(match)"
+               (click)="onMatchClick(match)"
+               [class.clickable]="canUpdateResults">
+            
+            <!-- Match participants -->
+            <div class="match-participants">
+              <div class="participant" 
+                   [class.winner]="match.opponent1?.result === 'win'"
+                   [class.loser]="match.opponent1?.result === 'loss'">
+                <span class="participant-name">
+                  {{ getParticipantName(match.opponent1?.id || null) }}
+                </span>
+                <span *ngIf="match.opponent1?.score !== undefined" class="score">
+                  {{ match.opponent1?.score }}
+                </span>
+              </div>
+              
+              <div class="vs-divider">VS</div>
+              
+              <div class="participant" 
+                   [class.winner]="match.opponent2?.result === 'win'"
+                   [class.loser]="match.opponent2?.result === 'loss'">
+                <span class="participant-name">
+                  {{ getParticipantName(match.opponent2?.id || null) }}
+                </span>
+                <span *ngIf="match.opponent2?.score !== undefined" class="score">
+                  {{ match.opponent2?.score }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Match status indicator -->
+            <div class="match-status">
+              <mat-icon *ngIf="match.status === 4">check_circle</mat-icon>
+              <mat-icon *ngIf="match.status === 2">play_circle_outline</mat-icon>
+              <mat-icon *ngIf="match.status === 1">schedule</mat-icon>
+              <mat-icon *ngIf="match.status === 0">lock</mat-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

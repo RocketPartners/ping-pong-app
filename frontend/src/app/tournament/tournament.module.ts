@@ -35,6 +35,8 @@ import {SharedComponentsModule} from '../_shared/shared-components.module';
 import {TournamentListComponent} from './tournament-list/tournament-list.component';
 import {TournamentCreateComponent} from './tournament-create/tournament-create.component';
 import {TournamentDetailComponent} from './tournament-detail/tournament-detail.component';
+import {TournamentBracketComponent} from './tournament-bracket/tournament-bracket.component';
+import {MatchResultDialogComponent} from './match-result-dialog/match-result-dialog.component';
 import {AuthGuard} from '../_helpers/auth.guard';
 
 export const tournamentRoutes: Routes = [
@@ -47,7 +49,9 @@ export const tournamentRoutes: Routes = [
   declarations: [
     TournamentListComponent,
     TournamentCreateComponent,
-    TournamentDetailComponent
+    TournamentDetailComponent,
+    TournamentBracketComponent,
+    MatchResultDialogComponent
   ],
   imports: [
     CommonModule,

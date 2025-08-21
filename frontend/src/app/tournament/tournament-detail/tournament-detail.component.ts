@@ -1,27 +1,28 @@
 // src/app/tournament/tournament-detail/tournament-detail.component.ts
+// New tournament detail component with brackets-viewer integration
 
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
-import {forkJoin, of} from 'rxjs';
-import {catchError, switchMap} from 'rxjs/operators';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { Subject, takeUntil, switchMap, catchError, of } from 'rxjs';
 
-import {TournamentService} from '../../_services/tournament.service';
-import {PlayerService} from '../../_services/player.service';
-import {AccountService} from '../../_services/account.service';
+import { TournamentService } from '../../_services/tournament.service';
+import { AccountService } from '../../_services/account.service';
 import {
-  BracketType,
-  MatchResultDTO,
-  Tournament,
-  TournamentMatch,
-  TournamentPlayer,
-  TournamentStatus
-} from '../../_models/tournament';
-import {Player} from '../../_models/models';
+  TournamentDetails,
+  TournamentStatus,
+  TournamentType,
+  Match,
+  MatchStatus,
+  UpdateMatchRequest,
+  Participant,
+  PlayerInfo
+} from '../../_models/tournament-new';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData
 } from '../../_shared/components/confirm-dialog/confirm-dialog.component';
+import { MatchResultDialogComponent, MatchResultDialogResult } from '../match-result-dialog/match-result-dialog.component';
 
 @Component({
   selector: 'app-tournament-detail',
@@ -29,215 +30,181 @@ import {
   styleUrls: ['./tournament-detail.component.scss'],
   standalone: false,
 })
-export class TournamentDetailComponent implements OnInit {
-  tournament: Tournament | null = null;
-  matches: TournamentMatch[] = [];
-  players: TournamentPlayer[] = [];
-  playersMap: Map<string, Player> = new Map();
+export class TournamentDetailComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('bracketContainer', { static: false }) bracketContainer!: ElementRef<HTMLDivElement>;
 
-  loading = true;
+  tournament: TournamentDetails | null = null;
+  readyMatches: Match[] = [];
+  playersInfo: Map<number, PlayerInfo> = new Map();
+
+  loading$ = this.tournamentService.loading$;
   error = '';
 
   isOrganizer = false;
   currentUserId?: string;
 
-  // For filtering matches
-  showWinnersBracket = true;
-  filteredMatches: TournamentMatch[] = [];
+  private destroy$ = new Subject<void>();
 
-  // Track round data
-  rounds: number[] = [];
-  matchesByRound: { [round: number]: TournamentMatch[] } = {};
+  // Tournament status enum for template
+  TournamentStatus = TournamentStatus;
+  TournamentType = TournamentType;
+  MatchStatus = MatchStatus;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private tournamentService: TournamentService,
-    private playerService: PlayerService,
     private accountService: AccountService,
     private dialog: MatDialog
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     this.currentUserId = this.accountService.playerValue?.player.playerId;
     this.loadTournamentData();
   }
 
-  loadTournamentData(): void {
-    this.loading = true;
+  ngAfterViewInit(): void {
+    // Simple bracket component handles its own initialization
+  }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.tournamentService.clearCurrentTournament();
+  }
+
+  private loadTournamentData(): void {
     this.route.paramMap.pipe(
       switchMap(params => {
         const id = params.get('id');
         if (!id) {
           throw new Error('Tournament ID is required');
         }
-
-        return forkJoin({
-          tournament: this.tournamentService.getTournamentById(id),
-          matches: this.tournamentService.getTournamentMatches(id),
-          players: this.tournamentService.getTournamentPlayers(id)
-        });
+        return this.tournamentService.getTournamentDetails(id);
       }),
       catchError(error => {
         this.error = 'Failed to load tournament data';
-        this.loading = false;
         console.error(error);
-        return of({
-          tournament: null,
-          matches: [],
-          players: []
-        });
-      })
-    ).subscribe(data => {
-      this.tournament = data.tournament;
-      this.matches = data.matches;
-      this.players = data.players;
-
-      if (this.tournament) {
-        this.isOrganizer = this.currentUserId === this.tournament.organizerId;
-        this.organizeBracket();
-        this.loadPlayerDetails();
-      }
-
-      this.loading = false;
-    });
-  }
-
-  loadPlayerDetails(): void {
-    if (!this.players || this.players.length === 0) return;
-
-    // Extract unique player IDs
-    const playerIds = this.players.map(p => p.playerId);
-
-    // Fetch player details
-    this.playerService.getPlayersByIds(playerIds).subscribe({
-      next: (players) => {
-        // Check if players is null before proceeding
-        if (players) {
-          // Create a map for easy lookup
-          players.forEach(player => {
-            this.playersMap.set(player.playerId, player);
-          });
-        }
-      },
-      error: (err) => {
-        console.error('Failed to load player details', err);
+        return of(null);
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe(tournament => {
+      if (tournament) {
+        this.tournament = tournament;
+        this.isOrganizer = this.currentUserId === tournament.organizerId;
+        
+        // Load additional data
+        this.loadReadyMatches();
+        this.loadPlayersInfo();
+        
+        // Subscribe to real-time updates
+        this.subscribeToUpdates();
       }
     });
   }
 
-  organizeBracket(): void {
-    if (!this.matches) return;
-
-    // Reset
-    this.rounds = [];
-    this.matchesByRound = {};
-
-    // Group matches by round
-    this.matches.forEach(match => {
-      if (!this.matchesByRound[match.round]) {
-        this.matchesByRound[match.round] = [];
-        this.rounds.push(match.round);
-      }
-
-      this.matchesByRound[match.round].push(match);
-    });
-
-    // Sort rounds
-    this.rounds.sort((a, b) => a - b);
-
-    this.filterMatches();
-  }
-
-  filterMatches(): void {
-    this.filteredMatches = this.matches.filter(match => {
-      // For double elimination tournaments
-      if (this.tournament?.tournamentType === 'DOUBLE_ELIMINATION') {
-        if (this.showWinnersBracket) {
-          return match.bracketType === BracketType.WINNER ||
-            match.bracketType === BracketType.CHAMPIONSHIP ||
-            match.bracketType === BracketType.FINAL;
-        } else {
-          return match.bracketType === BracketType.LOSER ||
-            match.bracketType === BracketType.CHAMPIONSHIP ||
-            match.bracketType === BracketType.FINAL;
-        }
-      }
-
-      // For single elimination, show all matches
-      return true;
-    });
-  }
-
-  toggleBracketView(): void {
-    this.showWinnersBracket = !this.showWinnersBracket;
-    this.filterMatches();
-  }
-
-  getPlayerName(playerId: string): string {
-    const player = this.playersMap.get(playerId);
-    return player ? player.username : 'Unknown Player';
-  }
-
-  getTeamNames(teamIds: string[]): string {
-    if (!teamIds || teamIds.length === 0) return 'TBD';
-
-    return teamIds.map(id => this.getPlayerName(id)).join(' & ');
-  }
-
-  updateMatchResult(matchId: string, winnerTeamIndex: number): void {
+  private loadReadyMatches(): void {
     if (!this.tournament?.id) return;
 
-    const match = this.matches.find(m => m.matchId === matchId);
-    if (!match) return;
+    this.tournamentService.getReadyMatches(this.tournament.id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(matches => {
+      this.readyMatches = matches;
+    });
+  }
 
-    let winnerIds: string[] = [];
-    let loserIds: string[] = [];
+  private loadPlayersInfo(): void {
+    if (!this.tournament?.participants) return;
 
-    if (winnerTeamIndex === 1) {
-      winnerIds = [...match.team1Ids];
-      loserIds = [...match.team2Ids];
-    } else {
-      winnerIds = [...match.team2Ids];
-      loserIds = [...match.team1Ids];
+    const playerIds = this.tournament.participants.map(p => p.playerId);
+    if (playerIds.length === 0) return;
+
+    this.tournamentService.getPlayersInfo(playerIds).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(players => {
+      players.forEach(player => {
+        // Map player info by the participant's numeric ID
+        const participant = this.tournament!.participants.find(p => p.playerId === player.playerId);
+        if (participant) {
+          this.playersInfo.set(participant.id, player);
+        }
+      });
+      
+      // Player names loaded and mapped to participant IDs
+    });
+  }
+
+  // Handle match result updates from bracket component
+  onMatchClicked(match: Match): void {
+    if (!this.canUpdateMatchResult(match)) {
+      return;
     }
 
-    const result: MatchResultDTO = {
-      winnerIds,
-      loserIds
-    };
+    this.showMatchResultDialog(match);
+  }
 
-    // Confirm match result
-    const dialogData: ConfirmDialogData = {
-      title: 'Confirm Match Result',
-      message: `Are you sure ${this.getTeamNames(winnerIds)} won this match?`,
-      confirmText: 'Confirm',
-      cancelText: 'Cancel'
-    };
+  private subscribeToUpdates(): void {
+    if (!this.tournament?.id) return;
 
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: dialogData
+    this.tournamentService.subscribeToUpdates(this.tournament.id).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      // Tournament data will be refreshed automatically by the service
+      this.loadReadyMatches();
+    });
+  }
+
+  // Event Handlers
+
+  private showMatchResultDialog(match: Match): void {
+    if (!this.tournament?.id) return;
+
+    // Open detailed match result dialog
+    const dialogRef = this.dialog.open(MatchResultDialogComponent, {
+      width: '500px',
+      data: {
+        match: match,
+        participants: this.tournament.bracketData?.participant || []
+      },
+      disableClose: false
     });
 
-    dialogRef.afterClosed().subscribe(confirmed => {
-      if (confirmed) {
-        this.tournamentService.updateMatchResult(this.tournament!.id!, matchId, result)
-          .subscribe({
-            next: () => {
-              // Reload tournament data to get updated matches
-              this.loadTournamentData();
-            },
-            error: (err) => {
-              this.error = 'Failed to update match result. ' + (err.error?.message || '');
-              console.error(err);
-            }
-          });
+    dialogRef.afterClosed().subscribe((result: MatchResultDialogResult | undefined) => {
+      if (result) {
+        // Update match result via backend with complete data
+        this.updateMatchResult(
+          match.id, 
+          result.winnerId, 
+          result.winnerScore, 
+          result.loserScore
+        );
       }
     });
   }
+
+  updateMatchResult(matchId: number, winnerId: number, winnerScore: number, loserScore: number): void {
+    if (!this.tournament?.id) return;
+
+    const request: UpdateMatchRequest = {
+      matchId,
+      winnerId,
+      winnerScore,
+      loserScore
+    };
+
+    this.tournamentService.updateMatchResult(this.tournament.id, request).subscribe({
+      next: () => {
+        // Success - refresh the tournament data to get updated bracket
+        this.loadTournamentData();
+      },
+      error: (err) => {
+        this.error = 'Failed to update match result. ' + (err.message || '');
+        console.error(err);
+      }
+    });
+  }
+
+  // Tournament Actions
 
   startTournament(): void {
     if (!this.tournament?.id) return;
@@ -255,18 +222,19 @@ export class TournamentDetailComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(confirmed => {
-      if (confirmed) {
-        this.tournamentService.startTournament(this.tournament!.id!)
-          .subscribe({
-            next: (tournament) => {
-              this.tournament = tournament;
-              this.loadTournamentData();
-            },
-            error: (err) => {
-              this.error = 'Failed to start tournament. ' + (err.error?.message || '');
-              console.error(err);
-            }
-          });
+      if (confirmed && this.tournament?.id) {
+        console.log('Starting tournament:', this.tournament.id, 'Current status:', this.tournament.status);
+        this.tournamentService.startTournament(this.tournament.id).subscribe({
+          next: (result) => {
+            console.log('Tournament start result:', result);
+            // Refresh tournament data to get updated status
+            this.loadTournamentData();
+          },
+          error: (err) => {
+            console.error('Tournament start error:', err);
+            this.error = 'Failed to start tournament. ' + (err.message || '');
+          }
+        });
       }
     });
   }
@@ -287,51 +255,51 @@ export class TournamentDetailComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(confirmed => {
-      if (confirmed) {
-        this.tournamentService.completeTournament(this.tournament!.id!)
-          .subscribe({
-            next: (tournament) => {
-              this.tournament = tournament;
-              this.loadTournamentData();
-            },
-            error: (err) => {
-              this.error = 'Failed to complete tournament. ' + (err.error?.message || '');
-              console.error(err);
-            }
-          });
+      if (confirmed && this.tournament?.id) {
+        this.tournamentService.completeTournament(this.tournament.id).subscribe({
+          error: (err) => {
+            this.error = 'Failed to complete tournament. ' + (err.message || '');
+            console.error(err);
+          }
+        });
       }
     });
   }
 
+  // Utility Methods
+
   canStartTournament(): boolean {
     return this.isOrganizer &&
-      this.tournament?.status === TournamentStatus.CREATED &&
-      (this.tournament.playerIds?.length || 0) >= 2;
+      (this.tournament?.status === TournamentStatus.CREATED || this.tournament?.status === TournamentStatus.READY_TO_START) &&
+      (this.tournament?.participants?.length || 0) >= 2;
   }
 
   canCompleteTournament(): boolean {
-    // Check if all matches have been completed
-    const allMatchesCompleted = this.matches.every(match => match.completed);
-
     return this.isOrganizer &&
-      this.tournament?.status === TournamentStatus.IN_PROGRESS &&
-      allMatchesCompleted;
+      (this.tournament?.status === TournamentStatus.IN_PROGRESS || 
+       this.tournament?.status === TournamentStatus.ROUND_COMPLETE) &&
+      this.readyMatches.length === 0; // No ready matches means tournament is complete
   }
 
-  canUpdateMatchResult(match: TournamentMatch): boolean {
-    return this.isOrganizer &&
-      this.tournament?.status === TournamentStatus.IN_PROGRESS &&
-      !match.completed &&
-      match.team1Ids.length > 0 &&
-      match.team2Ids.length > 0;
+  canUpdateMatchResult(match: Match): boolean {
+    return !!(this.isOrganizer &&
+      (this.tournament?.status === TournamentStatus.IN_PROGRESS ||
+       this.tournament?.status === TournamentStatus.ROUND_COMPLETE) &&
+      match.status === MatchStatus.READY &&
+      match.opponent1?.id &&
+      match.opponent2?.id);
   }
 
   getStatusClass(status: TournamentStatus): string {
     switch (status) {
       case TournamentStatus.CREATED:
         return 'status-created';
+      case TournamentStatus.READY_TO_START:
+        return 'status-ready';
       case TournamentStatus.IN_PROGRESS:
         return 'status-in-progress';
+      case TournamentStatus.ROUND_COMPLETE:
+        return 'status-round-complete';
       case TournamentStatus.COMPLETED:
         return 'status-completed';
       case TournamentStatus.CANCELLED:
@@ -345,8 +313,12 @@ export class TournamentDetailComponent implements OnInit {
     switch (status) {
       case TournamentStatus.CREATED:
         return 'Created';
+      case TournamentStatus.READY_TO_START:
+        return 'Ready to Start';
       case TournamentStatus.IN_PROGRESS:
         return 'In Progress';
+      case TournamentStatus.ROUND_COMPLETE:
+        return 'Round Complete';
       case TournamentStatus.COMPLETED:
         return 'Completed';
       case TournamentStatus.CANCELLED:
@@ -356,112 +328,12 @@ export class TournamentDetailComponent implements OnInit {
     }
   }
 
-  getBracketTypeClass(bracketType: BracketType): string {
-    switch (bracketType) {
-      case BracketType.WINNER:
-        return 'bracket-winner';
-      case BracketType.LOSER:
-        return 'bracket-loser';
-      case BracketType.FINAL:
-        return 'bracket-final';
-      case BracketType.CHAMPIONSHIP:
-        return 'bracket-championship';
-      default:
-        return '';
-    }
-  }
-
-  getBracketTypeLabel(bracketType: BracketType): string {
-    switch (bracketType) {
-      case BracketType.WINNER:
-        return 'Winner Bracket';
-      case BracketType.LOSER:
-        return 'Loser Bracket';
-      case BracketType.FINAL:
-        return 'Final';
-      case BracketType.CHAMPIONSHIP:
-        return 'Championship';
-      default:
-        return 'Unknown';
-    }
+  getPlayerName(participantId: number): string {
+    const playerInfo = this.playersInfo.get(participantId);
+    return playerInfo?.username || `Player ${participantId}`;
   }
 
   backToList(): void {
     this.router.navigate(['/tournaments']);
-  }
-
-  // Add these methods to your TournamentDetailComponent class
-
-  /**
-   * Checks if a match is a bye match (only one player/team assigned)
-   */
-  isByeMatch(match: TournamentMatch): boolean {
-    // A bye match has one team with players and the other team empty
-    const team1HasPlayers = match.team1Ids && match.team1Ids.length > 0;
-    const team2HasPlayers = match.team2Ids && match.team2Ids.length > 0;
-
-    return (team1HasPlayers && !team2HasPlayers) || (!team1HasPlayers && team2HasPlayers);
-  }
-
-  /**
-   * Handles advancing a player in a bye match
-   */
-  handleByeMatch(match: TournamentMatch): void {
-    if (!this.tournament?.id || match.completed) return;
-
-    // Only allow organizing to handle bye matches
-    if (!this.isOrganizer) return;
-
-    // Determine which team has the player
-    const team1HasPlayers = match.team1Ids && match.team1Ids.length > 0;
-    const team2HasPlayers = match.team2Ids && match.team2Ids.length > 0;
-
-    // Set up the match result with the correct winner/loser
-    let result: MatchResultDTO;
-
-    if (team1HasPlayers) {
-      result = {
-        winnerIds: [...match.team1Ids],
-        loserIds: [] // No losers in a bye
-      };
-    } else if (team2HasPlayers) {
-      result = {
-        winnerIds: [...match.team2Ids],
-        loserIds: [] // No losers in a bye
-      };
-    } else {
-      // Shouldn't happen, but just in case
-      return;
-    }
-
-    // Confirm bye advancement
-    const dialogData: ConfirmDialogData = {
-      title: 'Confirm Bye Match',
-      message: `Are you sure you want to advance ${this.getTeamNames(result.winnerIds)} to the next round?`,
-      confirmText: 'Advance',
-      cancelText: 'Cancel'
-    };
-
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: dialogData
-    });
-
-    dialogRef.afterClosed().subscribe(confirmed => {
-      if (confirmed) {
-        // Update the match result
-        this.tournamentService.updateMatchResult(this.tournament!.id!, match.matchId!, result)
-          .subscribe({
-            next: () => {
-              // Reload tournament data
-              this.loadTournamentData();
-            },
-            error: (err) => {
-              this.error = 'Failed to advance player in bye match. ' + (err.error?.message || '');
-              console.error(err);
-            }
-          });
-      }
-    });
   }
 }

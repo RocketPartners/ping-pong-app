@@ -1,0 +1,16 @@
+{
+  "name": "brackets-test",
+  "version": "1.0.0",
+  "description": "Test environment for brackets-manager and brackets-viewer integration",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node index.js",
+    "viewer": "node viewer-test.js"
+  },
+  "dependencies": {
+    "brackets-manager": "^1.6.4",
+    "brackets-viewer": "^1.6.2",
+    "brackets-json-db": "^1.0.2"
+  }
+}

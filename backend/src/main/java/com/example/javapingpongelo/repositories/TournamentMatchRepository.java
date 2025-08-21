@@ -1,5 +1,6 @@
 package com.example.javapingpongelo.repositories;
 
+import com.example.javapingpongelo.models.Tournament;
 import com.example.javapingpongelo.models.TournamentMatch;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -117,4 +118,13 @@ public interface TournamentMatchRepository extends JpaRepository<TournamentMatch
     TournamentMatch findByTournamentIdAndDisplayId(
             @Param("tournamentId") UUID tournamentId,
             @Param("displayId") String displayId);
+
+    /**
+     * Find matches by tournament and round, ordered by position in round
+     *
+     * @param tournament The tournament
+     * @param round The round number
+     * @return List of matches in the round ordered by position
+     */
+    List<TournamentMatch> findByTournamentAndRoundOrderByPositionInRound(Tournament tournament, Integer round);
 }

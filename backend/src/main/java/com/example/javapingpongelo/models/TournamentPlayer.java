@@ -46,10 +46,10 @@ public class TournamentPlayer {
     private UUID partnerId;
 
     /**
-     * The player's seeding position in the tournament
+     * The player's seeding position in the tournament (1 = best seed)
      */
     @Column(name = "seed_position")
-    private Integer seedPosition;
+    private Integer seed;
 
     /**
      * Player's final ranking in the tournament (after completion)
@@ -63,5 +63,11 @@ public class TournamentPlayer {
     @Column(name = "eliminated", nullable = false)
     @Builder.Default
     private boolean eliminated = false;
+
+    /**
+     * Round in which the player was eliminated (null if still active)
+     */
+    @Column(name = "eliminated_in_round")
+    private Integer eliminatedInRound;
 
 }

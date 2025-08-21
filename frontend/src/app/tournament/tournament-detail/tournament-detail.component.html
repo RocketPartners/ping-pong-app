@@ -1,18 +1,29 @@
 <!-- src/app/tournament/tournament-detail/tournament-detail.component.html -->
+<!-- New tournament detail template with brackets-viewer integration -->
 
 <div class="tournament-detail-container">
-  <!-- Loading state -->
-  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+  <!-- Loading spinner -->
+  <div *ngIf="loading$ | async" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading tournament...</p>
+  </div>
 
   <!-- Error message -->
-  <app-error-message *ngIf="error" [message]="error"></app-error-message>
+  <mat-card *ngIf="error" class="error-card">
+    <mat-icon class="error-icon">error</mat-icon>
+    <p class="error-message">{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="backToList()">
+      Back to Tournaments
+    </button>
+  </mat-card>
 
   <!-- Tournament content -->
-  <div *ngIf="tournament && !loading" class="tournament-content">
-    <!-- Header and actions -->
+  <div *ngIf="tournament && !(loading$ | async)" class="tournament-content">
+    
+    <!-- Header -->
     <div class="tournament-header">
       <div class="header-left">
-        <button (click)="backToList()" class="back-button" mat-icon-button>
+        <button mat-icon-button (click)="backToList()" class="back-button">
           <mat-icon>arrow_back</mat-icon>
         </button>
         <div class="header-info">
@@ -20,15 +31,19 @@
           <div class="tournament-meta">
             <div class="meta-item">
               <mat-icon>emoji_events</mat-icon>
-              <span>{{ tournament.tournamentType }}</span>
-            </div>
-            <div class="meta-item">
-              <mat-icon>sports_tennis</mat-icon>
-              <span>{{ tournament.gameType }}</span>
+              <span>{{ tournament.type | titlecase }}</span>
             </div>
             <div class="meta-item">
               <mat-icon>people</mat-icon>
-              <span>{{ tournament.numberOfPlayers }} Players</span>
+              <span>{{ (tournament.participants && tournament.participants.length) || 0 }}/{{ tournament.maxParticipants }} Players</span>
+            </div>
+            <div class="meta-item">
+              <mat-icon>person</mat-icon>
+              <span>{{ tournament.organizerName }}</span>
+            </div>
+            <div *ngIf="tournament.createdAt" class="meta-item">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ tournament.createdAt | date:'short' }}</span>
             </div>
           </div>
         </div>
@@ -39,15 +54,20 @@
           {{ getStatusText(tournament.status) }}
         </div>
 
-        <div *ngIf="canStartTournament()" class="organizer-actions">
-          <button (click)="startTournament()" color="primary" mat-raised-button>
+        <!-- Tournament actions -->
+        <div class="tournament-actions">
+          <button *ngIf="canStartTournament()" 
+                  mat-raised-button 
+                  color="primary" 
+                  (click)="startTournament()">
             <mat-icon>play_arrow</mat-icon>
             Start Tournament
           </button>
-        </div>
 
-        <div *ngIf="canCompleteTournament()" class="organizer-actions">
-          <button (click)="completeTournament()" color="accent" mat-raised-button>
+          <button *ngIf="canCompleteTournament()" 
+                  mat-raised-button 
+                  color="accent" 
+                  (click)="completeTournament()">
             <mat-icon>done_all</mat-icon>
             Complete Tournament
           </button>
@@ -60,149 +80,158 @@
       {{ tournament.description }}
     </p>
 
-    <!-- Double elimination bracket toggle -->
-    <div *ngIf="tournament.tournamentType === 'DOUBLE_ELIMINATION'" class="bracket-toggle">
-      <mat-button-toggle-group (change)="toggleBracketView()" [(value)]="showWinnersBracket">
-        <mat-button-toggle [value]="true">Winners Bracket</mat-button-toggle>
-        <mat-button-toggle [value]="false">Losers Bracket</mat-button-toggle>
-      </mat-button-toggle-group>
-    </div>
-
-    <!-- Status message for created tournaments -->
-    <div *ngIf="tournament.status === 'CREATED'" class="status-message">
+    <!-- Status messages -->
+    <mat-card *ngIf="tournament.status === TournamentStatus.CREATED" class="status-message info">
       <mat-icon>info</mat-icon>
-      <span>This tournament hasn't started yet. {{ isOrganizer ? 'Click the "Start Tournament" button to generate the bracket.' : 'Waiting for the organizer to start the tournament.' }}</span>
-    </div>
-
-    <!-- Status message for completed tournaments -->
-    <div *ngIf="tournament.status === 'COMPLETED'" class="status-message completed">
-      <mat-icon>emoji_events</mat-icon>
-      <span>Tournament completed! {{ tournament.championId ? 'Champion: ' + getPlayerName(tournament.championId) : '' }}</span>
-    </div>
-
-    <!-- Matches section -->
-    <div *ngIf="tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED'" class="matches-container">
-      <h2 class="section-title">Tournament Bracket</h2>
-
-      <!-- No matches message -->
-      <div *ngIf="filteredMatches.length === 0" class="no-matches-message">
-        <mat-icon>sports_tennis</mat-icon>
-        <p>No matches available for this bracket.</p>
+      <div class="message-content">
+        <h3>Tournament Not Started</h3>
+        <p>{{ isOrganizer ? 'Click "Start Tournament" to generate the bracket and begin.' : 'Waiting for the organizer to start the tournament.' }}</p>
       </div>
+    </mat-card>
 
-      <!-- Rounds display -->
-      <div *ngIf="filteredMatches.length > 0" class="rounds-container">
-        <div *ngFor="let round of rounds" class="round-column">
-          <div class="round-header">
-            <h3>Round {{ round }}</h3>
-          </div>
+    <mat-card *ngIf="tournament.status === TournamentStatus.READY_TO_START" class="status-message warning">
+      <mat-icon>schedule</mat-icon>
+      <div class="message-content">
+        <h3>Tournament Ready to Start</h3>
+        <p>{{ isOrganizer ? 'The bracket has been generated. Start the tournament when players are ready!' : 'The tournament bracket is ready. Waiting for the organizer to begin matches.' }}</p>
+      </div>
+    </mat-card>
 
-          <div class="match-list">
-            <!-- Update the match card section in your tournament-detail.component.html -->
+    <mat-card *ngIf="tournament.status === TournamentStatus.COMPLETED" class="status-message success">
+      <mat-icon>emoji_events</mat-icon>
+      <div class="message-content">
+        <h3>Tournament Completed!</h3>
+        <p *ngIf="tournament.winnerId">
+          🏆 Champion: {{ getPlayerName(tournament.winnerId) }}
+        </p>
+        <p *ngIf="tournament.runnerUpId">
+          🥈 Runner-up: {{ getPlayerName(tournament.runnerUpId) }}
+        </p>
+      </div>
+    </mat-card>
 
-            <!-- Modified match card with bye handling -->
-            <mat-card (click)="isByeMatch(match) && !match.completed && isOrganizer ? handleByeMatch(match) : null"
-                      *ngFor="let match of matchesByRound[round]"
-                      [ngClass]="[
-            getBracketTypeClass(match.bracketType),
-            match.completed ? 'match-completed' : '',
-            isByeMatch(match) ? 'match-bye' : '',
-            !match.team1Ids.length && !match.team2Ids.length ? 'match-pending' : ''
-          ]"
-                      class="match-card">
-
-              <div class="match-header">
-                <span class="match-id">{{ match.id }}</span>
-                <span class="match-type">{{ getBracketTypeLabel(match.bracketType) }}</span>
-              </div>
-
-              <div class="match-teams">
-                <!-- Team 1 -->
-                <div
-                  [ngClass]="{'winner': match.completed && match.winnerIds && match.winnerIds.includes(match.team1Ids[0])}"
-                  class="team team1">
-                  <div class="team-name">{{ getTeamNames(match.team1Ids) }}</div>
-                </div>
-
-                <div class="vs-separator">vs</div>
-
-                <!-- Team 2 -->
-                <div
-                  [ngClass]="{'winner': match.completed && match.winnerIds && match.winnerIds.includes(match.team2Ids[0])}"
-                  class="team team2">
-                  <div class="team-name">{{ getTeamNames(match.team2Ids) }}</div>
-                </div>
-              </div>
-
-              <!-- Match result/actions -->
-              <div *ngIf="match.completed" class="match-result">
-                <div class="result-label">Winner</div>
-                <div class="winner-name">
-                  {{ getTeamNames(match.winnerIds || []) }}
-                </div>
-              </div>
-
-              <!-- Match actions for normal matches -->
-              <div *ngIf="!match.completed && canUpdateMatchResult(match) && !isByeMatch(match)" class="match-actions">
-                <button (click)="$event.stopPropagation(); updateMatchResult(match.matchId!, 1)"
-                        color="primary"
-                        mat-stroked-button>
-                  {{ getTeamNames(match.team1Ids) }} Won
-                </button>
-
-                <button (click)="$event.stopPropagation(); updateMatchResult(match.matchId!, 2)"
-                        color="primary"
-                        mat-stroked-button>
-                  {{ getTeamNames(match.team2Ids) }} Won
-                </button>
-              </div>
-
-              <!-- Bye match indicator -->
-              <div *ngIf="!match.completed && isByeMatch(match)" class="bye-match-message">
-                <mat-icon>skip_next</mat-icon>
-                <span>{{ isOrganizer ? 'Click to advance player (Bye)' : 'Bye Match' }}</span>
-              </div>
-
-              <!-- Pending match message -->
-              <div *ngIf="!match.completed && !match.team1Ids.length && !match.team2Ids.length"
-                   class="match-pending-message">
-                Waiting for previous matches to complete
-              </div>
-            </mat-card>
-          </div>
+    <!-- Bracket Container -->
+    <div *ngIf="tournament.status === TournamentStatus.READY_TO_START || tournament.status === TournamentStatus.IN_PROGRESS || tournament.status === TournamentStatus.COMPLETED" 
+         class="bracket-section">
+      <div class="section-header">
+        <h2>Tournament Bracket</h2>
+        <div *ngIf="isOrganizer && (tournament.status === TournamentStatus.IN_PROGRESS || tournament.status === TournamentStatus.READY_TO_START)" class="bracket-help">
+          <mat-icon>info</mat-icon>
+          <span>{{ tournament.status === TournamentStatus.READY_TO_START ? 'Bracket is ready - start the tournament to begin matches' : 'Click on matches to update results' }}</span>
         </div>
       </div>
+
+      <!-- Tournament bracket component -->
+      <app-tournament-bracket
+        [matches]="tournament.bracketData?.match || []"
+        [participants]="tournament.bracketData?.participant || []"
+        [stages]="tournament.bracketData?.stage || []"
+        [canUpdateResults]="isOrganizer && tournament.status === TournamentStatus.IN_PROGRESS"
+        (matchClicked)="onMatchClicked($event)">
+      </app-tournament-bracket>
+
+      <!-- No bracket data fallback -->
+      <mat-card *ngIf="!tournament.bracketData" class="no-bracket-card">
+        <mat-icon>sports_tennis</mat-icon>
+        <h3>No Bracket Generated</h3>
+        <p>The tournament bracket hasn't been generated yet.</p>
+        <button *ngIf="isOrganizer && canStartTournament()" 
+                mat-raised-button 
+                color="primary" 
+                (click)="startTournament()">
+          Generate Bracket
+        </button>
+      </mat-card>
     </div>
 
-    <!-- Players section -->
-    <div class="players-container">
-      <h2 class="section-title">Players</h2>
+    <!-- Ready Matches Section (for organizers) -->
+    <div *ngIf="isOrganizer && tournament.status === TournamentStatus.IN_PROGRESS && readyMatches.length > 0" 
+         class="ready-matches-section">
+      <div class="section-header">
+        <h2>Ready to Play</h2>
+        <mat-icon class="section-icon">schedule</mat-icon>
+      </div>
 
-      <div class="players-grid">
-        <mat-card *ngFor="let player of players" class="player-card">
-          <div class="player-info">
-            <div class="player-avatar">
-              {{ getPlayerName(player.playerId).substring(0, 2).toUpperCase() }}
+      <div class="ready-matches-grid">
+        <mat-card *ngFor="let match of readyMatches" class="ready-match-card">
+          <div class="match-participants">
+            <div class="participant">
+              <div class="participant-name">{{ getPlayerName(match.opponent1?.id || 0) }}</div>
             </div>
-            <div class="player-details">
-              <div class="player-name">{{ getPlayerName(player.playerId) }}</div>
-              <div *ngIf="player.seedPosition" class="player-seed">Seed #{{ player.seedPosition }}</div>
+            <div class="vs-separator">VS</div>
+            <div class="participant">
+              <div class="participant-name">{{ getPlayerName(match.opponent2?.id || 0) }}</div>
             </div>
-            <div *ngIf="player.eliminated" class="player-status eliminated">
-              <mat-icon>cancel</mat-icon>
-              <span>Eliminated</span>
-            </div>
-            <div *ngIf="tournament.championId === player.playerId" class="player-status champion">
-              <mat-icon>emoji_events</mat-icon>
-              <span>Champion</span>
-            </div>
-            <div *ngIf="tournament.runnerUpId === player.playerId" class="player-status runner-up">
-              <mat-icon>military_tech</mat-icon>
-              <span>Runner-up</span>
-            </div>
+          </div>
+          <div class="match-actions">
+            <button mat-raised-button 
+                    color="primary" 
+                    (click)="onMatchClicked(match)">
+              <mat-icon>sports_score</mat-icon>
+              Enter Result
+            </button>
           </div>
         </mat-card>
       </div>
     </div>
+
+    <!-- Participants Section -->
+    <div class="participants-section">
+      <div class="section-header">
+        <h2>Participants</h2>
+        <mat-icon class="section-icon">people</mat-icon>
+      </div>
+
+      <div *ngIf="!tournament.participants || tournament.participants.length === 0" class="no-participants">
+        <mat-icon>people_outline</mat-icon>
+        <p>No participants yet</p>
+      </div>
+
+      <div *ngIf="tournament.participants && tournament.participants.length > 0" class="participants-grid">
+        <mat-card *ngFor="let participant of tournament.participants" class="participant-card">
+          <div class="participant-info">
+            <div class="participant-avatar">
+              {{ participant.name ? participant.name.substring(0, 2).toUpperCase() : 'PL' }}
+            </div>
+            <div class="participant-details">
+              <div class="participant-name">{{ participant.name || 'Unknown Player' }}</div>
+              <div *ngIf="participant.seed" class="participant-seed">Seed #{{ participant.seed }}</div>
+            </div>
+          </div>
+          
+          <!-- Winner/Runner-up indicators -->
+          <div *ngIf="tournament.winnerId === participant.id" class="participant-status winner">
+            <mat-icon>emoji_events</mat-icon>
+            <span>Champion</span>
+          </div>
+          <div *ngIf="tournament.runnerUpId === participant.id" class="participant-status runner-up">
+            <mat-icon>military_tech</mat-icon>
+            <span>Runner-up</span>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Tournament Statistics -->
+    <div *ngIf="tournament.status === TournamentStatus.IN_PROGRESS || tournament.status === TournamentStatus.COMPLETED" 
+         class="statistics-section">
+      <div class="section-header">
+        <h2>Statistics</h2>
+        <mat-icon class="section-icon">analytics</mat-icon>
+      </div>
+
+      <div class="stats-grid">
+        <mat-card class="stat-card">
+          <div class="stat-value">{{ tournament.currentParticipants }}</div>
+          <div class="stat-label">Participants</div>
+        </mat-card>
+        
+        <mat-card class="stat-card">
+          <div class="stat-value">{{ readyMatches.length }}</div>
+          <div class="stat-label">Ready Matches</div>
+        </mat-card>
+      </div>
+    </div>
+
   </div>
 </div>

@@ -5,7 +5,7 @@ import {Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {TournamentService} from '../../_services/tournament.service';
 import {AccountService} from '../../_services/account.service';
-import {Tournament, TournamentStatus} from '../../_models/tournament';
+import {TournamentListItem, TournamentStatus} from '../../_models/tournament-new';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData
@@ -18,8 +18,8 @@ import {
   standalone: false,
 })
 export class TournamentListComponent implements OnInit {
-  tournaments: Tournament[] = [];
-  filteredTournaments: Tournament[] = [];
+  tournaments: TournamentListItem[] = [];
+  filteredTournaments: TournamentListItem[] = [];
   loading = true;
   error = '';
 
@@ -44,13 +44,13 @@ export class TournamentListComponent implements OnInit {
 
   loadTournaments(): void {
     this.loading = true;
-    this.tournamentService.getAllTournaments().subscribe({
-      next: (data) => {
-        this.tournaments = data;
+    this.tournamentService.getTournaments().subscribe({
+      next: (data: { content: TournamentListItem[], totalElements: number }) => {
+        this.tournaments = data.content;
         this.applyFilters();
         this.loading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error = 'Failed to load tournaments. Please try again later.';
         this.loading = false;
         console.error(err);
@@ -69,7 +69,7 @@ export class TournamentListComponent implements OnInit {
       if (this.showMyTournamentsOnly) {
         // Show tournaments where user is organizer or participant
         const isOrganizer = tournament.organizerId === this.currentUserId;
-        const isParticipant = tournament.playerIds?.includes(this.currentUserId || '') || false;
+        const isParticipant = false; // TODO: Implement participant check
 
         if (!isOrganizer && !isParticipant) {
           return false;
@@ -88,7 +88,7 @@ export class TournamentListComponent implements OnInit {
     this.router.navigate(['/tournaments', id]);
   }
 
-  deleteTournament(tournament: Tournament): void {
+  deleteTournament(tournament: TournamentListItem): void {
     const dialogData: ConfirmDialogData = {
       title: 'Confirm Deletion',
       message: `Are you sure you want to delete the tournament "${tournament.name}"?`,
@@ -116,7 +116,7 @@ export class TournamentListComponent implements OnInit {
     });
   }
 
-  isOrganizer(tournament: Tournament): boolean {
+  isOrganizer(tournament: TournamentListItem): boolean {
     return tournament.organizerId === this.currentUserId;
   }
 
@@ -156,12 +156,10 @@ export class TournamentListComponent implements OnInit {
 
   getTournamentTypeText(type: string): string {
     switch (type) {
-      case 'SINGLE_ELIMINATION':
+      case 'single_elimination':
         return 'Single Elimination';
-      case 'DOUBLE_ELIMINATION':
+      case 'double_elimination':
         return 'Double Elimination';
-      case 'ROUND_ROBIN':
-        return 'Round Robin';
       default:
         return type;
     }

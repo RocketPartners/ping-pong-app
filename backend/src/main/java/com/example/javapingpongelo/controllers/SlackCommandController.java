@@ -1,7 +1,9 @@
 package com.example.javapingpongelo.controllers;
 
 import com.example.javapingpongelo.models.Challenge;
+import com.example.javapingpongelo.models.Game;
 import com.example.javapingpongelo.models.Player;
+import com.example.javapingpongelo.repositories.GameRepository;
 import com.example.javapingpongelo.services.ChallengeService;
 import com.example.javapingpongelo.services.IPlayerService;
 import com.example.javapingpongelo.services.SlackService;
@@ -31,6 +33,9 @@ public class SlackCommandController {
     
     @Autowired
     private SlackService slackService;
+    
+    @Autowired
+    private GameRepository gameRepository;
     
     /**
      * Handle /challenge slash command
@@ -279,8 +284,9 @@ public class SlackCommandController {
         }
     }
     
+    
     /**
-     * Handle interactive button clicks
+     * Handle interactive button clicks and shortcuts
      */
     @PostMapping("/interactive")
     public ResponseEntity<Map<String, Object>> handleInteractiveAction(@RequestBody String payload) {
@@ -288,13 +294,25 @@ public class SlackCommandController {
             log.info("Interactive action received: {}", payload);
             
             // Parse Slack interactive payload (URL-encoded JSON)
-            String decodedPayload = java.net.URLDecoder.decode(payload.substring(8), "UTF-8"); // Remove "payload="
+            String decodedPayload;
+            if (payload.startsWith("payload=")) {
+                decodedPayload = java.net.URLDecoder.decode(payload.substring(8), "UTF-8");
+            } else {
+                decodedPayload = payload;
+            }
             log.info("Decoded payload: {}", decodedPayload);
             
             // Parse JSON payload
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             com.fasterxml.jackson.databind.JsonNode payloadJson = mapper.readTree(decodedPayload);
             
+            // Check if this is a shortcut or button interaction
+            String type = payloadJson.get("type").asText();
+            if ("shortcut".equals(type)) {
+                return handleShortcutPayload(payloadJson);
+            }
+            
+            // Handle button interactions (existing logic)
             String actionId = payloadJson.get("actions").get(0).get("action_id").asText();
             String challengeId = payloadJson.get("actions").get(0).get("value").asText();
             String userId = payloadJson.get("user").get("id").asText();
@@ -341,6 +359,54 @@ public class SlackCommandController {
         } catch (Exception e) {
             log.error("Error processing interactive action", e);
             return ResponseEntity.ok(createSlackResponse("❌ Error processing your response: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Handle shortcut payloads within the interactive endpoint
+     */
+    private ResponseEntity<Map<String, Object>> handleShortcutPayload(com.fasterxml.jackson.databind.JsonNode payloadJson) {
+        try {
+            String callbackId = payloadJson.get("callback_id").asText();
+            String userId = payloadJson.get("user").get("id").asText();
+            String userName = payloadJson.get("user").get("name").asText();
+            String triggerId = payloadJson.get("trigger_id").asText();
+            
+            log.info("Shortcut: callbackId={}, userId={}, userName={}", callbackId, userId, userName);
+            
+            // Find the player
+            Player player = findPlayerBySlackIdentifier(userId, userName);
+            if (player == null && !"player_spotlight".equals(callbackId)) {
+                return ResponseEntity.ok(createSlackResponse("❌ You need to be registered in the ping pong system first!"));
+            }
+            
+            // Route to appropriate handler
+            switch (callbackId) {
+                case "quick_challenge":
+                    return handleQuickChallengeShortcut(triggerId, player);
+                case "my_stats":
+                    return handleMyStatsShortcut(triggerId, player);
+                case "leaderboards":
+                    return handleLeaderboardsShortcut(triggerId);
+                case "find_opponent":
+                    return handleFindOpponentShortcut(triggerId, player);
+                case "tournament_creator":
+                    return handleTournamentCreatorShortcut(triggerId, player);
+                case "hot_streaks":
+                    return handleHotStreaksShortcut(triggerId);
+                case "player_spotlight":
+                    return handlePlayerSpotlightShortcut(triggerId);
+                case "challenge_person":
+                    return handleChallengePersonShortcut(payloadJson, triggerId, player);
+                case "check_head_to_head":
+                    return handleHeadToHeadShortcut(payloadJson, triggerId, player);
+                default:
+                    return ResponseEntity.ok(createSlackResponse("❓ Unknown shortcut"));
+            }
+            
+        } catch (Exception e) {
+            log.error("Error processing shortcut", e);
+            return ResponseEntity.ok(createSlackResponse("❌ Error processing shortcut: " + e.getMessage()));
         }
     }
     
@@ -633,5 +699,293 @@ public class SlackCommandController {
         // Strategy 2 & 3: Handle @username format or plain text (no user ID available)
         Player player = findPlayerBySlackMention(mention);
         return new PlayerLookupResult(player, null);
+    }
+    
+    // ==================== SHORTCUT HANDLERS ====================
+    
+    /**
+     * ⚡ Quick Challenge - Modal to challenge someone
+     */
+    private ResponseEntity<Map<String, Object>> handleQuickChallengeShortcut(String triggerId, Player player) {
+        return ResponseEntity.ok(createSlackResponse("⚡ Quick Challenge feature coming soon!"));
+    }
+    
+    /**
+     * 📊 My Stats - Show personal statistics
+     */
+    private ResponseEntity<Map<String, Object>> handleMyStatsShortcut(String triggerId, Player player) {
+        try {
+            List<Game> playerGames = gameRepository.findByPlayerId(player.getPlayerId());
+            
+            // Calculate stats
+            long totalGames = playerGames.size();
+            long wins = playerGames.stream().filter(g -> isPlayerWinner(g, player.getPlayerId())).count();
+            long losses = totalGames - wins;
+            double winRate = totalGames > 0 ? (double) wins / totalGames * 100 : 0;
+            
+            StringBuilder stats = new StringBuilder();
+            stats.append(String.format("📊 **%s's Statistics**\n\n", player.getFullName()));
+            stats.append(String.format("🎯 **Overall Record**: %d-%d (%.1f%% win rate)\n\n", wins, losses, winRate));
+            
+            // ELO Ratings
+            stats.append("🏆 **Current ELO Ratings**\n");
+            stats.append(String.format("• Singles Ranked: %d\n", player.getSinglesRankedRating()));
+            stats.append(String.format("• Singles Normal: %d\n", player.getSinglesNormalRating()));
+            stats.append(String.format("• Doubles Ranked: %d\n", player.getDoublesRankedRating()));
+            stats.append(String.format("• Doubles Normal: %d\n", player.getDoublesNormalRating()));
+            
+            return ResponseEntity.ok(createSlackResponse(stats.toString()));
+            
+        } catch (Exception e) {
+            log.error("Error getting player stats", e);
+            return ResponseEntity.ok(createSlackResponse("❌ Error retrieving your stats"));
+        }
+    }
+    
+    /**
+     * 🏆 Leaderboards - Quick view of all leaderboards
+     */
+    private ResponseEntity<Map<String, Object>> handleLeaderboardsShortcut(String triggerId) {
+        slackService.postAllLeaderboards();
+        return ResponseEntity.ok(createSlackResponse("🏆 All leaderboards have been posted to the channel!"));
+    }
+    
+    /**
+     * 🎯 Find Opponent - ELO-based matchmaking
+     */
+    private ResponseEntity<Map<String, Object>> handleFindOpponentShortcut(String triggerId, Player player) {
+        try {
+            List<Player> suggestions = challengeService.getMatchmakingSuggestions(player.getPlayerId(), 5, "singles-ranked");
+            
+            if (suggestions.isEmpty()) {
+                return ResponseEntity.ok(createSlackResponse("🤔 No suitable opponents found right now"));
+            }
+            
+            StringBuilder response = new StringBuilder();
+            response.append(String.format("🎯 **Perfect Opponents for %s** (ELO: %d)\n\n", 
+                player.getFullName(), player.getSinglesRankedRating()));
+            
+            for (int i = 0; i < suggestions.size(); i++) {
+                Player suggested = suggestions.get(i);
+                int ratingDiff = Math.abs(suggested.getSinglesRankedRating() - player.getSinglesRankedRating());
+                response.append(String.format("%d. **%s** (ELO: %d, ±%d)\n", 
+                    i + 1, suggested.getFullName(), suggested.getSinglesRankedRating(), ratingDiff));
+            }
+            
+            response.append("\n💡 Use `/challenge @player` to challenge someone!");
+            
+            return ResponseEntity.ok(createSlackResponse(response.toString()));
+            
+        } catch (Exception e) {
+            log.error("Error getting matchmaking suggestions", e);
+            return ResponseEntity.ok(createSlackResponse("❌ Error finding opponents"));
+        }
+    }
+    
+    /**
+     * 📅 Tournament Creator - Modal to create tournament
+     */
+    private ResponseEntity<Map<String, Object>> handleTournamentCreatorShortcut(String triggerId, Player player) {
+        return ResponseEntity.ok(createSlackResponse("📅 Tournament Creator feature coming soon!"));
+    }
+    
+    /**
+     * 🔥 Hot Streaks - Show current win streaks
+     */
+    private ResponseEntity<Map<String, Object>> handleHotStreaksShortcut(String triggerId) {
+        try {
+            List<Player> allPlayers = playerService.findAllPlayers();
+            
+            // Calculate win streaks for all players
+            List<PlayerStreak> streaks = allPlayers.stream()
+                .map(this::calculateCurrentStreak)
+                .filter(streak -> streak.streakLength >= 3) // Only show 3+ streaks
+                .sorted((a, b) -> Integer.compare(b.streakLength, a.streakLength))
+                .limit(5)
+                .collect(Collectors.toList());
+            
+            if (streaks.isEmpty()) {
+                return ResponseEntity.ok(createSlackResponse("😴 No hot streaks right now - who will be the first to get on fire?"));
+            }
+            
+            StringBuilder response = new StringBuilder();
+            response.append("🔥 **Players on Fire!**\n\n");
+            
+            for (int i = 0; i < streaks.size(); i++) {
+                PlayerStreak streak = streaks.get(i);
+                String fire = streak.streakLength >= 10 ? "🔥🔥🔥" : 
+                            streak.streakLength >= 5 ? "🔥🔥" : "🔥";
+                response.append(String.format("%d. %s **%s** - %d game win streak!\n", 
+                    i + 1, fire, streak.playerName, streak.streakLength));
+            }
+            
+            response.append("\n⚔️ Who dares to challenge them?");
+            
+            return ResponseEntity.ok(createSlackResponse(response.toString()));
+            
+        } catch (Exception e) {
+            log.error("Error getting hot streaks", e);
+            return ResponseEntity.ok(createSlackResponse("❌ Error getting hot streaks"));
+        }
+    }
+    
+    /**
+     * 🔍 Player Spotlight - Search and analyze any player
+     */
+    private ResponseEntity<Map<String, Object>> handlePlayerSpotlightShortcut(String triggerId) {
+        return ResponseEntity.ok(createSlackResponse("🔍 Player Spotlight feature coming soon!"));
+    }
+    
+    /**
+     * Challenge Person (Message Shortcut)
+     */
+    private ResponseEntity<Map<String, Object>> handleChallengePersonShortcut(com.fasterxml.jackson.databind.JsonNode payload, String triggerId, Player challenger) {
+        try {
+            // Get the user from the message
+            String targetUserId = payload.get("message").get("user").asText();
+            Player targetPlayer = findPlayerBySlackIdentifier(targetUserId, null);
+            
+            if (targetPlayer == null) {
+                return ResponseEntity.ok(createSlackResponse("❌ That person is not registered in the ping pong system"));
+            }
+            
+            if (targetPlayer.getPlayerId().equals(challenger.getPlayerId())) {
+                return ResponseEntity.ok(createSlackResponse("❌ You can't challenge yourself!"));
+            }
+            
+            // Create quick challenge
+            Challenge challenge = challengeService.createChallenge(
+                challenger.getPlayerId(),
+                targetPlayer.getPlayerId(),
+                "Challenged via message shortcut!",
+                false, // Normal game
+                true,  // Singles
+                payload.get("channel").get("id").asText(),
+                payload.get("user").get("id").asText(),
+                targetUserId
+            );
+            
+            return ResponseEntity.ok(createSlackResponse(String.format("⚔️ Challenge sent to %s!", targetPlayer.getFullName())));
+            
+        } catch (Exception e) {
+            log.error("Error creating challenge from message shortcut", e);
+            return ResponseEntity.ok(createSlackResponse("❌ Error creating challenge"));
+        }
+    }
+    
+    /**
+     * Check Head-to-Head (Message Shortcut)
+     */
+    private ResponseEntity<Map<String, Object>> handleHeadToHeadShortcut(com.fasterxml.jackson.databind.JsonNode payload, String triggerId, Player player) {
+        try {
+            // Get the user from the message
+            String targetUserId = payload.get("message").get("user").asText();
+            Player targetPlayer = findPlayerBySlackIdentifier(targetUserId, null);
+            
+            if (targetPlayer == null) {
+                return ResponseEntity.ok(createSlackResponse("❌ That person is not registered in the ping pong system"));
+            }
+            
+            if (targetPlayer.getPlayerId().equals(player.getPlayerId())) {
+                return ResponseEntity.ok(createSlackResponse("❌ You can't check head-to-head against yourself!"));
+            }
+            
+            // Calculate head-to-head record
+            String h2hRecord = getDetailedHeadToHeadRecord(player, targetPlayer);
+            
+            return ResponseEntity.ok(createSlackResponse(h2hRecord));
+            
+        } catch (Exception e) {
+            log.error("Error getting head-to-head record", e);
+            return ResponseEntity.ok(createSlackResponse("❌ Error getting head-to-head record"));
+        }
+    }
+    
+    // Helper methods for shortcuts
+    
+    private boolean isPlayerWinner(Game game, UUID playerId) {
+        return (game.getChallengerId().equals(playerId) && game.isChallengerWin()) ||
+               (game.getOpponentId().equals(playerId) && game.isOpponentWin()) ||
+               (game.getChallengerTeam() != null && game.getChallengerTeam().contains(playerId) && game.isChallengerTeamWin()) ||
+               (game.getOpponentTeam() != null && game.getOpponentTeam().contains(playerId) && game.isOpponentTeamWin());
+    }
+    
+    private PlayerStreak calculateCurrentStreak(Player player) {
+        try {
+            List<Game> recentGames = gameRepository.findByPlayerId(player.getPlayerId())
+                .stream()
+                .sorted((a, b) -> b.getDatePlayed().compareTo(a.getDatePlayed()))
+                .collect(Collectors.toList());
+            
+            int streak = 0;
+            for (Game game : recentGames) {
+                if (isPlayerWinner(game, player.getPlayerId())) {
+                    streak++;
+                } else {
+                    break; // Streak broken
+                }
+            }
+            
+            return new PlayerStreak(player.getFullName(), streak);
+        } catch (Exception e) {
+            return new PlayerStreak(player.getFullName(), 0);
+        }
+    }
+    
+    private String getDetailedHeadToHeadRecord(Player player1, Player player2) {
+        try {
+            List<Game> player1Games = gameRepository.findByPlayerId(player1.getPlayerId());
+            int player1Wins = 0;
+            int player2Wins = 0;
+            
+            for (Game game : player1Games) {
+                if (game.isSinglesGame()) { // Focus on singles for now
+                    boolean hasPlayer2 = (game.getChallengerId().equals(player2.getPlayerId()) || 
+                                         game.getOpponentId().equals(player2.getPlayerId()));
+                    if (hasPlayer2) {
+                        if (isPlayerWinner(game, player1.getPlayerId())) {
+                            player1Wins++;
+                        } else {
+                            player2Wins++;
+                        }
+                    }
+                }
+            }
+            
+            if (player1Wins + player2Wins == 0) {
+                return String.format("⚔️ **%s vs %s**\n\nNo games played yet! Time to settle this on the table! 🏓", 
+                    player1.getFullName(), player2.getFullName());
+            }
+            
+            String leader = player1Wins > player2Wins ? player1.getFullName() : player2.getFullName();
+            int leaderWins = Math.max(player1Wins, player2Wins);
+            int otherWins = Math.min(player1Wins, player2Wins);
+            
+            return String.format(
+                "⚔️ **Head-to-Head: %s vs %s**\n\n" +
+                "🏆 %s leads %d-%d\n" +
+                "📊 Total games: %d\n" +
+                "🎯 %s's win rate: %.1f%%",
+                player1.getFullName(), player2.getFullName(),
+                leader, leaderWins, otherWins,
+                player1Wins + player2Wins,
+                player1.getFullName(), 
+                (double) player1Wins / (player1Wins + player2Wins) * 100
+            );
+            
+        } catch (Exception e) {
+            return "❌ Error calculating head-to-head record";
+        }
+    }
+    
+    // Helper class for streaks
+    private static class PlayerStreak {
+        final String playerName;
+        final int streakLength;
+        
+        PlayerStreak(String playerName, int streakLength) {
+            this.playerName = playerName;
+            this.streakLength = streakLength;
+        }
     }
 }

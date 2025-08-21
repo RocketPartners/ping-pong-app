@@ -52,8 +52,7 @@
         </div>
         <mat-card-title>{{ tournament.name }}</mat-card-title>
         <mat-card-subtitle>
-          {{ getTournamentTypeText(tournament.tournamentType) }} •
-          {{ getGameTypeText(tournament.gameType) }}
+          {{ getTournamentTypeText(tournament.type) }}
         </mat-card-subtitle>
         <div [ngClass]="getStatusClass(tournament.status)" class="status-badge">
           {{ getStatusText(tournament.status) }}
@@ -68,7 +67,7 @@
         <div class="tournament-info">
           <div class="info-item">
             <mat-icon>people</mat-icon>
-            <span>{{ tournament.numberOfPlayers }} Players</span>
+            <span>{{ tournament.currentParticipants }}/{{ tournament.maxParticipants }} Players</span>
           </div>
 
           <div class="info-item">
@@ -78,10 +77,6 @@
             </span>
           </div>
 
-          <div *ngIf="tournament.currentRound" class="info-item">
-            <mat-icon>sports_tennis</mat-icon>
-            <span>Round {{ tournament.currentRound }}</span>
-          </div>
 
           <!-- Organizer badge -->
           <div *ngIf="isOrganizer(tournament)" class="organizer-badge">

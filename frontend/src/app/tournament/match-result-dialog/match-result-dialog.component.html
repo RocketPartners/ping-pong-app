@@ -1,0 +1,104 @@
+<!-- src/app/tournament/match-result-dialog/match-result-dialog.component.html -->
+<div class="match-result-dialog">
+  <h2 mat-dialog-title>Update Match Result</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="resultForm" class="result-form">
+      <!-- Winner Selection -->
+      <div class="winner-selection">
+        <h3>Select Winner</h3>
+        
+        <mat-button-toggle-group formControlName="winner" class="winner-toggle">
+          <mat-button-toggle 
+            [value]="participant1Id" 
+            [disabled]="!participant1Id"
+            [ngClass]="{'active-winner': resultForm.get('winner')?.value === participant1Id}">
+            <div class="participant-option">
+              <mat-icon *ngIf="resultForm.get('winner')?.value === participant1Id">emoji_events</mat-icon>
+              <span>{{ participant1Name }}</span>
+            </div>
+          </mat-button-toggle>
+          
+          <mat-button-toggle 
+            [value]="participant2Id" 
+            [disabled]="!participant2Id"
+            [ngClass]="{'active-winner': resultForm.get('winner')?.value === participant2Id}">
+            <div class="participant-option">
+              <mat-icon *ngIf="resultForm.get('winner')?.value === participant2Id">emoji_events</mat-icon>
+              <span>{{ participant2Name }}</span>
+            </div>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+        
+        <div *ngIf="resultForm.get('winner')?.hasError('required') && resultForm.get('winner')?.touched" 
+             class="error-message">
+          Please select a winner
+        </div>
+      </div>
+      
+      <!-- Score Section -->
+      <div class="score-section">
+        <h3>Enter Scores</h3>
+        
+        <!-- Score Inputs -->
+        <div class="score-inputs">
+          <div class="score-group">
+            <label [class.winner-label]="resultForm.get('winner')?.value === participant1Id">
+              {{ participant1Name }}
+            </label>
+            <mat-form-field>
+              <input matInput type="number" min="0" max="99"
+                    [formControlName]="resultForm.get('winner')?.value === participant1Id ? 'winnerScore' : 'loserScore'"
+                    class="score-input">
+            </mat-form-field>
+          </div>
+          
+          <div class="score-divider">-</div>
+          
+          <div class="score-group">
+            <label [class.winner-label]="resultForm.get('winner')?.value === participant2Id">
+              {{ participant2Name }}
+            </label>
+            <mat-form-field>
+              <input matInput type="number" min="0" max="99"
+                    [formControlName]="resultForm.get('winner')?.value === participant2Id ? 'winnerScore' : 'loserScore'"
+                    class="score-input">
+            </mat-form-field>
+          </div>
+        </div>
+        
+        <!-- Quick Score Buttons -->
+        <div class="quick-score-buttons">
+          <h4>Quick Scores (Ping Pong - Play to 11, Win by 2)</h4>
+          <div class="quick-buttons">
+            <button mat-stroked-button (click)="quickScore(11, 0)">11-0</button>
+            <button mat-stroked-button (click)="quickScore(11, 5)">11-5</button>
+            <button mat-stroked-button (click)="quickScore(11, 8)">11-8</button>
+            <button mat-stroked-button (click)="quickScore(11, 9)">11-9</button>
+            <button mat-stroked-button (click)="quickScore(12, 10)">12-10</button>
+            <button mat-stroked-button (click)="quickScore(13, 11)">13-11</button>
+          </div>
+        </div>
+        
+        <!-- Validation Messages -->
+        <div class="form-errors">
+          <div *ngIf="resultForm.get('winnerScore')?.invalid && resultForm.get('winnerScore')?.touched" 
+              class="error-message">
+            Winner score must be between 0 and 99
+          </div>
+          <div *ngIf="resultForm.get('loserScore')?.invalid && resultForm.get('loserScore')?.touched" 
+              class="error-message">
+            Loser score must be between 0 and 99
+          </div>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="resultForm.invalid" (click)="onSubmit()">
+      Update Result
+    </button>
+  </mat-dialog-actions>
+</div>

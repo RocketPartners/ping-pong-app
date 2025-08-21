@@ -1,0 +1,231 @@
+<!-- src/app/tournament/tournament-bracket/tournament-bracket.component.html -->
+<div class="tournament-bracket">
+  <!-- Show message if no playable matches -->
+  <div *ngIf="bracketRounds.size === 0" class="no-bracket">
+    <mat-icon>sports_tennis</mat-icon>
+    <h3>No Matches to Display</h3>
+    <p>All remaining matches are byes or the next round hasn't been generated yet.</p>
+  </div>
+
+  <!-- Double Elimination View -->
+  <div *ngIf="isDoubleElimination && bracketRounds.size > 0" class="double-elimination-bracket">
+    <!-- Winner's Bracket -->
+    <div class="bracket-section winners-bracket">
+      <h3 class="bracket-section-title">Winner's Bracket</h3>
+      <div class="bracket-rounds">
+        <div *ngFor="let roundData of getWinnerBracketRounds()" class="bracket-round">
+          <div class="round-header">
+            <h4>{{ getWinnerBracketRoundName(roundData[0]) }}</h4>
+          </div>
+          
+          <div class="round-matches">
+            <div *ngFor="let match of roundData[1]" 
+                class="match-card" 
+                [ngClass]="getMatchStatusClass(match)"
+                (click)="onMatchClick(match)"
+                [class.clickable]="canUpdateResults && isMatchPlayable(match)">
+              
+              <!-- Match participants -->
+              <div class="match-participants">
+                <div class="participant" 
+                    [class.winner]="match.opponent1?.result === 'win'"
+                    [class.loser]="match.opponent1?.result === 'loss'">
+                  <span class="participant-name">
+                    {{ getParticipantName(match.opponent1?.id || null) }}
+                  </span>
+                  <span *ngIf="match.opponent1?.score !== undefined" class="score">
+                    {{ match.opponent1?.score }}
+                  </span>
+                </div>
+                
+                <div class="vs-divider">VS</div>
+                
+                <div class="participant" 
+                    [class.winner]="match.opponent2?.result === 'win'"
+                    [class.loser]="match.opponent2?.result === 'loss'">
+                  <span class="participant-name">
+                    {{ getParticipantName(match.opponent2?.id || null) }}
+                  </span>
+                  <span *ngIf="match.opponent2?.score !== undefined" class="score">
+                    {{ match.opponent2?.score }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Match status indicator -->
+              <div class="match-status">
+                <mat-icon *ngIf="match.status === matchStatus.COMPLETED">check_circle</mat-icon>
+                <mat-icon *ngIf="match.status === matchStatus.READY">play_circle_outline</mat-icon>
+                <mat-icon *ngIf="match.status === matchStatus.WAITING">schedule</mat-icon>
+                <mat-icon *ngIf="match.status === matchStatus.RUNNING">sports_score</mat-icon>
+                <mat-icon *ngIf="match.status === matchStatus.LOCKED">lock</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loser's Bracket -->
+    <div class="bracket-section losers-bracket">
+      <h3 class="bracket-section-title">Loser's Bracket</h3>
+      <div class="bracket-rounds">
+        <div *ngFor="let roundData of getLoserBracketRounds()" class="bracket-round">
+          <div class="round-header">
+            <h4>{{ getLoserBracketRoundName(roundData[0]) }}</h4>
+          </div>
+          
+          <div class="round-matches">
+            <div *ngFor="let match of roundData[1]" 
+                class="match-card" 
+                [ngClass]="getMatchStatusClass(match)"
+                (click)="onMatchClick(match)"
+                [class.clickable]="canUpdateResults && isMatchPlayable(match)">
+              
+              <!-- Match participants -->
+              <div class="match-participants">
+                <div class="participant" 
+                    [class.winner]="match.opponent1?.result === 'win'"
+                    [class.loser]="match.opponent1?.result === 'loss'">
+                  <span class="participant-name">
+                    {{ getParticipantName(match.opponent1?.id || null) }}
+                  </span>
+                  <span *ngIf="match.opponent1?.score !== undefined" class="score">
+                    {{ match.opponent1?.score }}
+                  </span>
+                </div>
+                
+                <div class="vs-divider">VS</div>
+                
+                <div class="participant" 
+                    [class.winner]="match.opponent2?.result === 'win'"
+                    [class.loser]="match.opponent2?.result === 'loss'">
+                  <span class="participant-name">
+                    {{ getParticipantName(match.opponent2?.id || null) }}
+                  </span>
+                  <span *ngIf="match.opponent2?.score !== undefined" class="score">
+                    {{ match.opponent2?.score }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Match status indicator -->
+              <div class="match-status">
+                <mat-icon *ngIf="match.status === matchStatus.COMPLETED">check_circle</mat-icon>
+                <mat-icon *ngIf="match.status === matchStatus.READY">play_circle_outline</mat-icon>
+                <mat-icon *ngIf="match.status === matchStatus.WAITING">schedule</mat-icon>
+                <mat-icon *ngIf="match.status === matchStatus.RUNNING">sports_score</mat-icon>
+                <mat-icon *ngIf="match.status === matchStatus.LOCKED">lock</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Finals Section -->
+    <div *ngIf="finalRounds.length > 0" class="bracket-section finals-section">
+      <h3 class="bracket-section-title">Grand Finals</h3>
+      <div class="finals-container">
+        <div *ngFor="let match of finalRounds" 
+             class="match-card final-match" 
+             [ngClass]="getMatchStatusClass(match)"
+             (click)="onMatchClick(match)"
+             [class.clickable]="canUpdateResults && isMatchPlayable(match)">
+          
+          <!-- Match participants -->
+          <div class="match-participants">
+            <div class="participant" 
+                [class.winner]="match.opponent1?.result === 'win'"
+                [class.loser]="match.opponent1?.result === 'loss'">
+              <span class="participant-name">
+                {{ getParticipantName(match.opponent1?.id || null) }}
+              </span>
+              <span *ngIf="match.opponent1?.score !== undefined" class="score">
+                {{ match.opponent1?.score }}
+              </span>
+            </div>
+            
+            <div class="vs-divider">VS</div>
+            
+            <div class="participant" 
+                [class.winner]="match.opponent2?.result === 'win'"
+                [class.loser]="match.opponent2?.result === 'loss'">
+              <span class="participant-name">
+                {{ getParticipantName(match.opponent2?.id || null) }}
+              </span>
+              <span *ngIf="match.opponent2?.score !== undefined" class="score">
+                {{ match.opponent2?.score }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Match status indicator -->
+          <div class="match-status">
+            <mat-icon *ngIf="match.status === matchStatus.COMPLETED">check_circle</mat-icon>
+            <mat-icon *ngIf="match.status === matchStatus.READY">play_circle_outline</mat-icon>
+            <mat-icon *ngIf="match.status === matchStatus.WAITING">schedule</mat-icon>
+            <mat-icon *ngIf="match.status === matchStatus.RUNNING">sports_score</mat-icon>
+            <mat-icon *ngIf="match.status === matchStatus.LOCKED">lock</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single Elimination View -->
+  <div *ngIf="!isDoubleElimination && bracketRounds.size > 0" class="single-elimination-bracket">
+    <div class="bracket-rounds">
+      <div *ngFor="let roundData of getSingleBracketRounds()" class="bracket-round">
+        <div class="round-header">
+          <h4>{{ getRoundName(roundData[0]) }}</h4>
+        </div>
+        
+        <div class="round-matches">
+          <div *ngFor="let match of roundData[1]" 
+               class="match-card" 
+               [ngClass]="getMatchStatusClass(match)"
+               (click)="onMatchClick(match)"
+               [class.clickable]="canUpdateResults && isMatchPlayable(match)">
+            
+            <!-- Match participants -->
+            <div class="match-participants">
+              <div class="participant" 
+                   [class.winner]="match.opponent1?.result === 'win'"
+                   [class.loser]="match.opponent1?.result === 'loss'">
+                <span class="participant-name">
+                  {{ getParticipantName(match.opponent1?.id || null) }}
+                </span>
+                <span *ngIf="match.opponent1?.score !== undefined" class="score">
+                  {{ match.opponent1?.score }}
+                </span>
+              </div>
+              
+              <div class="vs-divider">VS</div>
+              
+              <div class="participant" 
+                   [class.winner]="match.opponent2?.result === 'win'"
+                   [class.loser]="match.opponent2?.result === 'loss'">
+                <span class="participant-name">
+                  {{ getParticipantName(match.opponent2?.id || null) }}
+                </span>
+                <span *ngIf="match.opponent2?.score !== undefined" class="score">
+                  {{ match.opponent2?.score }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Match status indicator -->
+            <div class="match-status">
+              <mat-icon *ngIf="match.status === matchStatus.COMPLETED">check_circle</mat-icon>
+              <mat-icon *ngIf="match.status === matchStatus.READY">play_circle_outline</mat-icon>
+              <mat-icon *ngIf="match.status === matchStatus.WAITING">schedule</mat-icon>
+              <mat-icon *ngIf="match.status === matchStatus.RUNNING">sports_score</mat-icon>
+              <mat-icon *ngIf="match.status === matchStatus.LOCKED">lock</mat-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

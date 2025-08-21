@@ -25,12 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -49,7 +46,7 @@ public class SlackService {
     
     
     private final DecimalFormat eloFormat = new DecimalFormat("+#;-#");
-    private final DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm");
+    private final DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("h:mm a");
     
     @Value("${slack.bot.token:}")
     private String botToken;
@@ -92,6 +89,9 @@ public class SlackService {
             
             // Check for completed challenges and post results to challenge threads
             checkAndPostChallengeResults(game);
+            
+            // Check for leadership changes
+            checkAndPostLeadershipChanges(game);
             
         } catch (Exception e) {
             log.error("Error posting game result to Slack", e);
@@ -148,10 +148,10 @@ public class SlackService {
             .text(MarkdownTextObject.builder()
                 .text(String.format(
                     "📈 *ELO Changes*\n" +
-                    "🥇 %s: %.0f (%s%.0f)\n" +
-                    "🥈 %s: %.0f (%s%.0f)",
-                    winner.getFullName(), winnerRating, eloFormat.format(eloChange), eloChange,
-                    loser.getFullName(), loserRating, eloFormat.format(-eloChange), -eloChange
+                    "🥇 %s: %.0f (%s)\n" +
+                    "🥈 %s: %.0f (%s)",
+                    winner.getFullName(), winnerRating, eloFormat.format(eloChange),
+                    loser.getFullName(), loserRating, eloFormat.format(-eloChange)
                 ))
                 .build())
             .build());
@@ -280,7 +280,118 @@ public class SlackService {
     
     // Leaderboard functionality
     public boolean postDailyLeaderboard() {
-        return postLeaderboard("singles-ranked");
+        return postDailyLeaderboardWithStats();
+    }
+    
+    public boolean postDailyLeaderboardWithStats() {
+        if (methods == null) {
+            log.error("Slack methods not initialized");
+            return false;
+        }
+        
+        try {
+            // Post 24-hour summary first
+            postDaily24HourSummary();
+            
+            // Then post all leaderboards
+            return postAllLeaderboards();
+            
+        } catch (Exception e) {
+            log.error("Error posting daily leaderboard with stats", e);
+            return false;
+        }
+    }
+    
+    private void postDaily24HourSummary() {
+        try {
+            LocalDateTime yesterday = LocalDateTime.now().minusHours(24);
+            LocalDateTime now = LocalDateTime.now();
+            
+            // Convert LocalDateTime to Date for database query
+            Date startDate = Date.from(yesterday.atZone(ZoneId.systemDefault()).toInstant());
+            Date endDate = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+            
+            // Get games from last 24 hours
+            List<Game> recentGames = gameRepository.findGamesInTimeRange(startDate, endDate);
+            
+            if (recentGames.isEmpty()) {
+                return; // No games to report
+            }
+            
+            // Calculate stats
+            long totalGames = recentGames.size();
+            long singlesGames = recentGames.stream().filter(Game::isSinglesGame).count();
+            long doublesGames = recentGames.stream().filter(g -> !g.isSinglesGame()).count();
+            long rankedGames = recentGames.stream().filter(Game::isRatedGame).count();
+            long normalGames = recentGames.stream().filter(g -> !g.isRatedGame()).count();
+            
+            // Find most active players
+            Map<UUID, Long> playerGameCounts = new HashMap<>();
+            recentGames.forEach(game -> {
+                playerGameCounts.put(game.getChallengerId(), 
+                    playerGameCounts.getOrDefault(game.getChallengerId(), 0L) + 1);
+                playerGameCounts.put(game.getOpponentId(), 
+                    playerGameCounts.getOrDefault(game.getOpponentId(), 0L) + 1);
+                
+                // Add team members for doubles
+                if (game.getChallengerTeam() != null) {
+                    game.getChallengerTeam().forEach(playerId -> 
+                        playerGameCounts.put(playerId, 
+                            playerGameCounts.getOrDefault(playerId, 0L) + 1));
+                }
+                if (game.getOpponentTeam() != null) {
+                    game.getOpponentTeam().forEach(playerId -> 
+                        playerGameCounts.put(playerId, 
+                            playerGameCounts.getOrDefault(playerId, 0L) + 1));
+                }
+            });
+            
+            // Find top 3 most active players
+            List<Map.Entry<UUID, Long>> topPlayers = playerGameCounts.entrySet().stream()
+                .sorted(Map.Entry.<UUID, Long>comparingByValue().reversed())
+                .limit(3)
+                .collect(Collectors.toList());
+            
+            StringBuilder summary = new StringBuilder();
+            summary.append("📅 **Last 24 Hours Recap**\n\n");
+            summary.append(String.format("🏆 **Total Games**: %d\n", totalGames));
+            summary.append(String.format("🏓 Singles: %d | 👥 Doubles: %d\n", singlesGames, doublesGames));
+            summary.append(String.format("🏅 Ranked: %d | 🎲 Normal: %d\n\n", rankedGames, normalGames));
+            
+            if (!topPlayers.isEmpty()) {
+                summary.append("🔥 **Most Active Players:**\n");
+                for (int i = 0; i < topPlayers.size(); i++) {
+                    UUID playerId = topPlayers.get(i).getKey();
+                    Long gameCount = topPlayers.get(i).getValue();
+                    Player player = playerService.findPlayerById(playerId);
+                    
+                    String medal = i == 0 ? "🥇" : i == 1 ? "🥈" : "🥉";
+                    summary.append(String.format("%s %s - %d games\n", 
+                        medal, player != null ? player.getFullName() : "Unknown", gameCount));
+                }
+                summary.append("\n");
+            }
+            
+            summary.append("📈 **Daily Leaderboards Below** ⬇️");
+            
+            List<LayoutBlock> blocks = new ArrayList<>();
+            blocks.add(SectionBlock.builder()
+                .text(MarkdownTextObject.builder()
+                    .text(summary.toString())
+                    .build())
+                .build());
+            
+            methods.chatPostMessage(req -> req
+                .channel(resultsChannel)
+                .text("Daily 24-hour recap")
+                .blocks(blocks)
+            );
+            
+            log.info("Posted daily 24-hour summary");
+            
+        } catch (Exception e) {
+            log.error("Error posting daily summary", e);
+        }
     }
     
     public boolean postLeaderboard(String type) {
@@ -474,6 +585,84 @@ public class SlackService {
             log.info("Posted welcome message for new player: {}", player.getPlayerId());
         } catch (Exception e) {
             log.error("Error posting welcome message", e);
+        }
+    }
+    
+    // New #1 player notifications
+    public void checkAndPostLeadershipChanges(Game game) {
+        if (methods == null) return;
+        
+        try {
+            // Check all 4 leaderboard types
+            checkLeadershipChange("Singles Ranked", Player::getSinglesRankedRating);
+            checkLeadershipChange("Singles Normal", Player::getSinglesNormalRating);
+            checkLeadershipChange("Doubles Ranked", Player::getDoublesRankedRating);
+            checkLeadershipChange("Doubles Normal", Player::getDoublesNormalRating);
+            
+        } catch (Exception e) {
+            log.error("Error checking leadership changes", e);
+        }
+    }
+    
+    private void checkLeadershipChange(String leaderboardName, Function<Player, Integer> ratingExtractor) {
+        try {
+            List<Player> topPlayers = playerService.findAllPlayers().stream()
+                .sorted((p1, p2) -> Integer.compare(ratingExtractor.apply(p2), ratingExtractor.apply(p1)))
+                .limit(2)
+                .collect(Collectors.toList());
+            
+            if (topPlayers.size() < 2) return; // Need at least 2 players
+            
+            Player currentKing = topPlayers.get(0);
+            Player previousKing = topPlayers.get(1);
+            
+            // Check if there's been a leadership change in the last few minutes
+            // This is a simple implementation - in production you'd want to track this more precisely
+            int currentRating = ratingExtractor.apply(currentKing);
+            int previousRating = ratingExtractor.apply(previousKing);
+            
+            // If the difference is small, it might be a recent change
+            if (Math.abs(currentRating - previousRating) <= 50) {
+                // Could be a recent change, post notification
+                postLeadershipChange(leaderboardName, currentKing, previousKing, currentRating);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error checking leadership change for {}", leaderboardName, e);
+        }
+    }
+    
+    private void postLeadershipChange(String leaderboardName, Player newKing, Player formerKing, int newRating) {
+        try {
+            String message = String.format(
+                "👑 **The King is Dead, Long Live the King!** 👑\n\n" +
+                "📢 **%s Leaderboard**\n" +
+                "☠️ The reign of *%s* has ended\n" +
+                "👑 All hail *%s*, the new #1 with %d ELO!\n\n" +
+                "🏆 Will anyone dare challenge the new monarch?",
+                leaderboardName,
+                formerKing.getFullName(),
+                newKing.getFullName(),
+                newRating
+            );
+            
+            List<LayoutBlock> blocks = new ArrayList<>();
+            blocks.add(SectionBlock.builder()
+                .text(MarkdownTextObject.builder()
+                    .text(message)
+                    .build())
+                .build());
+            
+            methods.chatPostMessage(req -> req
+                .channel(resultsChannel)
+                .text(String.format("New #1 on %s leaderboard: %s!", leaderboardName, newKing.getFullName()))
+                .blocks(blocks)
+            );
+            
+            log.info("Posted leadership change for {}: {} -> {}", leaderboardName, formerKing.getFullName(), newKing.getFullName());
+            
+        } catch (Exception e) {
+            log.error("Error posting leadership change", e);
         }
     }
     

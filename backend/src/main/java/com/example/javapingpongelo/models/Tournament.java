@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -59,17 +60,26 @@ public class Tournament {
     @NotNull(message = "Seeding method is required")
     private SeedingMethod seedingMethod;
 
+    /**
+     * Whether to re-seed after each round (for fairness)
+     */
+    @Column(name = "enable_reseeding")
+    @Builder.Default
+    private boolean enableReseeding = true;
+
     @NotNull(message = "Organizer ID is required")
     @Column(name = "organizer_id")
     private UUID organizerId;
 
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<TournamentPlayer> tournamentPlayers = new ArrayList<>();
 
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @EqualsAndHashCode.Exclude
     @Builder.Default
     private List<TournamentMatch> matches = new ArrayList<>();
 
@@ -101,7 +111,23 @@ public class Tournament {
     private UUID runnerUpId;
 
     @Column(name = "current_round")
-    private Integer currentRound;
+    @Builder.Default
+    private Integer currentRound = 0;
+
+    /**
+     * Total number of rounds needed for this tournament
+     * Calculated based on tournament type and participant count
+     */
+    @Column(name = "total_rounds")
+    private Integer totalRounds;
+
+    /**
+     * Whether the current round is ready to start
+     * Used for hybrid manual/auto progression
+     */
+    @Column(name = "round_ready")
+    @Builder.Default
+    private boolean roundReady = false;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -160,13 +186,16 @@ public class Tournament {
 
     public enum SeedingMethod {
         RATING_BASED,
-        RANDOM
+        RANDOM,
+        MANUAL
     }
 
     public enum TournamentStatus {
-        CREATED,
-        IN_PROGRESS,
-        COMPLETED,
-        CANCELLED
+        CREATED,           // Tournament created, accepting registrations
+        READY_TO_START,    // Registration closed, ready for first round generation
+        IN_PROGRESS,       // Tournament actively running
+        ROUND_COMPLETE,    // Current round finished, next round needs approval
+        COMPLETED,         // Tournament finished with winner
+        CANCELLED          // Tournament cancelled
     }
 }

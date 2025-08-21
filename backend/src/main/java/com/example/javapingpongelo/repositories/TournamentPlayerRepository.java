@@ -1,5 +1,6 @@
 package com.example.javapingpongelo.repositories;
 
+import com.example.javapingpongelo.models.Tournament;
 import com.example.javapingpongelo.models.TournamentPlayer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -49,4 +50,21 @@ public interface TournamentPlayerRepository extends JpaRepository<TournamentPlay
     UUID findPartnerIdByTournamentIdAndPlayerId(
             @Param("tournamentId") UUID tournamentId,
             @Param("playerId") UUID playerId);
+
+    /**
+     * Find all players in a tournament
+     *
+     * @param tournament The tournament
+     * @return List of TournamentPlayer entries for the tournament
+     */
+    List<TournamentPlayer> findByTournament(Tournament tournament);
+
+    /**
+     * Find all players in a tournament with specific elimination status
+     *
+     * @param tournament The tournament
+     * @param eliminated Whether to find eliminated or non-eliminated players
+     * @return List of TournamentPlayer entries matching the criteria
+     */
+    List<TournamentPlayer> findByTournamentAndEliminated(Tournament tournament, boolean eliminated);
 }

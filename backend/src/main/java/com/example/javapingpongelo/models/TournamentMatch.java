@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class TournamentMatch {
     private UUID matchId;
 
     @Column(nullable = false, name = "match_display_id")
-    private String id;
+    private String displayId;
 
     @ElementCollection
     @CollectionTable(
@@ -79,10 +80,35 @@ public class TournamentMatch {
     @Column(name = "round")
     private Integer round;
 
+    /**
+     * Position within the round (for UI display ordering)
+     */
+    @Column(name = "position_in_round")
+    private Integer positionInRound;
+
+    /**
+     * Seeding/ranking of team1 at time of match creation
+     */
+    @Column(name = "team1_seed")
+    private Integer team1Seed;
+
+    /**
+     * Seeding/ranking of team2 at time of match creation
+     */
+    @Column(name = "team2_seed")
+    private Integer team2Seed;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tournament_id")
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     private Tournament tournament;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tournament_round_id")
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
+    private TournamentRound tournamentRound;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "bracket_type")
@@ -112,10 +138,41 @@ public class TournamentMatch {
     @Column(name = "location")
     private String location;
 
+    /**
+     * Whether this match is a bye (one team automatically advances)
+     */
+    @Column(name = "is_bye")
+    @Builder.Default
+    private boolean isBye = false;
+
+    /**
+     * Which team gets the bye (if applicable)
+     */
+    @Column(name = "bye_team")
+    private Integer byeTeam; // 1 or 2
+
     public enum BracketType {
-        WINNER,
-        FINAL,
-        CHAMPIONSHIP,
-        LOSER
+        WINNER,           // Winner's bracket match
+        LOSER,           // Loser's bracket match  
+        FINAL,           // Final match
+        GRAND_FINAL,     // Grand final (winner's bracket winner vs loser's bracket winner)
+        GRAND_FINAL_RESET // Second grand final if loser's bracket winner wins first
+    }
+
+    /**
+     * Helper method to check if this match can be played
+     */
+    public boolean isPlayable() {
+        return !isBye && !completed && 
+               ((team1Ids != null && !team1Ids.isEmpty()) || 
+                (team2Ids != null && !team2Ids.isEmpty()));
+    }
+
+    /**
+     * Helper method to check if match has both teams assigned
+     */
+    public boolean hasAllTeams() {
+        return team1Ids != null && !team1Ids.isEmpty() && 
+               team2Ids != null && !team2Ids.isEmpty();
     }
 }

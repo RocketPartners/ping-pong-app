@@ -1,0 +1,193 @@
+/* src/app/tournament/match-result-dialog/match-result-dialog.component.scss */
+
+.match-result-dialog {
+  min-width: 300px;
+  max-width: 500px;
+  padding: 0;
+  
+  h2 {
+    margin-bottom: 20px;
+    font-weight: 500;
+    color: #333;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+}
+
+mat-dialog-content {
+  padding-top: 0;
+  margin: 0;
+}
+
+.result-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.winner-selection {
+  h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: #444;
+  }
+}
+
+.winner-toggle {
+  width: 100%;
+  display: flex;
+  
+  .mat-button-toggle {
+    flex: 1;
+    
+    &:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    
+    &.active-winner {
+      background-color: #e8f5e9;
+      border-color: #a5d6a7;
+      
+      .mat-button-toggle-label-content {
+        color: #2e7d32;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.participant-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+  
+  mat-icon {
+    color: #4caf50;
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+  
+  span {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.score-section {
+  h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: #444;
+  }
+}
+
+.score-inputs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.score-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  
+  label {
+    font-size: 14px;
+    color: #555;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    
+    &.winner-label {
+      color: #2e7d32;
+      font-weight: 500;
+    }
+  }
+  
+  .mat-form-field {
+    width: 70px;
+  }
+  
+  .score-input {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+.score-divider {
+  font-size: 24px;
+  font-weight: 500;
+  color: #888;
+  margin-top: 24px;
+}
+
+.quick-score-buttons {
+  margin-top: 20px;
+  
+  h4 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: #555;
+  }
+}
+
+.quick-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  
+  button {
+    min-width: 60px;
+    font-weight: 500;
+  }
+}
+
+.error-message {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+mat-dialog-actions {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+  gap: 12px;
+}
+
+@media (max-width: 400px) {
+  .score-inputs {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .score-divider {
+    transform: rotate(90deg);
+    margin: 8px 0;
+  }
+  
+  .quick-buttons {
+    justify-content: center;
+  }
+}
