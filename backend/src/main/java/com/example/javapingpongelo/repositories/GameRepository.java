@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -111,4 +113,11 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
     List<Game> findByPlayerIdAndGameType(@Param("playerId") UUID playerId, 
                                          @Param("isSingles") boolean isSingles, 
                                          @Param("isRanked") boolean isRanked);
+    
+    /**
+     * Find games played within a time range
+     */
+    @Query("SELECT g FROM Game g WHERE g.datePlayed BETWEEN :startTime AND :endTime ORDER BY g.datePlayed DESC")
+    List<Game> findGamesInTimeRange(@Param("startTime") Date startTime, 
+                                   @Param("endTime") Date endTime);
 }

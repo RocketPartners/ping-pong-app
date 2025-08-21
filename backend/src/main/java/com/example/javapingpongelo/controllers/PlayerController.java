@@ -108,6 +108,31 @@ public class PlayerController {
         return ResponseEntity.ok(usernames);
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<PlayerDTO>> getPlayersBatch(@RequestBody Map<String, List<String>> request) {
+        List<String> playerIds = request.get("playerIds");
+        log.debug("Request to get players batch: {} players", playerIds != null ? playerIds.size() : 0);
+        
+        if (playerIds == null || playerIds.isEmpty()) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+        
+        List<PlayerDTO> players = new ArrayList<>();
+        for (String playerIdStr : playerIds) {
+            try {
+                UUID playerId = UUID.fromString(playerIdStr);
+                Player player = playerService.findPlayerById(playerId);
+                if (player != null) {
+                    players.add(PlayerDTO.fromEntity(player, null));
+                }
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid UUID format in batch request: {}", playerIdStr);
+            }
+        }
+        
+        return ResponseEntity.ok(players);
+    }
+
     @PostMapping
     public ResponseEntity<Player> createPlayer(@Validated(ValidationGroups.Create.class) @RequestBody Player player) {
         log.debug("Request to create new player: {}", player.getUsername());
