@@ -1053,4 +1053,79 @@ public class SlackService {
             log.error("Error posting challenge reminder", e);
         }
     }
+
+    /**
+     * Posts a special shame notification when someone gets "Gilyed" (scores 0 points)
+     */
+    public void postGilyedNotification(Game game, Player winner, Player loser) {
+        if (methods == null) {
+            log.debug("Slack not configured, skipping Gilyed notification");
+            return;
+        }
+
+        try {
+            // Only for singles games where loser scored 0
+            if (!game.isSinglesGame()) {
+                return;
+            }
+
+            int loserScore = game.getChallengerId().equals(loser.getPlayerId()) ? 
+                game.getChallengerTeamScore() : game.getOpponentTeamScore();
+            
+            if (loserScore == 0) {
+                List<LayoutBlock> blocks = new ArrayList<>();
+
+                // Shame header
+                blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                        .text("🔥💀 **GILYED ALERT!** 💀🔥")
+                        .build())
+                    .build());
+
+                // Main shame message
+                blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                        .text(String.format(
+                            "😱 *%s* just got **GILYED** by *%s*!\n\n" +
+                            "📊 Final Score: %d - **0** 🥚\n" +
+                            "⏰ The shame happened at %s\n\n" +
+                            "💥 That's a complete shutout! No mercy shown!",
+                            loser.getFullName(),
+                            winner.getFullName(),
+                            game.getChallengerId().equals(winner.getPlayerId()) ? 
+                                game.getChallengerTeamScore() : game.getOpponentTeamScore(),
+                            LocalDateTime.now().format(timeFormat)
+                        ))
+                        .build())
+                    .build());
+
+                blocks.add(DividerBlock.builder().build());
+
+                // Extra shame section
+                blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                        .text(String.format(
+                            "🏆 *%s* earned the \"Gilyed Someone\" achievement!\n" +
+                            "😭 *%s* earned the \"Got Gilyed\" achievement!\n\n" +
+                            "💬 Everyone point and laugh! 👉😂"
+                        ))
+                        .build())
+                    .build());
+
+                ChatPostMessageResponse response = methods.chatPostMessage(req -> req
+                    .channel(resultsChannel)
+                    .text(String.format("%s got GILYED by %s!", loser.getFullName(), winner.getFullName()))
+                    .blocks(blocks)
+                );
+
+                if (response.isOk()) {
+                    log.info("Posted Gilyed notification to Slack for game: {}", game.getGameId());
+                } else {
+                    log.error("Failed to post Gilyed notification to Slack: {}", response.getError());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error posting Gilyed notification to Slack", e);
+        }
+    }
 }

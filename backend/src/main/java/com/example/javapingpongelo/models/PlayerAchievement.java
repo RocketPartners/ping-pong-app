@@ -45,6 +45,13 @@ public class PlayerAchievement {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateEarned;
 
+    // Fields for contextual achievements like Gilyed
+    @Column(length = 100)
+    private String opponentName;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date gameDatePlayed;
+
     @PrePersist
     protected void onCreate() {
         if (this.progress == null) {

@@ -184,7 +184,9 @@ export class AchievementService extends BaseHttpService {
           achievementId: item.id || '',
           achieved: item.achieved || false,
           progress: item.progress || 0,
-          dateEarned: item.dateEarned
+          dateEarned: item.dateEarned,
+          opponentName: item.opponentName,
+          gameDatePlayed: item.gameDatePlayed
         },
         percentComplete: percentComplete
       };

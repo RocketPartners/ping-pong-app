@@ -129,6 +129,20 @@ public class GameService {
             
             if (challenger != null && opponent != null) {
                 slackService.postGameResult(game, challenger, opponent);
+                
+                // Check for Gilyed scenario and post special notification
+                if (game.isSinglesGame()) {
+                    Player winner = game.isChallengerWin() ? challenger : opponent;
+                    Player loser = game.isChallengerWin() ? opponent : challenger;
+                    
+                    // Check if loser scored 0 points
+                    int loserScore = game.getChallengerId().equals(loser.getPlayerId()) ? 
+                        game.getChallengerTeamScore() : game.getOpponentTeamScore();
+                    
+                    if (loserScore == 0) {
+                        slackService.postGilyedNotification(game, winner, loser);
+                    }
+                }
             }
         } catch (Exception e) {
             log.error("Error posting game result to Slack for game: {}", game.getGameId(), e);

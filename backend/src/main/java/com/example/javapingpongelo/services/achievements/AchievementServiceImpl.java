@@ -227,6 +227,41 @@ public class AchievementServiceImpl implements IAchievementService {
     }
 
     /**
+     * Update progress for a contextual achievement (like Gilyed) with opponent info
+     */
+    @Override
+    @Transactional
+    public PlayerAchievement updateAchievementProgress(UUID playerId, UUID achievementId, int progressValue, 
+                                                     String opponentName, Date gameDatePlayed) {
+        log.debug("Updating contextual achievement {} progress for player {}: +{}", achievementId, playerId, progressValue);
+
+        if (progressValue <= 0) {
+            log.debug("Skipping progress update with non-positive value: {}", progressValue);
+            return playerAchievementRepository
+                    .findByPlayerIdAndAchievementId(playerId, achievementId)
+                    .orElse(null);
+        }
+
+        Achievement achievement = findAchievementById(achievementId);
+
+        // For contextual achievements like Gilyed, we create a new record each time
+        // rather than updating existing progress
+        PlayerAchievement playerAchievement = new PlayerAchievement();
+        playerAchievement.setPlayerId(playerId);
+        playerAchievement.setAchievementId(achievementId);
+        playerAchievement.setProgress(1);
+        playerAchievement.setAchieved(true);
+        playerAchievement.setDateEarned(new Date());
+        playerAchievement.setOpponentName(opponentName);
+        playerAchievement.setGameDatePlayed(gameDatePlayed);
+
+        playerAchievementRepository.save(playerAchievement);
+
+        log.info("Contextual achievement {} earned by player {} against {}", achievementId, playerId, opponentName);
+        return playerAchievement;
+    }
+
+    /**
      * Evaluate achievements after a game is played
      */
     @Override
@@ -273,7 +308,25 @@ public class AchievementServiceImpl implements IAchievementService {
 
                     // Update progress if needed
                     if (progressUpdate > 0) {
-                        updateAchievementProgress(playerId, achievement.getId(), progressUpdate);
+                        // Check if this is a Gilyed achievement (contextual)
+                        JsonNode criteria = objectMapper.readTree(achievement.getCriteria());
+                        String type = criteria.has("type") ? criteria.get("type").asText() : "";
+                        
+                        if ("GILYED".equals(type) && context.getGame() != null) {
+                            // For Gilyed achievements, we need opponent info
+                            Game game = context.getGame();
+                            UUID opponentId = game.getChallengerId().equals(playerId) ? 
+                                game.getOpponentId() : game.getChallengerId();
+                            Player opponent = playerService.findPlayerById(opponentId);
+                            
+                            if (opponent != null) {
+                                updateAchievementProgress(playerId, achievement.getId(), progressUpdate, 
+                                    opponent.getFullName(), game.getDatePlayed());
+                            }
+                        } else {
+                            // Regular achievement
+                            updateAchievementProgress(playerId, achievement.getId(), progressUpdate);
+                        }
                     }
                 }
             }

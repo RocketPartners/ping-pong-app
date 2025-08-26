@@ -28,6 +28,13 @@
       </div>
     </div>
 
+    <div *ngIf="isAchieved && achievementData.playerProgress.opponentName" class="achievement-context">
+      vs {{ achievementData.playerProgress.opponentName }}
+      <span *ngIf="achievementData.playerProgress.gameDatePlayed">
+        on {{ achievementData.playerProgress.gameDatePlayed | date:'mediumDate' }}
+      </span>
+    </div>
+
     <div *ngIf="isAchieved && achievementData.playerProgress.dateEarned" class="achievement-date">
       Earned: {{ achievementData.playerProgress.dateEarned | date:'mediumDate' }}
     </div>

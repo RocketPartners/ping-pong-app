@@ -59,6 +59,12 @@ public interface IAchievementService {
     PlayerAchievement updateAchievementProgress(UUID playerId, UUID achievementId, int progressValue);
 
     /**
+     * Update progress for a contextual achievement (like Gilyed) with opponent info
+     */
+    PlayerAchievement updateAchievementProgress(UUID playerId, UUID achievementId, int progressValue, 
+                                               String opponentName, java.util.Date gameDatePlayed);
+
+    /**
      * Evaluate achievements after a game is played
      */
     void evaluateAchievementsForGame(Game game, Player... players);

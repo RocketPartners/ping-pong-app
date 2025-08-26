@@ -146,6 +146,28 @@ public class AchievementInitializer {
                     35
             );
 
+            // Gilyed Someone - Win a singles game where opponent scored 0 points
+            createAchievement(
+                    "Gilyed Someone",
+                    "Win a singles game where your opponent scored 0 points",
+                    Achievement.AchievementCategory.MEDIUM,
+                    Achievement.AchievementType.PROGRESSIVE,
+                    createGilyedCriteria("GILYED_WINNER"),
+                    "fire",
+                    75
+            );
+
+            // Got Gilyed - Lose a singles game by scoring 0 points
+            createAchievement(
+                    "Got Gilyed",
+                    "Score 0 points in a singles game (ouch!)",
+                    Achievement.AchievementCategory.EASY,
+                    Achievement.AchievementType.PROGRESSIVE,
+                    createGilyedCriteria("GILYED_LOSER"),
+                    "face_palm",
+                    25
+            );
+
             // MEDIUM ACHIEVEMENTS
 
             // Win Streak - Win 5 consecutive games
@@ -561,6 +583,23 @@ public class AchievementInitializer {
         }
         catch (Exception e) {
             log.error("Error creating complex criteria JSON", e);
+            return "{}";
+        }
+    }
+
+    /**
+     * Helper method to create Gilyed criteria
+     */
+    private String createGilyedCriteria(String achievementType) {
+        try {
+            Map<String, Object> criteria = new HashMap<>();
+            criteria.put("type", "GILYED");
+            criteria.put("achievementType", achievementType);
+            criteria.put("threshold", 1);
+            return objectMapper.writeValueAsString(criteria);
+        }
+        catch (Exception e) {
+            log.error("Error creating Gilyed criteria JSON", e);
             return "{}";
         }
     }

@@ -29,6 +29,8 @@ export interface PlayerAchievement {
   achieved: boolean;
   progress: number;
   dateEarned?: Date;
+  opponentName?: string;
+  gameDatePlayed?: Date;
 }
 
 // Combined data object returned from the API
