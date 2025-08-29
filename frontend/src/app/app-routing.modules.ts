@@ -53,6 +53,13 @@ const routes: Routes = [
   {path: 'achievements', component: AchievementListComponent, canActivate: [AuthGuard]},
   {path: 'achievements/:username', component: AchievementListComponent, canActivate: [AuthGuard]},
 
+  // Admin routes (lazy loaded)
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
+    canActivate: [AuthGuard]
+  },
+
   // otherwise redirect to home
   {path: '**', redirectTo: ''}
 ];

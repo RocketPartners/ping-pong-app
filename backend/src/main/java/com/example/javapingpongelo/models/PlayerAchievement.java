@@ -42,6 +42,16 @@ public class PlayerAchievement {
     @Column(nullable = false)
     private Integer progress;
 
+    // New progress tracking fields
+    @Column(name = "current_value")
+    private Integer currentValue;
+
+    @Column(name = "target_value")  
+    private Integer targetValue;
+
+    @Column(columnDefinition = "TEXT")
+    private String progressData; // JSON for complex progress tracking
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateEarned;
 
@@ -59,6 +69,12 @@ public class PlayerAchievement {
         }
         if (this.achieved == null) {
             this.achieved = false;
+        }
+        if (this.currentValue == null) {
+            this.currentValue = 0;
+        }
+        if (this.targetValue == null) {
+            this.targetValue = 1;
         }
     }
 
@@ -83,5 +99,43 @@ public class PlayerAchievement {
         }
 
         return false;
+    }
+
+    /**
+     * Sets the current value and target for real progress tracking
+     *
+     * @param currentValue The current progress value
+     * @param targetValue  The target value to reach
+     * @return True if the achievement was just achieved, false otherwise
+     */
+    public boolean setProgress(int currentValue, int targetValue) {
+        if (achieved) {
+            return false;
+        }
+
+        this.currentValue = currentValue;
+        this.targetValue = targetValue;
+        this.progress = targetValue > 0 ? (int) ((currentValue * 100.0) / targetValue) : 0;
+
+        if (currentValue >= targetValue) {
+            this.achieved = true;
+            this.dateEarned = new Date();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the progress percentage (0-100)
+     */
+    public int getProgressPercentage() {
+        if (targetValue == null || targetValue <= 0) {
+            return progress;
+        }
+        if (currentValue == null) {
+            return 0;
+        }
+        return Math.min(100, (int) ((currentValue * 100.0) / targetValue));
     }
 }

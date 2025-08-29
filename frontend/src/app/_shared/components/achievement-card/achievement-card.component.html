@@ -1,9 +1,35 @@
 <mat-card (click)="openDetails()"
-          [ngClass]="[categoryClass, sizeClass, isAchieved ? 'achieved' : 'locked']"
+          [ngClass]="getCardClasses()"
           class="achievement-card">
 
-  <div class="achievement-icon">
+  <!-- Multiple Visual Indicators for Recently Unlocked Achievements -->
+  <ng-container *ngIf="isRecentlyUnlocked()">
+    <!-- Animated Corner Ribbon -->
+    <div class="notification-ribbon">
+      <mat-icon>new_releases</mat-icon>
+      <span>FROM NOTIFICATIONS</span>
+    </div>
+    
+    <!-- Pulsing Border Overlay -->
+    <div class="pulse-border"></div>
+    
+    <!-- Spotlight Effect -->
+    <div class="spotlight-overlay"></div>
+  </ng-container>
+
+  <div class="achievement-icon" [ngClass]="categoryClass">
     <mat-icon>{{ getIconName() }}</mat-icon>
+    
+    <!-- Celebration level indicator -->
+    <div *ngIf="isAchieved && celebrationLevel !== 'NORMAL'" class="celebration-indicator">
+      <mat-icon class="celebration-icon">{{ celebrationLevel === 'EPIC' ? 'auto_awesome' : 'star' }}</mat-icon>
+    </div>
+    
+    <!-- Dependency indicator -->
+    <div *ngIf="showDependencies && hasBlockingDependencies" class="dependency-indicator" 
+         [matTooltip]="getDependencyStatusText()">
+      <mat-icon class="dependency-icon">link</mat-icon>
+    </div>
   </div>
 
   <mat-card-header>
@@ -16,26 +42,32 @@
   <mat-card-content *ngIf="showDetails">
     <p class="achievement-description">{{ achievementData.achievement.description }}</p>
 
-    <div *ngIf="showProgress" class="achievement-progress">
-      <mat-progress-bar
-        [mode]="isAchieved ? 'determinate' : 'determinate'"
-        [value]="achievementData.percentComplete">
-      </mat-progress-bar>
-
-      <div class="progress-text">
-        <span *ngIf="isAchieved">Complete</span>
-        <span *ngIf="!isAchieved">{{ achievementData.percentComplete | number:'1.0-0' }}% Complete</span>
-      </div>
+    <!-- Dependency information -->
+    <div *ngIf="showDependencies && dependencyCount > 0" class="dependency-info">
+      <mat-icon class="dependency-info-icon">{{ hasBlockingDependencies ? 'lock' : 'link' }}</mat-icon>
+      <span class="dependency-text">{{ getDependencyStatusText() }}</span>
     </div>
 
-    <div *ngIf="isAchieved && achievementData.playerProgress.opponentName" class="achievement-context">
-      vs {{ achievementData.playerProgress.opponentName }}
-      <span *ngIf="achievementData.playerProgress.gameDatePlayed">
-        on {{ achievementData.playerProgress.gameDatePlayed | date:'mediumDate' }}
-      </span>
+    <div *ngIf="showProgress" class="achievement-progress">
+      <app-achievement-progress
+        [progress]="achievementData.percentComplete"
+        [category]="achievementData.achievement.category"
+        [celebrationLevel]="celebrationLevel"
+        [isAchieved]="isAchieved"
+        [animated]="true"
+        [showText]="true"
+        [size]="size === 'small' ? 'small' : 'medium'">
+      </app-achievement-progress>
+    </div>
+
+    <!-- Enhanced contextual information -->
+    <div *ngIf="getContextualInfo()" class="achievement-context enhanced-context">
+      <mat-icon class="context-icon">sports_tennis</mat-icon>
+      <span>{{ getContextualInfo() }}</span>
     </div>
 
     <div *ngIf="isAchieved && achievementData.playerProgress.dateEarned" class="achievement-date">
+      <mat-icon class="date-icon">event</mat-icon>
       Earned: {{ achievementData.playerProgress.dateEarned | date:'mediumDate' }}
     </div>
   </mat-card-content>
@@ -45,7 +77,16 @@
             [matTooltip]="isAchieved ? 'View Achievement Details' : 'Keep Playing to Unlock'"
             color="primary"
             mat-button>
-      {{ isAchieved ? 'DETAILS' : 'LOCKED' }}
+      {{ isAchieved ? 'DETAILS' : (hasBlockingDependencies ? 'LOCKED' : 'IN PROGRESS') }}
+    </button>
+    
+    <button *ngIf="isAchieved && celebrationLevel !== 'NORMAL'"
+            (click)="triggerCelebration(); $event.stopPropagation()"
+            [matTooltip]="'Replay celebration'"
+            color="accent"
+            mat-button>
+      <mat-icon>celebration</mat-icon>
+      CELEBRATE
     </button>
   </mat-card-actions>
 </mat-card>

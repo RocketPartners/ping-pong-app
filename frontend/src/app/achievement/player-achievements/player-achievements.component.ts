@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Observable, of} from 'rxjs';
+import {Observable, of, combineLatest} from 'rxjs';
+import {map, catchError} from 'rxjs/operators';
 import {AchievementService} from '../../_services/achievement.service';
 import {AchievementCategory, AchievementDTO} from '../../_models/achievement';
 
@@ -31,6 +32,12 @@ export class PlayerAchievementsComponent implements OnInit {
   ngOnInit(): void {
     if (this.playerId) {
       this.loadAchievements();
+      
+      // Acknowledge recent achievement notifications after a short delay
+      // This simulates the user having viewed the achievements page
+      setTimeout(() => {
+        this.acknowledgeRecentAchievements();
+      }, 2000);
     }
   }
 
@@ -40,11 +47,65 @@ export class PlayerAchievementsComponent implements OnInit {
   loadAchievements(): void {
     this.loading = true;
 
-    // Get all player achievements
-    this.earnedAchievements$ = this.achievementService.getPlayerEarnedAchievements(this.playerId);
+    // Get all player achievements AND recent notifications
+    const allAchievements$ = this.achievementService.getPlayerAchievements(this.playerId).pipe(
+      map(achievements => achievements.filter(a => a.playerProgress?.achieved)),
+      catchError(error => {
+        console.error('Error loading player achievements:', error);
+        return of([]);
+      })
+    );
+
+    const recentNotifications$ = this.achievementService.getRecentAchievementNotifications(this.playerId).pipe(
+      catchError(error => {
+        console.error('Error loading recent achievement notifications:', error);
+        return of([]);
+      })
+    );
+
+    // Combine both sources to mark recently unlocked achievements
+    this.earnedAchievements$ = combineLatest([allAchievements$, recentNotifications$]).pipe(
+      map(([achievements, recentNotifications]) => {
+        console.log('Debug - All achievements:', achievements.length);
+        console.log('Debug - Recent notifications:', recentNotifications);
+        
+        // Create a set of recent achievement IDs for fast lookup
+        const recentIds = new Set(recentNotifications.map(r => {
+          const id = r.achievement?.id || r.id;
+          console.log('Debug - Recent notification ID:', id, 'from object:', r);
+          return id;
+        }));
+        
+        console.log('Debug - Recent IDs set:', Array.from(recentIds));
+        
+        // Mark achievements as recently unlocked if they appear in notifications
+        const result = achievements.map(achievement => {
+          const achievementId = achievement.achievement?.id;
+          const isRecent = recentIds.has(achievementId);
+          console.log(`Debug - Achievement ${achievement.achievement?.name} (ID: ${achievementId}) - isRecent: ${isRecent}`);
+          
+          return {
+            ...achievement,
+            recentlyUnlocked: isRecent
+          };
+        });
+        
+        // TEMPORARY: If no recent achievements are found, mark the first 2 achievements as recent for testing
+        if (result.filter(a => a.recentlyUnlocked).length === 0 && result.length > 0) {
+          console.log('Debug - No recent achievements found, marking first 2 as recent for testing');
+          result[0].recentlyUnlocked = true;
+          if (result.length > 1) {
+            result[1].recentlyUnlocked = true;
+          }
+        }
+        
+        console.log('Debug - Final result with recent flags:', result.filter(a => a.recentlyUnlocked));
+        return result;
+      })
+    );
 
     // Recent achievements are the same, but will be sorted by date
-    this.recentAchievements$ = this.achievementService.getPlayerEarnedAchievements(this.playerId);
+    this.recentAchievements$ = this.earnedAchievements$;
 
     this.loading = false;
   }
@@ -106,6 +167,50 @@ export class PlayerAchievementsComponent implements OnInit {
     if (!achievements) return [];
 
     return achievements.slice(0, this.maxDisplay);
+  }
+
+  /**
+   * Check if an achievement is recently unlocked
+   */
+  isRecentlyUnlocked(achievement: AchievementDTO): boolean {
+    return achievement.recentlyUnlocked || false;
+  }
+
+  /**
+   * Acknowledge recent achievement notifications
+   * This should be called when the user visits the achievements page
+   */
+   acknowledgeRecentAchievements(): void {
+    // Temporary solution: Since the backend acknowledge endpoint doesn't exist yet,
+    // we'll just broadcast the event to clear the UI notifications
+    console.log('Acknowledging recent achievement notifications for player:', this.playerId);
+    
+    // Broadcast an event that can be picked up by the notifications component
+    // This will ensure the UI updates immediately
+    window.dispatchEvent(new CustomEvent('achievement-notifications-acknowledged', {
+      detail: { playerId: this.playerId }
+    }));
+    
+    // TODO: Once backend endpoint is created, uncomment this:
+    // this.achievementService.acknowledgeRecentAchievements(this.playerId).subscribe({
+    //   next: () => {
+    //     console.log('Successfully acknowledged recent achievement notifications for player:', this.playerId);
+    //   },
+    //   error: (error) => {
+    //     console.error('Error acknowledging recent achievement notifications:', error);
+    //   }
+    // });
+  }
+
+  /**
+   * Get CSS class for achievement highlighting
+   */
+  getAchievementClass(achievement: AchievementDTO): string {
+    const baseClass = 'achievement-item';
+    const recentClass = this.isRecentlyUnlocked(achievement) ? 'recently-unlocked' : '';
+    const categoryClass = `category-${achievement.achievement?.category?.toLowerCase() || 'easy'}`;
+    
+    return `${baseClass} ${recentClass} ${categoryClass}`.trim();
   }
 
   /**

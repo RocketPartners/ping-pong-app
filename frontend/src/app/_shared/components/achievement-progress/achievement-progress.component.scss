@@ -1,0 +1,231 @@
+@use '../../../../styles/abstracts/tokens' as tokens;
+
+.achievement-progress-container {
+  width: 100%;
+  
+  &.small {
+    .progress-info {
+      font-size: 10px;
+      margin-top: 2px;
+    }
+  }
+  
+  &.medium {
+    .progress-info {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+  }
+  
+  &.large {
+    .progress-info {
+      font-size: 14px;
+      margin-top: 6px;
+    }
+  }
+}
+
+.progress-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.progress-track {
+  position: relative;
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  
+  // Dark mode
+  :host-context(.dark-theme) & {
+    background-color: #424242;
+  }
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  
+  // Category-based colors
+  &.progress-easy {
+    background: linear-gradient(90deg, #4caf50, #66bb6a);
+  }
+  
+  &.progress-medium {
+    background: linear-gradient(90deg, #2196f3, #42a5f5);
+  }
+  
+  &.progress-hard {
+    background: linear-gradient(90deg, #9c27b0, #ba68c8);
+  }
+  
+  &.progress-legendary {
+    background: linear-gradient(90deg, #ffc107, #ffb300);
+  }
+  
+  // Special celebration effects
+  &.progress-epic {
+    background: linear-gradient(90deg, #ff6b6b, #ffd93d, #4ecdc4, #45b7d1);
+    background-size: 200% 100%;
+    animation: rainbowShift 3s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  }
+  
+  &.progress-special {
+    background: linear-gradient(90deg, #4caf50, #66bb6a);
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.4);
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+}
+
+.progress-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  .progress-percentage {
+    font-weight: 500;
+    color: var(--on-surface-variant);
+  }
+  
+  .celebration-icon {
+    &.epic {
+      color: #ff6b6b;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+    
+    &.special {
+      color: #4caf50;
+      animation: pulse 2s ease-in-out infinite;
+    }
+  }
+}
+
+// Text styling based on progress state
+.progress-text {
+  &.text-complete {
+    .progress-percentage {
+      color: #4caf50;
+      font-weight: 600;
+    }
+  }
+  
+  &.text-special {
+    .progress-percentage {
+      color: #2196f3;
+      font-weight: 700;
+    }
+  }
+  
+  &.text-epic {
+    .progress-percentage {
+      color: #ff6b6b;
+      font-weight: 700;
+      text-shadow: 0 0 4px rgba(255, 107, 107, 0.5);
+      animation: textShimmer 3s ease-in-out infinite;
+    }
+  }
+}
+
+// Sparkle effects for epic achievements
+.sparkle-effects {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  
+  .sparkle {
+    position: absolute;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #fff, #ffd700);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    animation: sparkleMove 2s ease-in-out infinite;
+    opacity: 0;
+  }
+}
+
+// Animations
+@keyframes rainbowShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 6px rgba(76, 175, 80, 0.4); }
+  to { box-shadow: 0 0 12px rgba(76, 175, 80, 0.6); }
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes textShimmer {
+  0% { 
+    text-shadow: 0 0 4px rgba(255, 107, 107, 0.5);
+    color: #ff6b6b;
+  }
+  33% { 
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+    color: #ffd700;
+  }
+  66% { 
+    text-shadow: 0 0 6px rgba(78, 205, 196, 0.6);
+    color: #4ecdc4;
+  }
+  100% { 
+    text-shadow: 0 0 4px rgba(255, 107, 107, 0.5);
+    color: #ff6b6b;
+  }
+}
+
+@keyframes sparkleMove {
+  0% { 
+    opacity: 0; 
+    transform: translateY(-50%) scale(0); 
+  }
+  10% { 
+    opacity: 1; 
+    transform: translateY(-50%) scale(1); 
+  }
+  80% { 
+    opacity: 1; 
+    transform: translateY(-50%) scale(1); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: translateY(-50%) scale(0); 
+  }
+}
+
+// Dark mode adjustments
+:host-context(.dark-theme) {
+  .progress-text .progress-percentage {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .text-complete .progress-percentage {
+    color: #66bb6a;
+  }
+  
+  .text-special .progress-percentage {
+    color: #42a5f5;
+  }
+}

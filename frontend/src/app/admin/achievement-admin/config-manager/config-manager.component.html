@@ -1,0 +1,146 @@
+<div class="config-manager">
+  <div class="manager-header">
+    <h2 class="section-title">
+      <mat-icon>settings</mat-icon>
+      Configuration Manager
+    </h2>
+    <p class="section-subtitle">Load, validate, and manage achievement configurations</p>
+  </div>
+
+  <!-- Actions Section -->
+  <mat-card class="actions-card">
+    <mat-card-header>
+      <mat-card-title>Configuration Actions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="actions-grid">
+        
+        <!-- Load Configuration -->
+        <div class="action-section">
+          <h3>Load Configuration</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Configuration File</mat-label>
+            <input matInput [(ngModel)]="selectedFileName" placeholder="achievements-config.yaml">
+            <mat-hint>YAML file in the backend resources directory</mat-hint>
+          </mat-form-field>
+          <button mat-raised-button color="primary" 
+                  (click)="loadAndApplyConfig()"
+                  [disabled]="loading">
+            <mat-icon>upload</mat-icon>
+            Load & Apply
+          </button>
+        </div>
+
+        <!-- Validate Configuration -->
+        <div class="action-section">
+          <h3>Validate Configuration</h3>
+          <p class="action-description">Check loaded configurations for errors</p>
+          <button mat-raised-button color="accent" 
+                  (click)="validateConfigurations()"
+                  [disabled]="loading">
+            <mat-icon>check_circle</mat-icon>
+            Validate
+          </button>
+        </div>
+
+        <!-- Export Configuration -->
+        <div class="action-section">
+          <h3>Export Configuration</h3>
+          <p class="action-description">Download current achievements as YAML</p>
+          <button mat-raised-button color="warn" 
+                  (click)="exportConfigurations()"
+                  [disabled]="loading">
+            <mat-icon>download</mat-icon>
+            Export YAML
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Processing configurations...</p>
+  </div>
+
+  <!-- Validation Results -->
+  <mat-card *ngIf="validationResults" class="validation-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar [class]="validationResults.success ? 'success-icon' : 'error-icon'">
+        {{ validationResults.success ? 'check_circle' : 'error' }}
+      </mat-icon>
+      <mat-card-title>Validation Results</mat-card-title>
+      <mat-card-subtitle>
+        {{ validationResults.totalConfigurations }} total configurations, 
+        {{ validationResults.configurationWithErrors || 0 }} with errors
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      
+      <!-- Success State -->
+      <div *ngIf="validationResults.success" class="success-message">
+        <mat-icon>celebration</mat-icon>
+        <h3>All Configurations Valid!</h3>
+        <p>{{ validationResults.message }}</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="!validationResults.success && getValidationErrorKeys().length > 0" class="error-list">
+        <h4>Configuration Errors:</h4>
+        <div class="error-item" *ngFor="let configId of getValidationErrorKeys()">
+          <h5>{{ configId }}</h5>
+          <ul>
+            <li *ngFor="let error of validationResults.validationErrors[configId]" class="error-message">
+              {{ error }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loaded Configurations -->
+  <mat-card *ngIf="getConfigurationKeys().length > 0" class="configurations-card">
+    <mat-card-header>
+      <mat-card-title>Loaded Configurations</mat-card-title>
+      <mat-card-subtitle>{{ getConfigurationKeys().length }} configurations currently loaded</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="configurations-grid">
+        <div class="config-item" *ngFor="let configId of getConfigurationKeys()">
+          <div class="config-header">
+            <h4>{{ loadedConfigurations[configId].name }}</h4>
+            <mat-chip-set>
+              <mat-chip [color]="getCategoryColor(loadedConfigurations[configId].category)" selected>
+                {{ loadedConfigurations[configId].category }}
+              </mat-chip>
+              <mat-chip>{{ loadedConfigurations[configId].points }} pts</mat-chip>
+            </mat-chip-set>
+          </div>
+          <p class="config-description">{{ loadedConfigurations[configId].description }}</p>
+          <div class="config-details">
+            <small><strong>ID:</strong> {{ configId }}</small>
+            <small><strong>Type:</strong> {{ loadedConfigurations[configId].type }}</small>
+            <small><strong>Visible:</strong> {{ loadedConfigurations[configId].visible ? 'Yes' : 'No' }}</small>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- No Configurations -->
+  <mat-card *ngIf="!loading && getConfigurationKeys().length === 0" class="empty-card">
+    <mat-card-content>
+      <div class="empty-message">
+        <mat-icon>folder_open</mat-icon>
+        <h3>No Configurations Loaded</h3>
+        <p>Load a configuration file to get started with achievement management.</p>
+        <button mat-raised-button color="primary" (click)="loadAndApplyConfig()">
+          <mat-icon>upload</mat-icon>
+          Load Default Configuration
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

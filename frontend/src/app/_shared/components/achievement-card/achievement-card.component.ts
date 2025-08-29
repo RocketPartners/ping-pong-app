@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {AchievementCategory, AchievementDTO} from '../../../_models/achievement';
+import {AchievementCategory, AchievementDTO, CelebrationLevel} from '../../../_models/achievement';
 import {AchievementDetailService} from "../../../achievement/achievement-detail/achievement-detail.service";
+import {NotificationService} from '../../../_services/notification.service';
 
 @Component({
   selector: 'app-achievement-card',
@@ -12,6 +13,7 @@ export class AchievementCardComponent implements OnInit {
   @Input() achievementData!: AchievementDTO;
   @Input() showProgress: boolean = true;
   @Input() showDetails: boolean = true;
+  @Input() showDependencies: boolean = true;
   @Input() size: 'small' | 'medium' | 'large' = 'medium';
 
   // Whether the achievement is achieved
@@ -20,14 +22,49 @@ export class AchievementCardComponent implements OnInit {
   // CSS classes
   categoryClass: string = '';
   sizeClass: string = '';
+  
+  // Dependencies
+  hasBlockingDependencies: boolean = false;
+  dependencyCount: number = 0;
+  
+  // Celebration level
+  celebrationLevel: CelebrationLevel = CelebrationLevel.NORMAL;
 
-  constructor(private achievementDetailService: AchievementDetailService) {
-  }
+  constructor(
+    private achievementDetailService: AchievementDetailService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.isAchieved = this.achievementData?.playerProgress?.achieved || false;
     this.setCategoryClass();
     this.setSizeClass();
+    this.checkDependencies();
+    this.setCelebrationLevel();
+  }
+
+  /**
+   * Check if this achievement was recently unlocked (from notifications)
+   */
+  isRecentlyUnlocked(): boolean {
+    return this.achievementData?.recentlyUnlocked || false;
+  }
+
+  /**
+   * Get CSS classes for the achievement card including recent notification styling
+   */
+  getCardClasses(): string {
+    let classes = `achievement-card ${this.categoryClass} ${this.sizeClass}`;
+    
+    if (this.isRecentlyUnlocked()) {
+      classes += ' recently-unlocked';
+    }
+    
+    if (!this.isAchieved) {
+      classes += ' not-achieved';
+    }
+    
+    return classes;
   }
 
   /**
@@ -117,6 +154,97 @@ export class AchievementCardComponent implements OnInit {
       default:
         this.sizeClass = 'achievement-card-medium';
         break;
+    }
+  }
+
+  /**
+   * Check if this achievement has blocking dependencies
+   */
+  private checkDependencies(): void {
+    if (this.achievementData?.playerDependencyInfo) {
+      this.dependencyCount = this.achievementData.playerDependencyInfo.totalDependencies || 0;
+      this.hasBlockingDependencies = this.achievementData.playerDependencyInfo.hasBlockingDependencies || false;
+    }
+  }
+
+  /**
+   * Set celebration level based on achievement properties
+   */
+  private setCelebrationLevel(): void {
+    if (this.achievementData?.achievement) {
+      // Determine celebration level based on category and achievement properties
+      if (this.achievementData.achievement.category === AchievementCategory.LEGENDARY) {
+        this.celebrationLevel = CelebrationLevel.EPIC;
+      } else if (this.achievementData.achievement.category === AchievementCategory.HARD) {
+        this.celebrationLevel = CelebrationLevel.SPECIAL;
+      } else {
+        this.celebrationLevel = CelebrationLevel.NORMAL;
+      }
+    }
+  }
+
+  /**
+   * Get dependency status text
+   */
+  getDependencyStatusText(): string {
+    if (!this.showDependencies || this.dependencyCount === 0) {
+      return '';
+    }
+    
+    if (this.hasBlockingDependencies) {
+      return `${this.dependencyCount} dependency required`;
+    }
+    
+    return `Part of ${this.dependencyCount} achievement chain`;
+  }
+
+  /**
+   * Get contextual information about how the achievement was earned
+   */
+  getContextualInfo(): string {
+    if (!this.isAchieved || !this.achievementData?.playerProgress) {
+      return '';
+    }
+
+    const progress = this.achievementData.playerProgress;
+    let context = '';
+
+    if (progress.opponentName) {
+      context += `vs ${progress.opponentName}`;
+    }
+
+    if (progress.gameDatePlayed) {
+      const gameDate = new Date(progress.gameDatePlayed);
+      context += context ? ` on ${gameDate.toLocaleDateString()}` : `on ${gameDate.toLocaleDateString()}`;
+    }
+
+    return context;
+  }
+
+  /**
+   * Trigger achievement celebration
+   */
+  triggerCelebration(): void {
+    if (this.isAchieved) {
+      this.notificationService.showAchievementCelebration(
+        this.achievementData.achievement,
+        this.celebrationLevel,
+        this.getContextualInfo()
+      );
+    }
+  }
+
+  /**
+   * Get celebration level display text
+   */
+  getCelebrationLevelText(): string {
+    switch (this.celebrationLevel) {
+      case CelebrationLevel.EPIC:
+        return 'Epic Achievement!';
+      case CelebrationLevel.SPECIAL:
+        return 'Special Achievement!';
+      default:
+        return 'Achievement Unlocked!';
     }
   }
 }

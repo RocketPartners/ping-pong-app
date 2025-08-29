@@ -42,4 +42,14 @@ public interface PlayerAchievementRepository extends JpaRepository<PlayerAchieve
      * Find all in-progress (not yet achieved) achievements for a player
      */
     List<PlayerAchievement> findByPlayerIdAndAchievedFalse(UUID playerId);
+
+    /**
+     * Find player achievements by player ID and achieved status
+     */
+    List<PlayerAchievement> findByPlayerIdAndAchieved(UUID playerId, boolean achieved);
+
+    /**
+     * Find all player achievements for a specific achievement
+     */
+    List<PlayerAchievement> findByAchievementId(UUID achievementId);
 }

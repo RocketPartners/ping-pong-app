@@ -1,0 +1,150 @@
+<div class="notification-preferences">
+  <div class="preferences-header">
+    <h3>
+      <mat-icon>tune</mat-icon>
+      Notification Preferences
+    </h3>
+    <p>Customize how you receive achievement notifications</p>
+  </div>
+
+  <form [formGroup]="preferencesForm" class="preferences-form">
+    
+    <!-- In-App Notifications -->
+    <mat-card class="preference-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>notifications_active</mat-icon>
+          In-App Notifications
+        </mat-card-title>
+        <mat-card-subtitle>Celebrations and overlays within the application</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="preference-controls">
+          <mat-slide-toggle formControlName="enableInApp">
+            Enable in-app celebrations
+          </mat-slide-toggle>
+          
+          <mat-slide-toggle formControlName="showContextualStories">
+            Show contextual achievement stories
+          </mat-slide-toggle>
+          
+          <div class="duration-control">
+            <mat-form-field appearance="outline">
+              <mat-label>Celebration Duration</mat-label>
+              <mat-select formControlName="celebrationDuration">
+                <mat-option *ngFor="let option of durationOptions" [value]="option.value">
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Sound Notifications -->
+    <mat-card class="preference-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>volume_up</mat-icon>
+          Sound Notifications
+        </mat-card-title>
+        <mat-card-subtitle>Audio alerts for achievements</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="preference-controls">
+          <mat-slide-toggle formControlName="enableSound">
+            Enable achievement sounds
+          </mat-slide-toggle>
+          <p class="help-text">
+            Different achievement levels will play different sounds
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Desktop Notifications -->
+    <mat-card class="preference-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>desktop_windows</mat-icon>
+          Desktop Notifications
+        </mat-card-title>
+        <mat-card-subtitle>System notifications outside the browser</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="preference-controls">
+          <mat-slide-toggle 
+            formControlName="enableDesktop"
+            [disabled]="desktopNotificationPermission !== 'granted'">
+            Enable desktop notifications
+          </mat-slide-toggle>
+          
+          <div class="permission-status">
+            <div class="status-info">
+              <span class="status-label">Permission Status:</span>
+              <mat-chip [color]="getPermissionStatusColor()" selected>
+                {{ getPermissionStatusText() }}
+              </mat-chip>
+            </div>
+            
+            <button *ngIf="desktopNotificationPermission === 'default'"
+                    mat-stroked-button
+                    color="primary"
+                    (click)="requestDesktopPermission()">
+              <mat-icon>security</mat-icon>
+              Request Permission
+            </button>
+            
+            <p *ngIf="desktopNotificationPermission === 'denied'" class="warning-text">
+              <mat-icon>warning</mat-icon>
+              Desktop notifications are blocked. Please enable them in your browser settings.
+            </p>
+            
+            <p *ngIf="!isDesktopNotificationSupported" class="warning-text">
+              <mat-icon>error</mat-icon>
+              Desktop notifications are not supported in this browser.
+            </p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Test Section -->
+    <mat-card class="preference-section test-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>play_circle</mat-icon>
+          Test Notifications
+        </mat-card-title>
+        <mat-card-subtitle>Preview how notifications will look with your current settings</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="test-buttons">
+          <button mat-raised-button (click)="testNormal()">
+            <mat-icon>emoji_events</mat-icon>
+            Test Normal
+          </button>
+          
+          <button mat-raised-button color="primary" (click)="testSpecial()">
+            <mat-icon>star</mat-icon>
+            Test Special
+          </button>
+          
+          <button mat-raised-button color="accent" (click)="testEpic()">
+            <mat-icon>auto_awesome</mat-icon>
+            Test Epic
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions -->
+    <div class="preferences-actions">
+      <button mat-stroked-button (click)="resetToDefaults()">
+        <mat-icon>restore</mat-icon>
+        Reset to Defaults
+      </button>
+    </div>
+  </form>
+</div>

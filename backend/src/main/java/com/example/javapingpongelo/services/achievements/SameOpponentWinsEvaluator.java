@@ -3,6 +3,7 @@ package com.example.javapingpongelo.services.achievements;
 import com.example.javapingpongelo.models.Achievement;
 import com.example.javapingpongelo.models.Game;
 import com.example.javapingpongelo.models.Player;
+import com.example.javapingpongelo.models.PlayerStatistics;
 import com.example.javapingpongelo.repositories.GameRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class SameOpponentWinsEvaluator extends AchievementEvaluator {
         UUID playerId = player.getPlayerId();
 
         // Find the maximum number of wins against any single opponent
-        int maxWinsAgainstSameOpponent = getMaxWinsAgainstSameOpponent(playerId);
+        int maxWinsAgainstSameOpponent = getMaxWinsAgainstSameOpponent(playerId, context);
 
         // Check if the player has reached the threshold
         if (maxWinsAgainstSameOpponent >= requiredWins) {
@@ -49,8 +50,38 @@ public class SameOpponentWinsEvaluator extends AchievementEvaluator {
 
     /**
      * Gets the maximum number of wins against any single opponent.
+     * Uses pre-computed statistics when available for better performance.
      */
-    private int getMaxWinsAgainstSameOpponent(UUID playerId) {
+    private int getMaxWinsAgainstSameOpponent(UUID playerId, EvaluationContext context) {
+        // Try to use pre-computed statistics first
+        if (context.getPlayerStatistics() != null) {
+            return context.getOrCompute("maxWinsAgainstOpponent", Integer.class, () -> {
+                // Parse opponent win counts from statistics
+                PlayerStatistics stats = context.getPlayerStatistics();
+                if (stats.getOpponentWinCounts() == null || stats.getOpponentWinCounts().isEmpty()) {
+                    return 0;
+                }
+                try {
+                    java.util.Map<String, Integer> winCounts = objectMapper.readValue(
+                        stats.getOpponentWinCounts(), 
+                        new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, Integer>>() {}
+                    );
+                    return winCounts.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+                } catch (Exception e) {
+                    // Fall back to database query
+                    return getMaxWinsAgainstSameOpponentFromDB(playerId);
+                }
+            });
+        }
+        
+        // Fallback to database query
+        return getMaxWinsAgainstSameOpponentFromDB(playerId);
+    }
+
+    /**
+     * Fallback method that queries the database directly
+     */
+    private int getMaxWinsAgainstSameOpponentFromDB(UUID playerId) {
         // Get all games where this player won
         List<Game> wonGames = gameRepository.findWinsByPlayerId(playerId.toString());
 

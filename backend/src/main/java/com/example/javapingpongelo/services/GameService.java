@@ -1,5 +1,6 @@
 package com.example.javapingpongelo.services;
 
+import com.example.javapingpongelo.events.GameCompletedEvent;
 import com.example.javapingpongelo.models.Game;
 import com.example.javapingpongelo.models.GameType;
 import com.example.javapingpongelo.models.Player;
@@ -9,6 +10,7 @@ import com.example.javapingpongelo.repositories.GameRepository;
 import com.example.javapingpongelo.services.achievements.IAchievementService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -47,6 +49,9 @@ public class GameService {
     
     @Autowired
     private SlackHelperMethods slackHelper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * Save games and return the saved game entities
@@ -169,13 +174,14 @@ public class GameService {
         try {
             List<Player> players = getPlayersFromGame(game);
 
-            // Call achievement service to evaluate achievements for all players
+            // Publish game completed event for smart achievement evaluation
             if (!players.isEmpty()) {
-                achievementService.evaluateAchievementsForGame(game, players.toArray(new Player[0]));
+                log.debug("Publishing GameCompletedEvent for game: {}", game.getGameId());
+                eventPublisher.publishEvent(new GameCompletedEvent(this, game, players));
             }
         }
         catch (Exception e) {
-            log.error("Error evaluating achievements for game: {}", game.getGameId(), e);
+            log.error("Error publishing game completed event for game: {}", game.getGameId(), e);
             // We don't want achievement errors to block the game saving process
         }
     }

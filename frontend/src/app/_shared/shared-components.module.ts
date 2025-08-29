@@ -1,6 +1,8 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterModule} from '@angular/router';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {ReactiveFormsModule, FormsModule} from '@angular/forms';
 
 // Components
 import {LoadingSpinnerComponent} from './components/loading-spinner/loading-spinner.component';
@@ -16,7 +18,6 @@ import {SkeletonLoadingDirective} from './components/skeleton-loading/skeleton-l
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {MatBadgeModule} from '@angular/material/badge';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -27,7 +28,15 @@ import {AchievementCardComponent} from "./components/achievement-card/achievemen
 import {
   AchievementNotificationsComponent
 } from "./components/achievement-notifications/achievement-notifications.component";
+import {AchievementProgressComponent} from "./components/achievement-progress/achievement-progress.component";
+import {CelebrationOverlayComponent} from "./components/celebration-overlay/celebration-overlay.component";
+import {NotificationPanelComponent} from "./components/notification-panel/notification-panel.component";
+import {NotificationPreferencesComponent} from "./components/notification-preferences/notification-preferences.component";
 import {MatMenu, MatMenuTrigger} from "@angular/material/menu";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {MatSelectModule} from "@angular/material/select";
+import {MatBadgeModule} from "@angular/material/badge";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
 import {ProfileAvatarComponent} from "./components/profile-avatar/profile-avatar.component";
 
 @NgModule({
@@ -41,11 +50,18 @@ import {ProfileAvatarComponent} from "./components/profile-avatar/profile-avatar
     ConfirmDialogComponent,
     AchievementCardComponent,
     AchievementNotificationsComponent,
+    AchievementProgressComponent,
+    CelebrationOverlayComponent,
+    NotificationPanelComponent,
+    NotificationPreferencesComponent,
     ProfileAvatarComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
+    BrowserAnimationsModule,
+    ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -56,6 +72,9 @@ import {ProfileAvatarComponent} from "./components/profile-avatar/profile-avatar
     MatChipsModule,
     MatDividerModule,
     MatDialogModule,
+    MatSnackBarModule,
+    MatSlideToggleModule,
+    MatSelectModule,
     MatMenuTrigger,
     MatMenu,
     SkeletonLoadingDirective
@@ -71,6 +90,10 @@ import {ProfileAvatarComponent} from "./components/profile-avatar/profile-avatar
     ConfirmDialogComponent,
     AchievementCardComponent,
     AchievementNotificationsComponent,
+    AchievementProgressComponent,
+    CelebrationOverlayComponent,
+    NotificationPanelComponent,
+    NotificationPreferencesComponent,
     ProfileAvatarComponent,
     SkeletonLoadingDirective,
     // Re-export modules

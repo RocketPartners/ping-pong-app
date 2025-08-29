@@ -7,6 +7,7 @@ import com.example.javapingpongelo.models.dto.AchievementDTO;
 import com.example.javapingpongelo.models.exceptions.BadRequestException;
 import com.example.javapingpongelo.models.exceptions.ResourceNotFoundException;
 import com.example.javapingpongelo.services.achievements.IAchievementService;
+import com.example.javapingpongelo.services.achievements.SmartAchievementFilterService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class AchievementController {
 
     @Autowired
     IAchievementService achievementService;
+
+    @Autowired
+    SmartAchievementFilterService smartAchievementFilterService;
 
     /**
      * Get all visible achievements
@@ -163,5 +167,17 @@ public class AchievementController {
 
         achievementService.recalculatePlayerAchievements(playerId);
         return ResponseEntity.ok(new ApiResponse(true, "Achievements recalculated successfully"));
+    }
+
+    /**
+     * Debug endpoint to repopulate achievement triggers
+     */
+    @PostMapping("/admin/repopulate-triggers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> repopulateTriggers() {
+        log.info("Admin request to repopulate achievement triggers");
+
+        smartAchievementFilterService.clearAndRepopulateAllTriggers();
+        return ResponseEntity.ok(new ApiResponse(true, "Achievement triggers repopulated successfully"));
     }
 }

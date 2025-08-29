@@ -14,6 +14,24 @@
     transform: translateY(-5px);
     box-shadow: tokens.$shadow-lg;
   }
+
+  // Recently unlocked highlighting - Enhanced with multiple visual indicators
+  &.recently-unlocked {
+    border: 3px solid #ff6b35 !important;
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 193, 7, 0.05) 50%, rgba(255, 107, 53, 0.08) 100%);
+    box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
+    transform: scale(1.02);
+    z-index: 10;
+    
+    // Strong pulsing animation
+    animation: strongPulse 1.5s ease-in-out infinite alternate;
+
+    .achievement-icon mat-icon {
+      color: #ff6b35 !important;
+      text-shadow: 0 0 12px rgba(255, 107, 53, 0.8);
+      animation: iconBounce 2s ease-in-out infinite;
+    }
+  }
   
   // Dark mode styling
   :host-context(.dark-theme) & {
@@ -50,6 +68,29 @@
   &.achievement-legendary {
     border-left: 4px solid #ffc107; // Amber
     background: linear-gradient(to right, rgba(255, 215, 0, 0.1), transparent);
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(255, 215, 0, 0.1) 0%, transparent 50%, rgba(255, 215, 0, 0.1) 100%);
+      background-size: 200% 200%;
+      animation: shimmer 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+  }
+  
+  // Enhanced styling for cards with dependencies
+  &.has-dependencies {
+    &:not(.achieved) {
+      border-style: dashed;
+      opacity: 0.8;
+    }
   }
 
   // Size variations
@@ -168,6 +209,49 @@
     width: 20px;
     line-height: 20px;
   }
+  
+  // Celebration indicator
+  .celebration-indicator {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+    
+    .celebration-icon {
+      font-size: 10px;
+      height: 10px;
+      width: 10px;
+      color: white;
+    }
+  }
+  
+  // Dependency indicator
+  .dependency-indicator {
+    position: absolute;
+    bottom: -4px;
+    left: -4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ff9800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .dependency-icon {
+      font-size: 10px;
+      height: 10px;
+      width: 10px;
+      color: white;
+    }
+  }
 }
 
 // Content styling
@@ -225,6 +309,30 @@ mat-card-header {
   :host-context(.dark-theme) & {
     color: rgba(255, 255, 255, 0.7);
   }
+  
+  // Enhanced context styling
+  &.enhanced-context {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(33, 150, 243, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    
+    .context-icon {
+      font-size: 14px;
+      height: 14px;
+      width: 14px;
+      color: #2196f3;
+    }
+    
+    // Dark mode
+    :host-context(.dark-theme) & {
+      background: rgba(33, 150, 243, 0.2);
+      border-color: rgba(33, 150, 243, 0.3);
+    }
+  }
 }
 
 .achievement-date {
@@ -232,10 +340,24 @@ mat-card-header {
   font-size: 12px;
   color: rgba(0, 0, 0, 0.5);
   font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  .date-icon {
+    font-size: 14px;
+    height: 14px;
+    width: 14px;
+    color: rgba(0, 0, 0, 0.4);
+  }
   
   // Dark mode
   :host-context(.dark-theme) & {
     color: rgba(255, 255, 255, 0.5);
+    
+    .date-icon {
+      color: rgba(255, 255, 255, 0.4);
+    }
   }
 }
 
@@ -243,6 +365,84 @@ mat-card-header {
 mat-card-actions button {
   position: relative;
   z-index: 2;
+}
+
+// Dependency information styling
+.dependency-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  border-radius: 8px;
+  font-size: 12px;
+  color: #ff9800;
+  
+  .dependency-info-icon {
+    font-size: 14px;
+    height: 14px;
+    width: 14px;
+  }
+  
+  .dependency-text {
+    font-weight: 500;
+  }
+  
+  // Dark mode
+  :host-context(.dark-theme) & {
+    background: rgba(255, 152, 0, 0.2);
+    border-color: rgba(255, 152, 0, 0.3);
+  }
+}
+
+// Enhanced progress styling
+.achievement-progress {
+  .celebration-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+    
+    ::ng-deep .mat-progress-bar-fill::after {
+      background: linear-gradient(90deg, #ffd700, #ff8f00) !important;
+    }
+  }
+  
+  .completion-text {
+    font-weight: 600;
+    
+    &.epic-complete {
+      color: #ff6b6b;
+      text-shadow: 0 0 4px rgba(255, 107, 107, 0.5);
+      animation: textGlow 2s ease-in-out infinite alternate;
+    }
+    
+    &.special-complete {
+      color: #4caf50;
+      font-weight: 700;
+    }
+  }
+}
+
+// Animations
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+  to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+}
+
+@keyframes textGlow {
+  from { text-shadow: 0 0 4px rgba(255, 107, 107, 0.5); }
+  to { text-shadow: 0 0 8px rgba(255, 107, 107, 0.8); }
 }
 
 /* Progress bar colors by category */

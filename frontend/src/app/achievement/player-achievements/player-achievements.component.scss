@@ -1,0 +1,413 @@
+.player-achievements {
+  padding: 16px;
+}
+
+.achievement-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #2196f3;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
+      margin-top: 4px;
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.no-achievements {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    color: rgba(0, 0, 0, 0.3);
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.achievement-card {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  // Recently unlocked highlighting - Enhanced with multiple visual indicators
+  &.recently-unlocked {
+    border: 3px solid #ff6b35;
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 193, 7, 0.05) 50%, rgba(255, 107, 53, 0.08) 100%);
+    box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
+    transform: scale(1.02);
+    z-index: 10;
+    
+    // Strong pulsing animation
+    animation: strongPulse 1.5s ease-in-out infinite alternate;
+
+    .achievement-icon mat-icon {
+      color: #ff6b35;
+      text-shadow: 0 0 12px rgba(255, 107, 53, 0.8);
+      animation: iconBounce 2s ease-in-out infinite;
+    }
+  }
+
+  // Category-based accent colors
+  &.category-easy {
+    border-left: 4px solid #4caf50;
+  }
+
+  &.category-medium {
+    border-left: 4px solid #2196f3;
+  }
+
+  &.category-hard {
+    border-left: 4px solid #9c27b0;
+  }
+
+  &.category-legendary {
+    border-left: 4px solid #ffc107;
+  }
+}
+
+.recent-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: white;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+  z-index: 2;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.achievement-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: rgba(0, 0, 0, 0.6);
+    transition: all 0.3s ease;
+
+    // Category colors for icons
+    &.category-easy {
+      color: #4caf50;
+    }
+
+    &.category-medium {
+      color: #2196f3;
+    }
+
+    &.category-hard {
+      color: #9c27b0;
+    }
+
+    &.category-legendary {
+      color: #ffc107;
+    }
+  }
+}
+
+.achievement-info {
+  text-align: center;
+
+  .achievement-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .achievement-description {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+  }
+
+  .achievement-metadata {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .achievement-category {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+
+      &.category-easy {
+        background-color: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+      }
+
+      &.category-medium {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+      }
+
+      &.category-hard {
+        background-color: rgba(156, 39, 176, 0.1);
+        color: #9c27b0;
+      }
+
+      &.category-legendary {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #f57c00;
+      }
+    }
+
+    .achievement-points {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2196f3;
+    }
+  }
+
+  .date-earned {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.5);
+    margin-bottom: 8px;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .achievement-context {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+// Enhanced notification visual elements
+.notification-ribbon {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 0 12px 0 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  z-index: 15;
+  animation: ribbonWave 3s ease-in-out infinite;
+  
+  mat-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.pulse-border {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 3px solid #ff6b35;
+  border-radius: 16px;
+  opacity: 0.7;
+  animation: borderPulse 2s ease-in-out infinite;
+  z-index: 5;
+}
+
+.spotlight-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+  border-radius: 12px;
+  animation: spotlightSweep 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 8;
+}
+
+// Enhanced animations
+@keyframes strongPulse {
+  0% {
+    box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 12px 40px rgba(255, 107, 53, 0.5);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes iconBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes ribbonWave {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-2px) rotate(1deg);
+  }
+  75% {
+    transform: translateY(2px) rotate(-1deg);
+  }
+}
+
+@keyframes borderPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes spotlightSweep {
+  0% {
+    background: radial-gradient(circle at 20% 20%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+  }
+  25% {
+    background: radial-gradient(circle at 80% 20%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+  }
+  50% {
+    background: radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+  }
+  75% {
+    background: radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+  }
+  100% {
+    background: radial-gradient(circle at 20% 20%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+  }
+}
+
+// Legacy animation (kept for fallback)
+@keyframes achievementGlow {
+  0% {
+    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
+  }
+  100% {
+    box-shadow: 0 6px 24px rgba(255, 193, 7, 0.4);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .achievement-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .achievement-stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

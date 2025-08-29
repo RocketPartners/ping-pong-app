@@ -1,0 +1,88 @@
+<div class="player-achievements">
+  <!-- Achievement Statistics -->
+  <div class="achievement-stats" *ngIf="showCount">
+    <ng-container *ngIf="earnedAchievements$ | async as achievements">
+      <div class="stat-item">
+        <span class="stat-value">{{ achievements.length }}</span>
+        <span class="stat-label">Achievements Earned</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ getTotalPoints(achievements) }}</span>
+        <span class="stat-label">Total Points</span>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>Loading achievements...</span>
+  </div>
+
+  <!-- Achievement Grid -->
+  <div class="achievement-grid" *ngIf="!loading">
+    <ng-container *ngIf="earnedAchievements$ | async as achievements">
+      <!-- No achievements message -->
+      <div *ngIf="achievements.length === 0" class="no-achievements">
+        <mat-icon>emoji_events</mat-icon>
+        <h3>No achievements yet</h3>
+        <p>Play some games to start earning achievements!</p>
+      </div>
+
+      <!-- Achievement Cards -->
+      <div *ngFor="let achievement of limitAchievements(sortByCategory(filterAchievements(achievements)))" 
+           class="achievement-card"
+           [ngClass]="getAchievementClass(achievement)">
+        
+        <!-- Multiple Visual Indicators for Recently Unlocked Achievements -->
+        <ng-container *ngIf="isRecentlyUnlocked(achievement)">
+          <!-- Animated Corner Ribbon -->
+          <div class="notification-ribbon">
+            <mat-icon>new_releases</mat-icon>
+            <span>FROM NOTIFICATIONS</span>
+          </div>
+          
+          <!-- Pulsing Border Overlay -->
+          <div class="pulse-border"></div>
+          
+          <!-- Spotlight Effect -->
+          <div class="spotlight-overlay"></div>
+        </ng-container>
+
+        <!-- Achievement Icon -->
+        <div class="achievement-icon">
+          <mat-icon [class]="'category-' + ((achievement.achievement.category || 'EASY').toLowerCase())">
+            {{ achievement.achievement.icon || 'emoji_events' }}
+          </mat-icon>
+        </div>
+
+        <!-- Achievement Info -->
+        <div class="achievement-info">
+          <h4 class="achievement-name">{{ achievement.achievement.name }}</h4>
+          <p class="achievement-description">{{ achievement.achievement.description }}</p>
+          
+          <!-- Achievement Metadata -->
+          <div class="achievement-metadata">
+            <span class="achievement-category" 
+                  [ngClass]="'category-' + ((achievement.achievement.category || 'EASY').toLowerCase())">
+              {{ achievement.achievement.category | titlecase }}
+            </span>
+            <span class="achievement-points">{{ achievement.achievement.points }} pts</span>
+          </div>
+
+          <!-- Date Earned -->
+          <div *ngIf="achievement.playerProgress?.dateEarned" class="date-earned">
+            <mat-icon>schedule</mat-icon>
+            <span>Earned {{ achievement.playerProgress.dateEarned | date:'mediumDate' }}</span>
+          </div>
+
+          <!-- Opponent Context (if available) -->
+          <div *ngIf="achievement.playerProgress?.opponentName" class="achievement-context">
+            <mat-icon>person</mat-icon>
+            <span>vs {{ achievement.playerProgress.opponentName }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

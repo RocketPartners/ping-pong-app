@@ -2,6 +2,8 @@ package com.example.javapingpongelo.configuration;
 
 import com.example.javapingpongelo.models.Achievement;
 import com.example.javapingpongelo.repositories.AchievementRepository;
+import com.example.javapingpongelo.services.achievements.SmartAchievementFilterService;
+import com.example.javapingpongelo.services.achievements.AchievementConfigurationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +26,117 @@ public class AchievementInitializer {
     @Autowired
     private AchievementRepository achievementRepository;
 
+    @Autowired
+    private SmartAchievementFilterService smartAchievementFilterService;
+
+    @Autowired
+    private AchievementConfigurationService configurationService;
+
     /**
-     * Initializes default achievements if none exist.
+     * Initializes and updates achievements from YAML configuration.
+     * Always runs to ensure achievements are up to date with the YAML file.
      */
     @Bean
     public CommandLineRunner initializeAchievements() {
         return args -> {
-            if (achievementRepository.count() == 0) {
-                log.info("No achievements found. Initializing default achievements.");
-                createDefaultAchievements();
-            }
-            else {
-                log.info("Achievements already exist, skipping initialization.");
+            try {
+                log.info("Loading achievements from YAML configuration...");
+                
+                // Load achievements from YAML file
+                configurationService.loadConfigurationsFromFile("achievements-config.yaml");
+                
+                if (achievementRepository.count() == 0) {
+                    log.info("No achievements found in database. Creating achievements from YAML...");
+                } else {
+                    log.info("Achievements exist in database. Comparing with YAML and updating as needed...");
+                }
+                
+                // Apply configurations - this handles both creation and safe updates
+                configurationService.applyConfigurations();
+                log.info("Achievement sync complete.");
+                
+                // Handle deprecation - remove triggers for deprecated achievements
+                handleDeprecatedAchievements();
+                
+                // Always repopulate triggers to ensure they're up to date
+                log.info("Repopulating achievement triggers to ensure they're current...");
+                smartAchievementFilterService.clearAndRepopulateAllTriggers();
+                
+            } catch (Exception e) {
+                log.error("Failed to initialize achievements from YAML: {}", e.getMessage(), e);
+                
+                // Fallback to hardcoded achievements if YAML fails
+                if (achievementRepository.count() == 0) {
+                    log.warn("YAML loading failed and no achievements exist. Creating minimal fallback achievements...");
+                    createFallbackAchievements();
+                }
             }
         };
     }
 
     /**
-     * Creates the default set of achievements.
+     * Handle deprecated achievements by removing their triggers
+     * Existing PlayerAchievement records are preserved
      */
+    private void handleDeprecatedAchievements() {
+        try {
+            // Find all achievements marked as deprecated
+            var allAchievements = achievementRepository.findAll();
+            var deprecatedCount = 0;
+            
+            for (Achievement achievement : allAchievements) {
+                if (Boolean.TRUE.equals(achievement.getDeprecated())) {
+                    // Remove triggers for deprecated achievements so they can't be earned anymore
+                    // The SmartAchievementFilterService will skip these during trigger population
+                    log.debug("Achievement '{}' is deprecated - triggers will be excluded", achievement.getName());
+                    deprecatedCount++;
+                }
+            }
+            
+            if (deprecatedCount > 0) {
+                log.info("Found {} deprecated achievements. These will be excluded from trigger evaluation.", deprecatedCount);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error handling deprecated achievements: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Creates minimal fallback achievements if YAML loading fails
+     */
+    private void createFallbackAchievements() {
+        try {
+            log.info("Creating fallback achievements...");
+            
+            // Create a minimal "First Steps" achievement as fallback
+            if (achievementRepository.findByName("First Steps").isEmpty()) {
+                Achievement firstSteps = Achievement.builder()
+                    .name("First Steps")
+                    .description("Win your first game")
+                    .category(Achievement.AchievementCategory.EASY)
+                    .type(Achievement.AchievementType.ONE_TIME)
+                    .criteria(createCriteria("WIN_COUNT", 1))
+                    .icon("emoji_events")
+                    .points(10)
+                    .isVisible(true)
+                    .deprecated(false)
+                    .build();
+                
+                achievementRepository.save(firstSteps);
+                log.info("Created fallback achievement: {}", firstSteps.getName());
+            }
+            
+        } catch (Exception e) {
+            log.error("Failed to create fallback achievements: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Creates the default set of achievements.
+     * @deprecated This method is replaced by YAML-based configuration
+     */
+    @Deprecated
     private void createDefaultAchievements() {
         try {
             // EASY ACHIEVEMENTS
@@ -54,7 +148,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.EASY,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("WIN_COUNT", 1),
-                    "trophy_bronze",
+                    "emoji_events",
                     10
             );
 
@@ -65,7 +159,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.EASY,
                     Achievement.AchievementType.PROGRESSIVE,
                     createCriteria("GAME_COUNT", 5),
-                    "controller",
+                    "videogame_asset",
                     20
             );
 
@@ -76,7 +170,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.EASY,
                     Achievement.AchievementType.PROGRESSIVE,
                     createCriteria("UNIQUE_OPPONENTS", 5),
-                    "friends",
+                    "group",
                     25
             );
 
@@ -109,7 +203,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.EASY,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteriaWithGameType("GAME_COUNT", 1, "RANKED"),
-                    "medal_bronze",
+                    "workspace_premium",
                     15
             );
 
@@ -120,7 +214,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.EASY,
                     Achievement.AchievementType.PROGRESSIVE,
                     createCriteriaWithGameType("WIN_COUNT", 5, "NORMAL"),
-                    "casual",
+                    "beach_access",
                     30
             );
 
@@ -131,7 +225,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.EASY,
                     Achievement.AchievementType.ONE_TIME,
                     createComplexCriteria("WIN_RATE", 50, 10), // 50% after 10 games
-                    "chart",
+                    "analytics",
                     40
             );
 
@@ -142,7 +236,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.EASY,
                     Achievement.AchievementType.ONE_TIME,
                     createComplexCriteria("OPPONENT_SCORE_BELOW", 5, 1),
-                    "zero",
+                    "block",
                     35
             );
 
@@ -164,7 +258,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.EASY,
                     Achievement.AchievementType.PROGRESSIVE,
                     createGilyedCriteria("GILYED_LOSER"),
-                    "face_palm",
+                    "sentiment_very_dissatisfied",
                     25
             );
 
@@ -188,7 +282,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.MEDIUM,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("ALL_GAME_TYPES", 4),
-                    "dice",
+                    "casino",
                     75
             );
 
@@ -210,7 +304,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.MEDIUM,
                     Achievement.AchievementType.PROGRESSIVE,
                     createCriteria("POINTS_SCORED", 100),
-                    "target",
+                    "gps_fixed",
                     60
             );
 
@@ -221,7 +315,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.MEDIUM,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("PERFECT_MATCH", 3),
-                    "check",
+                    "check_circle",
                     80
             );
 
@@ -232,7 +326,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.MEDIUM,
                     Achievement.AchievementType.ONE_TIME,
                     createComplexCriteria("RATING_DIFFERENCE_WIN", 200, 1),
-                    "giant",
+                    "fitness_center",
                     120
             );
 
@@ -243,7 +337,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.MEDIUM,
                     Achievement.AchievementType.ONE_TIME,
                     createComplexCriteria("CLOSE_GAME_WIN", 2, 1),
-                    "clock",
+                    "schedule",
                     65
             );
 
@@ -254,7 +348,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.MEDIUM,
                     Achievement.AchievementType.PROGRESSIVE,
                     createCriteriaWithGameType("WIN_COUNT", 10, "DOUBLES"),
-                    "team",
+                    "groups",
                     85
             );
 
@@ -265,7 +359,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.MEDIUM,
                     Achievement.AchievementType.PROGRESSIVE,
                     createCriteriaWithGameType("WIN_COUNT", 10, "SINGLES"),
-                    "person_star",
+                    "person",
                     85
             );
 
@@ -276,7 +370,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.MEDIUM,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("TOURNAMENT_ROUND", 2), // Semi-finals = round 2
-                    "tournament",
+                    "emoji_events",
                     90
             );
 
@@ -289,7 +383,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.HARD,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("WIN_STREAK", 10),
-                    "trophy_gold",
+                    "emoji_events",
                     150
             );
 
@@ -311,7 +405,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.HARD,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("RATING_THRESHOLD", 1500),
-                    "medal",
+                    "workspace_premium",
                     250
             );
 
@@ -322,7 +416,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.HARD,
                     Achievement.AchievementType.ONE_TIME,
                     createComplexCriteria("ALL_RATINGS_THRESHOLD", 1300, 4),
-                    "star_gold",
+                    "pets",
                     300
             );
 
@@ -333,7 +427,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.HARD,
                     Achievement.AchievementType.PROGRESSIVE,
                     createCriteria("WIN_COUNT", 100),
-                    "100",
+                    "looks_100",
                     200
             );
 
@@ -355,7 +449,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.HARD,
                     Achievement.AchievementType.ONE_TIME,
                     createComplexCriteria("WIN_RATE", 75, 50),
-                    "crown_silver",
+                    "restaurant",
                     400
             );
 
@@ -366,7 +460,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.HARD,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("COMEBACK_WIN", 5), // 5 = best-of-5
-                    "reverse",
+                    "undo",
                     275
             );
 
@@ -377,7 +471,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.HARD,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("SAME_OPPONENT_WINS", 10),
-                    "skull",
+                    "cake",
                     225
             );
 
@@ -388,7 +482,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.HARD,
                     Achievement.AchievementType.ONE_TIME,
                     createComplexCriteria("PARTNER_WIN_STREAK", 15, 1),
-                    "team_gold",
+                    "favorite",
                     325
             );
 
@@ -401,7 +495,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.LEGENDARY,
                     Achievement.AchievementType.ONE_TIME,
                     createCriteria("RATING_THRESHOLD", 1800),
-                    "crown_gold",
+                    "auto_awesome",
                     500
             );
 
@@ -423,7 +517,7 @@ public class AchievementInitializer {
                     Achievement.AchievementCategory.LEGENDARY,
                     Achievement.AchievementType.PROGRESSIVE,
                     createCriteria("WIN_COUNT", 500),
-                    "legend",
+                    "local_florist",
                     800
             );
 
@@ -505,6 +599,10 @@ public class AchievementInitializer {
             );
 
             log.info("Successfully initialized {} achievements", achievementRepository.count());
+            
+            // Populate triggers for the newly created achievements
+            log.info("Populating achievement triggers...");
+            smartAchievementFilterService.clearAndRepopulateAllTriggers();
         }
         catch (Exception e) {
             log.error("Error initializing default achievements", e);

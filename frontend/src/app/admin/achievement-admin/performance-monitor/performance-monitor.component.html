@@ -1,0 +1,140 @@
+<div class="performance-monitor">
+  <div class="monitor-header">
+    <h2 class="section-title">
+      <mat-icon>monitor_heart</mat-icon>
+      Performance Monitor
+    </h2>
+    <p class="section-subtitle">Test achievement evaluation and manage system performance</p>
+  </div>
+
+  <!-- Testing Tools -->
+  <mat-card class="testing-card">
+    <mat-card-header>
+      <mat-card-title>Testing & Management Tools</mat-card-title>
+      <mat-card-subtitle>Tools for testing and managing the achievement system</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="tools-grid">
+        
+        <!-- Player Evaluation Testing -->
+        <div class="tool-section">
+          <h3>Test Player Evaluation</h3>
+          <p class="tool-description">Manually trigger achievement evaluation for a specific player</p>
+          
+          <mat-form-field appearance="outline" class="player-input">
+            <mat-label>Player ID</mat-label>
+            <input matInput [(ngModel)]="selectedPlayerId" placeholder="Enter player UUID">
+            <mat-hint>UUID of the player to evaluate</mat-hint>
+          </mat-form-field>
+          
+          <button mat-raised-button color="primary" 
+                  (click)="testPlayerEvaluation()"
+                  [disabled]="evaluating || !selectedPlayerId.trim()">
+            <mat-icon>play_arrow</mat-icon>
+            <span *ngIf="!evaluating">Evaluate Player</span>
+            <span *ngIf="evaluating">Evaluating...</span>
+          </button>
+        </div>
+
+        <!-- System Reset -->
+        <div class="tool-section danger-section">
+          <h3>⚠️ System Reset</h3>
+          <p class="tool-description">Permanently reset all player achievement progress</p>
+          
+          <div class="danger-warning">
+            <mat-icon>warning</mat-icon>
+            <strong>DANGER:</strong> This action cannot be undone!
+          </div>
+          
+          <button mat-raised-button color="warn" 
+                  (click)="resetAllProgress()"
+                  [disabled]="resetting">
+            <mat-icon>delete_forever</mat-icon>
+            <span *ngIf="!resetting">Reset All Progress</span>
+            <span *ngIf="resetting">Resetting...</span>
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading system information...</p>
+  </div>
+
+  <!-- Achievement Overview -->
+  <mat-card *ngIf="!loading && achievements.length > 0" class="overview-card">
+    <mat-card-header>
+      <mat-card-title>System Overview</mat-card-title>
+      <mat-card-subtitle>{{ achievements.length }} achievements currently in the system</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      
+      <!-- Achievement Statistics -->
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">{{ achievements.length }}</div>
+          <div class="stat-label">Total Achievements</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ getVisibleAchievements() }}</div>
+          <div class="stat-label">Visible Achievements</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ getAchievementsByCategory('EASY') }}</div>
+          <div class="stat-label">Easy Achievements</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ getAchievementsByCategory('LEGENDARY') }}</div>
+          <div class="stat-label">Legendary Achievements</div>
+        </div>
+      </div>
+
+      <!-- Achievement List -->
+      <div class="achievements-list">
+        <h4>Achievement Breakdown by Category</h4>
+        <div class="category-groups">
+          <div *ngFor="let category of getCategories()" class="category-group">
+            <h5 class="category-title">
+              <mat-chip [color]="getCategoryColor(category)" selected>
+                {{ category }}
+              </mat-chip>
+              <span class="category-count">({{ getAchievementsByCategory(category) }})</span>
+            </h5>
+            <div class="achievement-items">
+              <div *ngFor="let achievement of getAchievementsByCategory(category, true)" 
+                   class="achievement-item">
+                <div class="achievement-info">
+                  <span class="achievement-name">{{ achievement.name }}</span>
+                  <span class="achievement-points">{{ achievement.points }} pts</span>
+                </div>
+                <div class="achievement-meta">
+                  <mat-icon class="visibility-icon" [matTooltip]="achievement.isVisible ? 'Visible to players' : 'Hidden from players'">
+                    {{ achievement.isVisible ? 'visibility' : 'visibility_off' }}
+                  </mat-icon>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- No Data State -->
+  <mat-card *ngIf="!loading && achievements.length === 0" class="empty-card">
+    <mat-card-content>
+      <div class="empty-message">
+        <mat-icon>hourglass_empty</mat-icon>
+        <h3>No Achievements Found</h3>
+        <p>No achievements are currently loaded in the system.</p>
+        <button mat-raised-button color="primary" (click)="loadAchievements()">
+          <mat-icon>refresh</mat-icon>
+          Refresh Data
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

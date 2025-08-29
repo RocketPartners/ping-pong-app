@@ -1,0 +1,72 @@
+<div class="dependency-tree-container" role="main" aria-label="Achievement Dependency Tree">
+  <div class="tree-header">
+    <h2 class="tree-title" id="tree-title">
+      <mat-icon aria-hidden="true">account_tree</mat-icon>
+      Achievement Dependency Tree
+    </h2>
+    <div class="tree-controls" role="toolbar" aria-label="Tree view controls">
+      <button mat-icon-button 
+              [matTooltip]="'Reset view'" 
+              (click)="resetView()"
+              [disabled]="loading"
+              aria-label="Reset tree view to center"
+              [attr.aria-describedby]="loading ? 'loading-desc' : null">
+        <mat-icon aria-hidden="true">center_focus_strong</mat-icon>
+      </button>
+      <button mat-icon-button 
+              [matTooltip]="'Export as SVG'" 
+              (click)="exportSvg()"
+              [disabled]="loading"
+              aria-label="Export dependency tree as SVG file"
+              [attr.aria-describedby]="loading ? 'loading-desc' : null">
+        <mat-icon aria-hidden="true">download</mat-icon>
+      </button>
+      <button mat-icon-button 
+              [matTooltip]="'Refresh tree'" 
+              (click)="loadDependencyTree()"
+              [disabled]="loading"
+              aria-label="Refresh dependency tree data"
+              [attr.aria-describedby]="loading ? 'loading-desc' : null">
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  <span id="loading-desc" class="sr-only" *ngIf="loading">Tree is currently loading</span>
+
+  <div class="tree-content">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading dependency tree...</p>
+    </div>
+
+    <!-- Tree Visualization -->
+    <div *ngIf="!loading" class="tree-visualization">
+      <div #treeContainer class="tree-container"></div>
+      
+      <!-- Instructions -->
+      <div class="tree-instructions">
+        <h4>Instructions:</h4>
+        <ul>
+          <li><strong>Pan:</strong> Drag to move the tree around</li>
+          <li><strong>Zoom:</strong> Use mouse wheel to zoom in/out</li>
+          <li><strong>Node Info:</strong> Hover over nodes for details</li>
+          <li><strong>Navigate:</strong> Click nodes to view achievement details</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && (!dependencyTree || !achievements.length)" class="empty-state">
+      <mat-icon>device_hub</mat-icon>
+      <h3>No Dependency Data</h3>
+      <p>No achievement dependencies found for this player.</p>
+      <button mat-raised-button 
+              color="primary" 
+              (click)="loadDependencyTree()">
+        <mat-icon>refresh</mat-icon>
+        Retry Loading
+      </button>
+    </div>
+  </div>
+</div>

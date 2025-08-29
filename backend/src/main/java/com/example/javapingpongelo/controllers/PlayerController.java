@@ -254,6 +254,13 @@ public class PlayerController {
             throw new ResourceNotFoundException("Player not found with id: " + id);
         }
 
+        // Get recent achievement notifications to mark which ones are newly unlocked
+        List<Map<String, Object>> recentNotifications = achievementService.getRecentAchievementNotifications(id, 7);
+        Set<UUID> recentlyUnlockedIds = new HashSet<>();
+        for (Map<String, Object> notification : recentNotifications) {
+            recentlyUnlockedIds.add((UUID) notification.get("achievementId"));
+        }
+
         // Get player achievements
         List<PlayerAchievement> achievements = achievementService.findPlayerAchievements(id);
 
@@ -276,6 +283,9 @@ public class PlayerController {
             detail.put("achieved", pa.getAchieved());
             detail.put("progress", pa.getProgress());
             detail.put("dateEarned", pa.getDateEarned());
+            
+            // Mark if this achievement was recently unlocked
+            detail.put("recentlyUnlocked", recentlyUnlockedIds.contains(achievement.getId()));
 
             // Calculate threshold from criteria
             try {
@@ -290,6 +300,11 @@ public class PlayerController {
             }
 
             detailedAchievements.add(detail);
+        }
+
+        // Acknowledge the achievement notifications now that the user has viewed the achievements page
+        if (!recentlyUnlockedIds.isEmpty()) {
+            achievementService.acknowledgeAchievementNotifications(id);
         }
 
         return ResponseEntity.ok(detailedAchievements);
@@ -527,6 +542,51 @@ public class PlayerController {
         List<PlayerStyleReview> reviews = playerStyleReviewService.findRecentUnacknowledgedReviewsForPlayer(playerId, 7);
 
         return ResponseEntity.ok(reviews);
+    }
+
+    /**
+     * Return recent achievement notifications for the last 7 days
+     */
+    @GetMapping("/{playerId}/recent-achievements")
+    public ResponseEntity<List<Map<String, Object>>> getRecentPlayerAchievements(
+            @PathVariable("playerId") UUID playerId) {
+
+        log.debug("Request to get recent achievement notifications for player: {}", playerId);
+
+        // Validate player exists
+        Player player = playerService.findPlayerById(playerId);
+        if (player == null) {
+            throw new ResourceNotFoundException("Player not found with id: " + playerId);
+        }
+
+        // Get recent achievement notifications from the achievement service
+        List<Map<String, Object>> recentAchievements = achievementService.getRecentAchievementNotifications(playerId, 7);
+
+        return ResponseEntity.ok(recentAchievements);
+    }
+
+    /**
+     * Acknowledge recent achievement notifications for a player
+     */
+    @PostMapping("/{playerId}/recent-achievements/acknowledge")
+    public ResponseEntity<Map<String, Object>> acknowledgeRecentAchievements(
+            @PathVariable("playerId") UUID playerId) {
+        log.debug("Request to acknowledge recent achievement notifications for player: {}", playerId);
+        
+        // Validate player exists
+        Player player = playerService.findPlayerById(playerId);
+        if (player == null) {
+            throw new ResourceNotFoundException("Player not found with id: " + playerId);
+        }
+        
+        // Acknowledge the notifications
+        achievementService.acknowledgeAchievementNotifications(playerId);
+        
+        // Return success response
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Achievement notifications acknowledged successfully");
+        return ResponseEntity.ok(response);
     }
 
     /**

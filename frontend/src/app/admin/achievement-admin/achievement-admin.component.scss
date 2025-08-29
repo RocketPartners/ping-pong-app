@@ -1,0 +1,148 @@
+@use '../../../styles/abstracts/tokens';
+@use '../../../styles/abstracts/mixins';
+
+.admin-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+  min-height: calc(100vh - 200px);
+}
+
+.admin-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg) 0;
+  border-bottom: 2px solid var(--surface-variant);
+}
+
+.admin-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--on-surface);
+  margin: 0 0 var(--space-sm) 0;
+
+  mat-icon {
+    font-size: var(--font-size-2xl);
+    width: var(--font-size-2xl);
+    height: var(--font-size-2xl);
+    color: var(--primary);
+  }
+}
+
+.admin-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--on-surface-variant);
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+}
+
+.admin-navigation {
+  background: var(--surface);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--elevation-1);
+
+  ::ng-deep {
+    .mat-mdc-tab-group {
+      .mat-mdc-tab-header {
+        background: var(--surface-variant);
+        border-bottom: 1px solid var(--outline-variant);
+      }
+
+      .mat-mdc-tab {
+        min-width: 200px;
+        opacity: 0.7;
+        transition: all 0.2s ease-in-out;
+
+        &.mdc-tab--active {
+          opacity: 1;
+        }
+
+        .mdc-tab__content {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          font-weight: var(--font-weight-medium);
+        }
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .mat-mdc-tab-body-wrapper {
+        min-height: 600px;
+      }
+    }
+  }
+}
+
+.tab-content {
+  padding: var(--space-lg);
+  min-height: 500px;
+}
+
+// Dark theme support
+:host-context(.dark-theme) {
+  .admin-header {
+    border-bottom-color: var(--outline-variant);
+  }
+
+  .admin-navigation {
+    background: var(--surface-container);
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .admin-container {
+    padding: var(--space-md);
+  }
+
+  .admin-title {
+    font-size: var(--font-size-xl);
+    flex-direction: column;
+    gap: var(--space-sm);
+
+    mat-icon {
+      font-size: var(--font-size-xl);
+      width: var(--font-size-xl);
+      height: var(--font-size-xl);
+    }
+  }
+
+  .admin-subtitle {
+    font-size: var(--font-size-md);
+  }
+
+  .admin-navigation {
+    ::ng-deep {
+      .mat-mdc-tab {
+        min-width: auto;
+        flex: 1;
+
+        .mdc-tab__content {
+          flex-direction: column;
+          gap: var(--space-xs);
+          font-size: var(--font-size-sm);
+        }
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+
+  .tab-content {
+    padding: var(--space-md);
+  }
+}

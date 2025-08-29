@@ -1,6 +1,8 @@
 package com.example.javapingpongelo.services.achievements;
 
+import com.example.javapingpongelo.events.AchievementUnlockedEvent;
 import com.example.javapingpongelo.models.*;
+import com.example.javapingpongelo.repositories.AchievementNotificationRepository;
 import com.example.javapingpongelo.repositories.AchievementRepository;
 import com.example.javapingpongelo.repositories.GameRepository;
 import com.example.javapingpongelo.repositories.MatchRepository;
@@ -11,9 +13,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -43,6 +49,15 @@ public class AchievementServiceImpl implements IAchievementService {
     @Autowired
     AchievementEvaluatorFactory evaluatorFactory;
 
+    @Autowired
+    AchievementNotificationRepository achievementNotificationRepository;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private AchievementDependencyService dependencyService;
+
     private static Map<String, Object> getStringObjectMap(Player player) {
         Map<String, Object> additionalData = new HashMap<>();
         additionalData.put("singlesRankedRating", player.getSinglesRankedRating());
@@ -57,6 +72,7 @@ public class AchievementServiceImpl implements IAchievementService {
      * Retrieve all achievements
      */
     @Override
+    @Cacheable(value = "achievements", key = "'all'")
     public List<Achievement> findAllAchievements() {
         return achievementRepository.findAll();
     }
@@ -65,6 +81,7 @@ public class AchievementServiceImpl implements IAchievementService {
      * Retrieve visible achievements only
      */
     @Override
+    @Cacheable(value = "achievements", key = "'visible'")
     public List<Achievement> findVisibleAchievements() {
         return achievementRepository.findByIsVisible(true);
     }
@@ -73,6 +90,7 @@ public class AchievementServiceImpl implements IAchievementService {
      * Create a new achievement
      */
     @Override
+    @CacheEvict(value = "achievements", allEntries = true)
     public Achievement createAchievement(Achievement achievement) {
         log.info("Creating new achievement: {}", achievement.getName());
         return achievementRepository.save(achievement);
@@ -206,6 +224,12 @@ public class AchievementServiceImpl implements IAchievementService {
                 });
 
         try {
+            // Check prerequisites before allowing progress
+            if (!dependencyService.meetsPrerequisites(playerId, achievementId)) {
+                log.debug("Player {} does not meet prerequisites for achievement {}", playerId, achievementId);
+                return playerAchievement; // Return existing progress without update
+            }
+
             // Parse criteria to get threshold
             JsonNode criteria = objectMapper.readTree(achievement.getCriteria());
             int threshold = criteria.has("threshold") ? criteria.get("threshold").asInt() : 1;
@@ -215,7 +239,9 @@ public class AchievementServiceImpl implements IAchievementService {
 
             if (newlyAchieved) {
                 log.info("Achievement {} earned by player {} after progress update", achievementId, playerId);
-                // Additional notification logic could go here
+                
+                // Publish achievement unlocked event
+                publishAchievementUnlockedEvent(playerId, achievement, playerAchievement, "progress_update");
             }
 
             return playerAchievement;
@@ -258,6 +284,11 @@ public class AchievementServiceImpl implements IAchievementService {
         playerAchievementRepository.save(playerAchievement);
 
         log.info("Contextual achievement {} earned by player {} against {}", achievementId, playerId, opponentName);
+        
+        // Publish achievement unlocked event with context
+        publishContextualAchievementUnlockedEvent(playerId, achievement, playerAchievement, 
+                                                 "contextual_unlock", opponentName, gameDatePlayed);
+        
         return playerAchievement;
     }
 
@@ -293,6 +324,29 @@ public class AchievementServiceImpl implements IAchievementService {
 
             // Evaluate each achievement
             evaluateEachAchievement(context, player, playerId, achievements);
+        }
+    }
+
+    /**
+     * Evaluate specific achievements for a player (used by event-driven system)
+     */
+    @Transactional
+    public void evaluateSpecificAchievements(Player player, List<Achievement> achievements, 
+                                           AchievementEvaluator.EvaluationContext context) {
+        log.debug("Evaluating {} specific achievements for player {}", achievements.size(), player.getPlayerId());
+        
+        try {
+            UUID playerId = player.getPlayerId();
+            
+            // Evaluate each achievement
+            evaluateEachAchievement(context, player, playerId, achievements);
+            
+            log.debug("Successfully evaluated {} achievements for player {}", achievements.size(), playerId);
+        } catch (Exception e) {
+            log.error("Error evaluating specific achievements for player {}: {}", 
+                     player.getPlayerId(), e.getMessage(), e);
+            // Don't throw RuntimeException to prevent UndeclaredThrowableException in async context
+            // Just log the error and continue
         }
     }
 
@@ -429,6 +483,207 @@ public class AchievementServiceImpl implements IAchievementService {
         }
         catch (Exception e) {
             log.error("Error in special recalculation for achievement {}", achievement.getId(), e);
+        }
+    }
+
+    /**
+     * Publishes achievement unlocked event
+     */
+    private void publishAchievementUnlockedEvent(UUID playerId, Achievement achievement, 
+                                               PlayerAchievement playerAchievement, String triggerEvent) {
+        try {
+            Player player = playerService.findPlayerById(playerId);
+            AchievementUnlockedEvent.UnlockContext context = new AchievementUnlockedEvent.UnlockContext(triggerEvent);
+            
+            AchievementUnlockedEvent event = new AchievementUnlockedEvent(
+                    this, player, achievement, playerAchievement, context);
+            
+            eventPublisher.publishEvent(event);
+            log.debug("Published AchievementUnlockedEvent for {} - {}", player.getFullName(), achievement.getName());
+            
+        } catch (Exception e) {
+            log.error("Error publishing achievement unlocked event", e);
+        }
+    }
+
+    /**
+     * Publishes contextual achievement unlocked event (like Gilyed)
+     */
+    private void publishContextualAchievementUnlockedEvent(UUID playerId, Achievement achievement, 
+                                                         PlayerAchievement playerAchievement, String triggerEvent,
+                                                         String opponentName, Date gameDatePlayed) {
+        try {
+            Player player = playerService.findPlayerById(playerId);
+            AchievementUnlockedEvent.UnlockContext context = new AchievementUnlockedEvent.UnlockContext(triggerEvent)
+                    .withOpponent(opponentName, gameDatePlayed != null ? gameDatePlayed.toString() : null);
+            
+            AchievementUnlockedEvent event = new AchievementUnlockedEvent(
+                    this, player, achievement, playerAchievement, context);
+            
+            eventPublisher.publishEvent(event);
+            log.debug("Published contextual AchievementUnlockedEvent for {} - {} vs {}", 
+                     player.getFullName(), achievement.getName(), opponentName);
+            
+        } catch (Exception e) {
+            log.error("Error publishing contextual achievement unlocked event", e);
+        }
+    }
+
+    /**
+     * Get all achievements (alias for findAllAchievements)
+     */
+    @Override
+    public List<Achievement> getAllAchievements() {
+        return findAllAchievements();
+    }
+
+    /**
+     * Evaluate all achievements for a specific player
+     */
+    @Override
+    @Transactional
+    public void evaluateAllAchievementsForPlayer(UUID playerId) {
+        log.info("Evaluating all achievements for player: {}", playerId);
+        try {
+            Player player = playerService.findPlayerById(playerId);
+            List<Achievement> achievements = achievementRepository.findAll();
+            
+            // Create evaluation context
+            List<Game> gameHistory = gameRepository.findByPlayerId(playerId);
+            List<Match> matchHistory = matchRepository.findByPlayerId(playerId);
+            
+            AchievementEvaluator.EvaluationContext context = new AchievementEvaluator.EvaluationContext();
+            context.setGameHistory(gameHistory);
+            context.setMatchHistory(matchHistory);
+            context.setAdditionalData(getStringObjectMap(player));
+            
+            // Evaluate each achievement
+            for (Achievement achievement : achievements) {
+                try {
+                    AchievementEvaluator evaluator = evaluatorFactory.getEvaluator(achievement.getCriteria());
+                    if (evaluator != null) {
+                        int progressUpdate = evaluator.evaluate(player, achievement, context);
+                        if (progressUpdate > 0) {
+                            updateAchievementProgress(playerId, achievement.getId(), progressUpdate);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error evaluating achievement {} for player {}: {}", 
+                             achievement.getId(), playerId, e.getMessage());
+                }
+            }
+            
+            log.info("Completed achievement evaluation for player: {}", playerId);
+            
+        } catch (Exception e) {
+            log.error("Error evaluating all achievements for player {}: {}", playerId, e.getMessage());
+            throw new RuntimeException("Failed to evaluate achievements", e);
+        }
+    }
+
+    /**
+     * Reset all player achievement progress (DANGEROUS - admin only)
+     */
+    @Override
+    @Transactional
+    @CacheEvict(value = {"player-achievements", "player-statistics"}, allEntries = true)
+    public void resetAllPlayerProgress() {
+        log.warn("DANGEROUS OPERATION: Resetting all player achievement progress");
+        try {
+            // This will delete all player achievement records
+            playerAchievementRepository.deleteAll();
+            log.warn("All player achievement progress has been reset");
+            
+        } catch (Exception e) {
+            log.error("Error resetting all player progress: {}", e.getMessage());
+            throw new RuntimeException("Failed to reset player progress", e);
+        }
+    }
+
+    /**
+     * Get recent achievement notifications for a player
+     */
+    @Override
+    public List<Map<String, Object>> getRecentAchievementNotifications(UUID playerId, int days) {
+        log.debug("Getting recent achievement notifications for player: {} (last {} days)", playerId, days);
+        
+        try {
+            LocalDateTime since = LocalDateTime.now().minusDays(days);
+            List<AchievementNotification> notifications = achievementNotificationRepository
+                    .findRecentNotificationsByPlayer(playerId, since);
+            
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (AchievementNotification notification : notifications) {
+                // Only include IN_APP notifications for the UI
+                if (notification.getNotificationType() == AchievementNotification.NotificationType.IN_APP) {
+                    Map<String, Object> notificationData = new HashMap<>();
+                    
+                    // Get achievement details
+                    Achievement achievement = achievementRepository.findById(notification.getAchievementId()).orElse(null);
+                    if (achievement != null) {
+                        notificationData.put("id", notification.getId());
+                        notificationData.put("type", "achievement");
+                        notificationData.put("achievementId", notification.getAchievementId());
+                        notificationData.put("achievementName", achievement.getName());
+                        notificationData.put("achievementDescription", achievement.getDescription());
+                        notificationData.put("achievementIcon", achievement.getIcon());
+                        notificationData.put("achievementPoints", achievement.getPoints());
+                        notificationData.put("achievementCategory", achievement.getCategory());
+                        notificationData.put("createdAt", notification.getCreatedAt());
+                        notificationData.put("status", notification.getStatus());
+                        
+                        // Add contextual information if available
+                        if (notification.getOpponentName() != null) {
+                            notificationData.put("opponentName", notification.getOpponentName());
+                        }
+                        if (notification.getGameDate() != null) {
+                            notificationData.put("gameDate", notification.getGameDate());
+                        }
+                        
+                        result.add(notificationData);
+                    }
+                }
+            }
+            
+            log.debug("Found {} recent achievement notifications for player {}", result.size(), playerId);
+            return result;
+            
+        } catch (Exception e) {
+            log.error("Error getting recent achievement notifications for player {}: {}", playerId, e.getMessage(), e);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Acknowledge/mark achievement notifications as read for a player
+     */
+    @Override
+    @Transactional
+    public void acknowledgeAchievementNotifications(UUID playerId) {
+        log.debug("Acknowledging achievement notifications for player: {}", playerId);
+        
+        try {
+            // Find all pending IN_APP notifications for this player
+            List<AchievementNotification> notifications = achievementNotificationRepository
+                    .findByPlayerId(playerId);
+            
+            // Mark IN_APP notifications as sent/acknowledged
+            for (AchievementNotification notification : notifications) {
+                if (notification.getNotificationType() == AchievementNotification.NotificationType.IN_APP &&
+                    notification.getStatus() == AchievementNotification.NotificationStatus.PENDING) {
+                    notification.markAsSent();
+                }
+            }
+            
+            // Save all changes
+            achievementNotificationRepository.saveAll(notifications);
+            
+            log.debug("Acknowledged {} achievement notifications for player {}", 
+                     notifications.size(), playerId);
+                     
+        } catch (Exception e) {
+            log.error("Error acknowledging achievement notifications for player {}: {}", 
+                     playerId, e.getMessage(), e);
         }
     }
 }

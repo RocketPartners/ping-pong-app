@@ -1,0 +1,129 @@
+<!-- Notification trigger button -->
+<button mat-icon-button 
+        class="notification-trigger"
+        (click)="togglePanel()"
+        [matTooltip]="'Notifications (' + unreadCount + ')'">
+  <mat-icon [matBadge]="unreadCount > 0 ? unreadCount : null" 
+            [matBadgeColor]="'warn'"
+            matBadgeSize="small">
+    notifications
+  </mat-icon>
+</button>
+
+<!-- Notification panel -->
+<div class="notification-panel-container" [class.open]="isOpen">
+  <!-- Backdrop -->
+  <div class="panel-backdrop" 
+       (click)="onBackdropClick()" 
+       [class.visible]="isOpen"></div>
+  
+  <!-- Panel -->
+  <div class="notification-panel" 
+       [@slideInOut]="isOpen ? 'in' : 'out'"
+       (keydown)="onKeydown($event)"
+       tabindex="0">
+    
+    <!-- Panel header -->
+    <div class="panel-header">
+      <div class="header-title">
+        <mat-icon>notifications</mat-icon>
+        <h3>Notifications</h3>
+        <span class="count-badge" *ngIf="notifications.length > 0">({{ notifications.length }})</span>
+      </div>
+      
+      <div class="header-actions">
+        <button mat-icon-button 
+                [matTooltip]="'Clear all'"
+                (click)="clearAll()"
+                [disabled]="notifications.length === 0">
+          <mat-icon>clear_all</mat-icon>
+        </button>
+        
+        <button mat-icon-button 
+                [matTooltip]="'Close'"
+                (click)="closePanel()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Panel content -->
+    <div class="panel-content">
+      
+      <!-- Test buttons (development only) -->
+      <div class="test-section" *ngIf="!notifications.length">
+        <p class="test-label">Test celebrations:</p>
+        <div class="test-buttons">
+          <button mat-stroked-button 
+                  size="small"
+                  (click)="testNormalCelebration()">
+            Normal
+          </button>
+          <button mat-stroked-button 
+                  color="primary"
+                  size="small"
+                  (click)="testSpecialCelebration()">
+            Special
+          </button>
+          <button mat-stroked-button 
+                  color="accent"
+                  size="small"
+                  (click)="testEpicCelebration()">
+            Epic
+          </button>
+        </div>
+      </div>
+      
+      <!-- Notifications list -->
+      <div class="notifications-list" *ngIf="notifications.length > 0">
+        <div *ngFor="let notification of notifications; trackBy: trackByNotification"
+             [ngClass]="getNotificationClass(notification)"
+             [@notificationItem]>
+          
+          <!-- Notification icon -->
+          <div class="notification-icon" [style.background-color]="getCategoryColor(notification)">
+            <mat-icon>{{ getNotificationIcon(notification) }}</mat-icon>
+          </div>
+          
+          <!-- Notification content -->
+          <div class="notification-content">
+            <div class="notification-header">
+              <span class="celebration-prefix">{{ getCelebrationPrefix(notification) }}</span>
+              <span class="timestamp">{{ formatTimestamp(notification.timestamp) }}</span>
+            </div>
+            
+            <h4 class="achievement-name">{{ notification.achievement.name }}</h4>
+            
+            <p class="achievement-description">{{ notification.achievement.description }}</p>
+            
+            <div *ngIf="notification.contextualMessage" class="contextual-message">
+              <mat-icon>auto_stories</mat-icon>
+              <span>{{ notification.contextualMessage }}</span>
+            </div>
+            
+            <div class="notification-meta">
+              <span class="category">{{ notification.achievement.category }}</span>
+              <span class="points">+{{ notification.achievement.points }} pts</span>
+            </div>
+          </div>
+          
+          <!-- Notification actions -->
+          <div class="notification-actions">
+            <button mat-icon-button 
+                    [matTooltip]="'Replay celebration'"
+                    (click)="replayCelebration(notification)">
+              <mat-icon>replay</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="notifications.length === 0">
+        <mat-icon>notifications_none</mat-icon>
+        <h4>No notifications yet</h4>
+        <p>Achievement notifications will appear here when you unlock them!</p>
+      </div>
+    </div>
+  </div>
+</div>

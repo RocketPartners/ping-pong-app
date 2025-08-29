@@ -48,6 +48,10 @@ public class Achievement {
     @Column(nullable = false)
     private Boolean isVisible;
 
+    @Column(nullable = true)
+    @Builder.Default
+    private Boolean deprecated = false;
+
     /**
      * Achievement categories representing difficulty levels
      */

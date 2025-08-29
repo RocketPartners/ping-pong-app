@@ -1,0 +1,416 @@
+@use '../../../../styles/abstracts/tokens';
+@use '../../../../styles/abstracts/mixins';
+
+// Screen reader only utility class
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.analytics-dashboard {
+  padding: var(--space-lg);
+}
+
+// Header Section
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--outline-variant);
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--on-surface);
+    margin: 0;
+
+    mat-icon {
+      color: var(--primary);
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: var(--space-md);
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+  }
+}
+
+// Loading State
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  gap: var(--space-lg);
+
+  p {
+    color: var(--on-surface-variant);
+    font-size: var(--font-size-lg);
+  }
+}
+
+// Summary Cards
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+
+  .summary-card {
+    text-align: center;
+    
+    ::ng-deep {
+      .mat-mdc-card-header {
+        justify-content: center;
+        padding-bottom: var(--space-sm);
+
+        .mat-mdc-card-avatar {
+          background: var(--primary-container);
+          color: var(--on-primary-container);
+        }
+
+        .mat-mdc-card-title {
+          font-size: var(--font-size-md);
+          font-weight: var(--font-weight-medium);
+          color: var(--on-surface-variant);
+        }
+      }
+    }
+
+    .metric-value {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--primary);
+      margin-top: var(--space-sm);
+    }
+  }
+}
+
+// Charts Section
+.charts-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+
+  .chart-card {
+    ::ng-deep {
+      .mat-mdc-card-header {
+        .mat-mdc-card-title {
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-semibold);
+        }
+
+        .mat-mdc-card-subtitle {
+          font-size: var(--font-size-sm);
+          color: var(--on-surface-variant);
+        }
+      }
+    }
+  }
+}
+
+// Chart Placeholder
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  color: var(--on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+    font-style: italic;
+  }
+}
+
+// Simple Chart Implementation
+.simple-chart {
+  padding: var(--space-md) 0;
+
+  .chart-item {
+    display: grid;
+    grid-template-columns: 120px 1fr 60px;
+    gap: var(--space-md);
+    align-items: center;
+    margin-bottom: var(--space-md);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .chart-label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--on-surface);
+    }
+
+    .chart-bar {
+      background: var(--surface-variant);
+      border-radius: var(--border-radius-sm);
+      height: 24px;
+      position: relative;
+      overflow: hidden;
+
+      .chart-fill {
+        background: var(--primary);
+        height: 100%;
+        border-radius: var(--border-radius-sm);
+        transition: width 0.3s ease-in-out;
+
+        &.difficulty-bar {
+          background: linear-gradient(90deg, var(--success) 0%, var(--warning) 50%, var(--error) 100%);
+        }
+      }
+    }
+
+    .chart-value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--on-surface);
+      text-align: right;
+    }
+  }
+}
+
+// Achievements Needing Attention
+.attention-card {
+  .warning-icon {
+    background: var(--warning-container) !important;
+    color: var(--on-warning-container) !important;
+  }
+}
+
+.attention-list {
+  .attention-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--space-md);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--space-md);
+    background: var(--surface-container-low);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .attention-info {
+      flex: 1;
+
+      .achievement-name {
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-semibold);
+        color: var(--on-surface);
+        margin: 0 0 var(--space-sm) 0;
+      }
+
+      .attention-metrics {
+        ::ng-deep {
+          .mat-mdc-chip-set {
+            gap: var(--space-xs);
+          }
+
+          .mat-mdc-chip {
+            font-size: var(--font-size-xs);
+            height: 24px;
+
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+            }
+          }
+        }
+      }
+    }
+
+    .attention-stats {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      min-width: 120px;
+
+      .stat {
+        display: flex;
+        justify-content: space-between;
+        font-size: var(--font-size-sm);
+
+        .stat-label {
+          color: var(--on-surface-variant);
+        }
+
+        .stat-value {
+          font-weight: var(--font-weight-semibold);
+          color: var(--on-surface);
+        }
+      }
+    }
+  }
+}
+
+// Trend Colors
+.trend-positive {
+  background-color: var(--success-container) !important;
+  color: var(--on-success-container) !important;
+}
+
+.trend-negative {
+  background-color: var(--error-container) !important;  
+  color: var(--on-error-container) !important;
+}
+
+.trend-neutral {
+  background-color: var(--surface-variant) !important;
+  color: var(--on-surface-variant) !important;
+}
+
+// Success Card
+.success-card {
+  .success-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-xl);
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: var(--success);
+      margin-bottom: var(--space-md);
+    }
+
+    h3 {
+      color: var(--on-surface);
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      margin: 0 0 var(--space-sm) 0;
+    }
+
+    p {
+      color: var(--on-surface-variant);
+      margin: 0;
+    }
+  }
+}
+
+// Refresh Overlay
+.refresh-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  .refresh-card {
+    min-width: 300px;
+    text-align: center;
+
+    mat-card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+
+      p {
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-medium);
+        color: var(--on-surface);
+        margin: 0;
+      }
+
+      small {
+        color: var(--on-surface-variant);
+      }
+    }
+  }
+}
+
+// Mobile Responsiveness
+@media (max-width: 768px) {
+  .analytics-dashboard {
+    padding: var(--space-md);
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: stretch;
+
+    .header-actions {
+      justify-content: center;
+    }
+  }
+
+  .summary-cards {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .charts-section {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .attention-item {
+    flex-direction: column;
+    gap: var(--space-md);
+
+    .attention-stats {
+      align-self: stretch;
+    }
+  }
+
+  .simple-chart .chart-item {
+    grid-template-columns: 80px 1fr 50px;
+    gap: var(--space-sm);
+
+    .chart-label {
+      font-size: var(--font-size-xs);
+    }
+
+    .chart-bar {
+      height: 20px;
+    }
+
+    .chart-value {
+      font-size: var(--font-size-xs);
+    }
+  }
+}

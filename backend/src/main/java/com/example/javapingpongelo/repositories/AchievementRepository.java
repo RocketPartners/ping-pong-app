@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -23,4 +24,9 @@ public interface AchievementRepository extends JpaRepository<Achievement, UUID> 
      * Find achievements by type
      */
     List<Achievement> findByType(Achievement.AchievementType type);
+
+    /**
+     * Find achievement by name
+     */
+    Optional<Achievement> findByName(String name);
 }

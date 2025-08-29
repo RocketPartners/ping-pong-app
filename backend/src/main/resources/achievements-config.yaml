@@ -1,0 +1,710 @@
+achievements:
+  # EASY ACHIEVEMENTS
+  - id: first_steps
+    name: "First Steps"
+    description: "Win your first game"
+    category: EASY
+    type: ONE_TIME
+    icon: "emoji_events"
+    points: 10
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 1
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: getting_started
+    name: "Getting Started"
+    description: "Play 5 games (win or lose)"
+    category: EASY
+    type: PROGRESSIVE
+    icon: "videogame_asset"
+    points: 20
+    visible: true
+    deprecated: false
+    criteria:
+      type: GAME_COUNT
+      threshold: 5
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: social_butterfly
+    name: "Social Butterfly"
+    description: "Play against 5 different opponents"
+    category: EASY
+    type: PROGRESSIVE
+    icon: "group"
+    points: 25
+    visible: true
+    deprecated: false
+    criteria:
+      type: UNIQUE_OPPONENTS
+      threshold: 5
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: singles_player
+    name: "Singles Player"
+    description: "Win a singles game"
+    category: EASY
+    type: ONE_TIME
+    icon: "person"
+    points: 15
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 1
+      gameType: SINGLES
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+
+  - id: team_player
+    name: "Team Player"
+    description: "Win a doubles game"
+    category: EASY
+    type: ONE_TIME
+    icon: "groups"
+    points: 15
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 1
+      gameType: DOUBLES
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: ranked_rookie
+    name: "Ranked Rookie"
+    description: "Play your first ranked game"
+    category: EASY
+    type: ONE_TIME
+    icon: "workspace_premium"
+    points: 15
+    visible: true
+    deprecated: false
+    criteria:
+      type: GAME_COUNT
+      threshold: 1
+      gameType: RANKED
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: casual_contender
+    name: "Casual Contender"
+    description: "Win 5 normal (unranked) games"
+    category: EASY
+    type: PROGRESSIVE
+    icon: "beach_access"
+    points: 30
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 5
+      gameType: NORMAL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_CASUAL", "DOUBLES_CASUAL"]
+
+  - id: consistent_competitor
+    name: "Consistent Competitor"
+    description: "Maintain a 50% win rate after 10 games"
+    category: EASY
+    type: ONE_TIME
+    icon: "analytics"
+    points: 40
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_RATE
+      threshold: 50
+      secondaryValue: 10
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: shutout_victory
+    name: "Shutout Victory"
+    description: "Win a game where your opponent scored fewer than 5 points"
+    category: EASY
+    type: ONE_TIME
+    icon: "block"
+    points: 35
+    visible: true
+    deprecated: false
+    criteria:
+      type: OPPONENT_SCORE_BELOW
+      threshold: 5
+      secondaryValue: 1
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: got_gilyed
+    name: "Got Gilyed"
+    description: "Score 0 points in a singles game (ouch!)"
+    category: EASY
+    type: PROGRESSIVE
+    icon: "sentiment_very_dissatisfied"
+    points: 25
+    visible: true
+    deprecated: false
+    criteria:
+      type: GILYED_LOSER
+      threshold: 1
+      gameType: SINGLES
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+
+  # MEDIUM ACHIEVEMENTS
+  - id: win_streak
+    name: "Win Streak"
+    description: "Win 5 consecutive games"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "fire"
+    points: 50
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_STREAK
+      threshold: 5
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: gilyed_someone
+    name: "Gilyed Someone"
+    description: "Win a singles game where your opponent scored 0 points"
+    category: MEDIUM
+    type: PROGRESSIVE
+    icon: "fire"
+    points: 75
+    visible: true
+    deprecated: false
+    criteria:
+      type: GILYED_WINNER
+      threshold: 1
+      gameType: SINGLES
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+
+  - id: versatile_athlete
+    name: "Versatile Athlete"
+    description: "Win at least one game in each game type"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "casino"
+    points: 75
+    visible: true
+    deprecated: false
+    criteria:
+      type: ALL_GAME_TYPES
+      threshold: 4
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: rising_star
+    name: "Rising Star"
+    description: "Reach a rating of 1200 in any game type"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "star"
+    points: 100
+    visible: true
+    deprecated: false
+    criteria:
+      type: RATING_THRESHOLD
+      threshold: 1200
+      gameType: ALL
+    triggers:
+      - triggerType: RATING_UPDATED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: point_machine
+    name: "Point Machine"
+    description: "Score 100 total points across all games"
+    category: MEDIUM
+    type: PROGRESSIVE
+    icon: "gps_fixed"
+    points: 60
+    visible: true
+    deprecated: false
+    criteria:
+      type: POINTS_SCORED
+      threshold: 100
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: perfect_set
+    name: "Perfect Set"
+    description: "Win a best-of-3 match without losing a game"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "check_circle"
+    points: 80
+    visible: true
+    deprecated: false
+    criteria:
+      type: PERFECT_MATCH
+      threshold: 3
+      gameType: ALL
+    triggers:
+      - triggerType: MATCH_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: giant_slayer
+    name: "Giant Slayer"
+    description: "Defeat a player with a rating 200+ points higher than yours"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "fitness_center"
+    points: 120
+    visible: true
+    deprecated: false
+    criteria:
+      type: RATING_DIFFERENCE_WIN
+      threshold: 200
+      secondaryValue: 1
+      gameType: RANKED
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: marathon_match
+    name: "Marathon Match"
+    description: "Win a game that had a score difference of only 2 points"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "schedule"
+    points: 65
+    visible: true
+    deprecated: false
+    criteria:
+      type: CLOSE_GAME_WIN
+      threshold: 2
+      secondaryValue: 1
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: doubles_domination
+    name: "Doubles Domination"
+    description: "Win 10 doubles games"
+    category: MEDIUM
+    type: PROGRESSIVE
+    icon: "groups"
+    points: 85
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 10
+      gameType: DOUBLES
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: singles_specialist
+    name: "Singles Specialist"
+    description: "Win 10 singles games"
+    category: MEDIUM
+    type: PROGRESSIVE
+    icon: "person"
+    points: 85
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 10
+      gameType: SINGLES
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+
+  - id: tournament_contender
+    name: "Tournament Contender"
+    description: "Reach the semi-finals in any tournament"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "emoji_events"
+    points: 90
+    visible: true
+    deprecated: false
+    criteria:
+      type: TOURNAMENT_ROUND
+      threshold: 2
+      gameType: ALL
+    triggers:
+      - triggerType: TOURNAMENT_EVENT
+        gameTypes: ["TOURNAMENT"]
+
+  # HARD ACHIEVEMENTS
+  - id: unstoppable
+    name: "Unstoppable"
+    description: "Win 10 consecutive games"
+    category: HARD
+    type: ONE_TIME
+    icon: "emoji_events"
+    points: 150
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_STREAK
+      threshold: 10
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: perfect_match
+    name: "Perfect Match"
+    description: "Win a best-of-7 match without losing a game"
+    category: HARD
+    type: ONE_TIME
+    icon: "star"
+    points: 200
+    visible: true
+    deprecated: false
+    criteria:
+      type: PERFECT_MATCH
+      threshold: 7
+      gameType: ALL
+    triggers:
+      - triggerType: MATCH_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: elite_player
+    name: "Elite Player"
+    description: "Reach a rating of 1500 in any game type"
+    category: HARD
+    type: ONE_TIME
+    icon: "workspace_premium"
+    points: 250
+    visible: true
+    deprecated: false
+    criteria:
+      type: RATING_THRESHOLD
+      threshold: 1500
+      gameType: ALL
+    triggers:
+      - triggerType: RATING_UPDATED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: master_of_all
+    name: "Master of All"
+    description: "Reach a rating of 1300+ in all four game types"
+    category: HARD
+    type: ONE_TIME
+    icon: "pets"
+    points: 300
+    visible: true
+    deprecated: false
+    criteria:
+      type: ALL_RATINGS_THRESHOLD
+      threshold: 1300
+      secondaryValue: 4
+      gameType: ALL
+    triggers:
+      - triggerType: RATING_UPDATED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: century_club
+    name: "Century Club"
+    description: "Win 100 total games"
+    category: HARD
+    type: PROGRESSIVE
+    icon: "looks_100"
+    points: 200
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 100
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: tournament_champion
+    name: "Tournament Champion"
+    description: "Win a tournament"
+    category: HARD
+    type: ONE_TIME
+    icon: "trophy"
+    points: 350
+    visible: true
+    deprecated: false
+    criteria:
+      type: TOURNAMENT_WIN
+      threshold: 1
+      gameType: ALL
+    triggers:
+      - triggerType: TOURNAMENT_EVENT
+        gameTypes: ["TOURNAMENT"]
+
+  - id: season_dominator
+    name: "Season Dominator"
+    description: "Maintain a 75%+ win rate over 50+ games in a season"
+    category: HARD
+    type: ONE_TIME
+    icon: "restaurant"
+    points: 400
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_RATE
+      threshold: 75
+      secondaryValue: 50
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: comeback_king_queen
+    name: "Comeback King/Queen"
+    description: "Win a best-of-5 match after losing the first two games"
+    category: HARD
+    type: ONE_TIME
+    icon: "undo"
+    points: 275
+    visible: true
+    deprecated: false
+    criteria:
+      type: COMEBACK_WIN
+      threshold: 5
+      gameType: ALL
+    triggers:
+      - triggerType: MATCH_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: nemesis
+    name: "Nemesis"
+    description: "Defeat the same opponent 10 times"
+    category: HARD
+    type: ONE_TIME
+    icon: "cake"
+    points: 225
+    visible: true
+    deprecated: false
+    criteria:
+      type: SAME_OPPONENT_WINS
+      threshold: 10
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: unbeatable_duo
+    name: "Unbeatable Duo"
+    description: "Win 15 consecutive doubles games with the same partner"
+    category: HARD
+    type: ONE_TIME
+    icon: "favorite"
+    points: 325
+    visible: true
+    deprecated: false
+    criteria:
+      type: PARTNER_WIN_STREAK
+      threshold: 15
+      secondaryValue: 1
+      gameType: DOUBLES
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  # LEGENDARY ACHIEVEMENTS
+  - id: grandmaster
+    name: "Grandmaster"
+    description: "Reach a rating of 1800 in any game type"
+    category: LEGENDARY
+    type: ONE_TIME
+    icon: "auto_awesome"
+    points: 500
+    visible: true
+    deprecated: false
+    criteria:
+      type: RATING_THRESHOLD
+      threshold: 1800
+      gameType: ALL
+    triggers:
+      - triggerType: RATING_UPDATED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: perfect_season
+    name: "Perfect Season"
+    description: "Win 25+ games in a season without a single loss"
+    category: LEGENDARY
+    type: ONE_TIME
+    icon: "diamond"
+    points: 1000
+    visible: true
+    deprecated: false
+    criteria:
+      type: PERFECT_SEASON
+      threshold: 25
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: the_legend
+    name: "The Legend"
+    description: "Win 500 total games"
+    category: LEGENDARY
+    type: PROGRESSIVE
+    icon: "local_florist"
+    points: 800
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 500
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: tournament_dynasty
+    name: "Tournament Dynasty"
+    description: "Win 5 tournaments"
+    category: LEGENDARY
+    type: PROGRESSIVE
+    icon: "emoji_events"
+    points: 1500
+    visible: true
+    deprecated: false
+    criteria:
+      type: TOURNAMENT_WIN
+      threshold: 5
+      gameType: ALL
+    triggers:
+      - triggerType: TOURNAMENT_EVENT
+        gameTypes: ["TOURNAMENT"]
+
+  # ADDITIONAL ACHIEVEMENTS FROM DATABASE
+  - id: against_all_odds
+    name: "Against All Odds"
+    description: "Win when significantly outmatched"
+    category: HARD
+    type: ONE_TIME
+    icon: "lightbulb"
+    points: 200
+    visible: true
+    deprecated: false
+    criteria:
+      type: RATING_DIFFERENCE_WIN
+      threshold: 300
+      secondaryValue: 1
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
+
+  - id: flawless_victory
+    name: "Flawless Victory"
+    description: "Perfect game execution"
+    category: LEGENDARY
+    type: ONE_TIME
+    icon: "eco"
+    points: 500
+    visible: true
+    deprecated: false
+    criteria:
+      type: PERFECT_GAME
+      threshold: 1
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: table_tennis_immortal
+    name: "Table Tennis Immortal"
+    description: "Legendary status achieved"
+    category: LEGENDARY
+    type: ONE_TIME
+    icon: "spa"
+    points: 1000
+    visible: true
+    deprecated: false
+    criteria:
+      type: WIN_COUNT
+      threshold: 1000
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  - id: the_specialist
+    name: "The Specialist"
+    description: "Master of a specific game mode"
+    category: HARD
+    type: ONE_TIME
+    icon: "local_library"
+    points: 300
+    visible: true
+    deprecated: false
+    criteria:
+      type: SPECIALIZATION
+      threshold: 50
+      secondaryValue: 1
+      gameType: SINGLES
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+
+  - id: ultimate_rival
+    name: "Ultimate Rival"
+    description: "Face the same opponent many times"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "face"
+    points: 100
+    visible: true
+    deprecated: false
+    criteria:
+      type: SAME_OPPONENT_GAMES
+      threshold: 25
+      gameType: ALL
+    triggers:
+      - triggerType: GAME_COMPLETED
+        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+
+  # EXAMPLE DEPRECATED ACHIEVEMENT
+  - id: old_achievement_example
+    name: "Old Achievement (Deprecated)"
+    description: "This achievement is no longer available but existing holders keep it"
+    category: EASY
+    type: ONE_TIME
+    icon: "archive"
+    points: 10
+    visible: false
+    deprecated: true
+    criteria:
+      type: WIN_COUNT
+      threshold: 1
+      gameType: ALL
+    triggers: []

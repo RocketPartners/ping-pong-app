@@ -1,15 +1,28 @@
+<!-- Review Notifications Button -->
 <button
-  [matBadgeHidden]="!(hasUnseenReviews$ | async)"
+  [matBadgeHidden]="!((reviewNotifications$ | async)?.length)"
   [matBadge]="(reviewNotifications$ | async)?.length || 0"
   [matMenuTriggerFor]="reviewMenu"
   aria-label="Review notifications"
-  class="notification-button"
+  class="notification-button review-button"
   mat-icon-button
   matBadgeColor="accent">
   <mat-icon>rate_review</mat-icon>
 </button>
 
-<!-- Reviews Dropdown Menu -->
+<!-- Achievement Notifications Button -->
+<button
+  [matBadgeHidden]="!((achievementNotifications$ | async)?.length)"
+  [matBadge]="(achievementNotifications$ | async)?.length || 0"
+  [matMenuTriggerFor]="achievementMenu"
+  aria-label="Achievement notifications"
+  class="notification-button achievement-button"
+  mat-icon-button
+  matBadgeColor="warn">
+  <mat-icon>emoji_events</mat-icon>
+</button>
+
+<!-- Review Notifications Dropdown Menu -->
 <mat-menu #reviewMenu="matMenu" class="review-notifications-menu" xPosition="before">
   <div class="menu-header">
     <h3 class="menu-title">Player Reviews</h3>
@@ -22,17 +35,18 @@
     </div>
 
     <!-- No notifications message -->
-    <ng-container *ngIf="reviewNotifications$ | async as reviews; else loadingBlock">
+    <ng-container *ngIf="reviewNotifications$ | async as reviews; else reviewLoadingBlock">
       <div *ngIf="reviews.length === 0 && !loading" class="no-notifications">
         <mat-icon>check_circle</mat-icon>
         <span>No new reviews</span>
       </div>
 
-      <!-- Notification items -->
+      <!-- Review Notification items -->
       <div class="notification-list">
-        <div *ngFor="let review of reviews" class="notification-item">
+        <div *ngFor="let review of reviews" class="notification-item review-notification">
           <div class="notification-content">
             <div class="notification-header">
+              <mat-icon class="notification-type-icon">rate_review</mat-icon>
               <span class="notification-source">{{ review.reviewerUsername || 'Anonymous' }}</span>
               <span class="notification-time">{{ review.reviewDate | date:'shortDate' }}</span>
             </div>
@@ -64,10 +78,70 @@
       </div>
     </ng-container>
 
-    <ng-template #loadingBlock>
+    <ng-template #reviewLoadingBlock>
       <div *ngIf="!loading" class="no-notifications">
         <mat-icon>check_circle</mat-icon>
         <span>No new reviews</span>
+      </div>
+    </ng-template>
+  </div>
+</mat-menu>
+
+<!-- Achievement Notifications Dropdown Menu -->
+<mat-menu #achievementMenu="matMenu" class="achievement-notifications-menu" xPosition="before">
+  <div class="menu-header">
+    <h3 class="menu-title">Achievements</h3>
+  </div>
+
+  <div class="menu-content">
+    <!-- No notifications message -->
+    <ng-container *ngIf="achievementNotifications$ | async as achievements; else achievementLoadingBlock">
+      <div *ngIf="achievements.length === 0" class="no-notifications">
+        <mat-icon>emoji_events</mat-icon>
+        <span>No new achievements</span>
+      </div>
+
+      <!-- Achievement Notification items -->
+      <div class="notification-list">
+        <div *ngFor="let achievement of achievements" class="notification-item achievement-notification">
+          <div class="notification-content" (click)="viewAchievement(achievement, $event)">
+            <div class="notification-header">
+              <mat-icon class="notification-type-icon achievement-icon">emoji_events</mat-icon>
+              <span class="notification-source">Achievement Unlocked!</span>
+              <span class="notification-time">{{ achievement.dateEarned | date:'shortDate' }}</span>
+            </div>
+
+            <div class="notification-details">
+              <div class="achievement-info">
+                <span class="achievement-name">{{ achievement.name }}</span>
+                <span class="achievement-category mini-chip" [ngClass]="'category-' + (achievement.category?.toLowerCase() || 'easy')">
+                  {{ formatCategoryName(achievement.category || 'EASY') }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notification-actions">
+            <button (click)="dismissAchievementNotification(achievement.id)" mat-icon-button matTooltip="Dismiss">
+              <mat-icon>close</mat-icon>
+            </button>
+            <button (click)="viewAchievement(achievement, $event)" color="primary" mat-icon-button matTooltip="View">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer with view all link -->
+      <div *ngIf="achievements.length > 0" class="menu-footer">
+        <a [routerLink]="['/achievements']" class="view-all-button" mat-button>View All Achievements</a>
+      </div>
+    </ng-container>
+
+    <ng-template #achievementLoadingBlock>
+      <div class="no-notifications">
+        <mat-icon>emoji_events</mat-icon>
+        <span>No new achievements</span>
       </div>
     </ng-template>
   </div>

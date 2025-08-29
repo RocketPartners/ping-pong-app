@@ -1,0 +1,32 @@
+<div class="achievement-progress-container" [ngClass]="size">
+  <div class="progress-wrapper" [@completionPulse]="completionState">
+    <div class="progress-track" [style.height.px]="progressBarHeight">
+      <div 
+        class="progress-fill" 
+        [ngClass]="progressBarClass"
+        [@progressAnimation]="{ value: animationState, params: { progressWidth: progress } }"
+        [style.height.px]="progressBarHeight">
+      </div>
+      
+      <!-- Epic achievement sparkle effect -->
+      <div *ngIf="isAchieved && celebrationLevel === 'EPIC'" class="sparkle-effects">
+        <div class="sparkle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="sparkle" style="left: 30%; animation-delay: 0.5s;"></div>
+        <div class="sparkle" style="left: 60%; animation-delay: 1s;"></div>
+        <div class="sparkle" style="left: 85%; animation-delay: 1.5s;"></div>
+      </div>
+    </div>
+    
+    <div *ngIf="showText" class="progress-info" [ngClass]="getProgressTextClass()">
+      <span class="progress-percentage">{{ getProgressText() }}</span>
+      
+      <!-- Special celebration icons -->
+      <mat-icon *ngIf="isAchieved && celebrationLevel === 'EPIC'" class="celebration-icon epic">
+        auto_awesome
+      </mat-icon>
+      <mat-icon *ngIf="isAchieved && celebrationLevel === 'SPECIAL'" class="celebration-icon special">
+        star
+      </mat-icon>
+    </div>
+  </div>
+</div>

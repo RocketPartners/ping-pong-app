@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,25 +58,60 @@ public abstract class AchievementEvaluator {
     }
 
     /**
-     * Context class for holding data needed during achievement evaluation.
+     * Enhanced context class for holding data needed during achievement evaluation.
      * This provides a flexible way to pass different data types to evaluators.
      */
     @Getter
     @Setter
     public static class EvaluationContext {
+        // Current event data
         private Game game;
-
         private Match match;
-
         private Tournament tournament;
 
+        // Historical data
         private List<Game> gameHistory;
-
         private List<Match> matchHistory;
-
         private List<Tournament> tournamentHistory;
 
+        // Pre-computed player statistics (new!)
+        private PlayerStatistics playerStatistics;
+
+        // Achievement context
+        private List<Achievement> earnedAchievements;
+        private AchievementTrigger.TriggerType triggerType;
+
+        // Computed values cache to avoid recalculation
+        private Map<String, Object> computedValues;
+
+        // Legacy additional data
         private Map<String, Object> additionalData;
 
+        public EvaluationContext() {
+            this.computedValues = new HashMap<>();
+            this.additionalData = new HashMap<>();
+        }
+
+        /**
+         * Gets or computes a value, caching it for subsequent calls
+         */
+        @SuppressWarnings("unchecked")
+        public <T> T getOrCompute(String key, Class<T> type, java.util.function.Supplier<T> supplier) {
+            return (T) computedValues.computeIfAbsent(key, k -> supplier.get());
+        }
+
+        /**
+         * Caches a computed value
+         */
+        public void cache(String key, Object value) {
+            computedValues.put(key, value);
+        }
+
+        /**
+         * Checks if a value is cached
+         */
+        public boolean isCached(String key) {
+            return computedValues.containsKey(key);
+        }
     }
 }

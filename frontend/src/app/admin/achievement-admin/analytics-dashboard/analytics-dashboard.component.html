@@ -1,0 +1,196 @@
+<div class="analytics-dashboard" role="main" aria-label="Achievement Analytics Dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <h1 class="section-title" id="dashboard-title">
+      <mat-icon aria-hidden="true">analytics</mat-icon>
+      Achievement Analytics Dashboard
+    </h1>
+    <div class="header-actions" role="toolbar" aria-label="Dashboard actions">
+      <button mat-raised-button color="primary" 
+              (click)="recalculateStaleAnalytics()"
+              [disabled]="refreshingAnalytics"
+              aria-describedby="refresh-stale-desc"
+              [attr.aria-busy]="refreshingAnalytics">
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+        Refresh Stale
+      </button>
+      <span id="refresh-stale-desc" class="sr-only">Refresh only stale analytics data</span>
+      <button mat-raised-button color="accent" 
+              (click)="recalculateAnalytics()"
+              [disabled]="refreshingAnalytics"
+              aria-describedby="full-recalc-desc"
+              [attr.aria-busy]="refreshingAnalytics">
+        <mat-icon aria-hidden="true">calculate</mat-icon>
+        Full Recalculation
+      </button>
+      <span id="full-recalc-desc" class="sr-only">Recalculate all analytics data from scratch</span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container" role="status" aria-live="polite">
+    <mat-spinner diameter="40" aria-label="Loading analytics data"></mat-spinner>
+    <p>Loading analytics data...</p>
+  </div>
+
+  <!-- Main Dashboard Content -->
+  <div *ngIf="!loading && analyticsSummary" class="dashboard-content">
+    
+    <!-- Summary Cards -->
+    <section class="summary-cards" aria-labelledby="summary-heading">
+      <h2 id="summary-heading" class="sr-only">Analytics Summary</h2>
+      
+      <mat-card class="summary-card" role="region" aria-labelledby="total-achievements-title">
+        <mat-card-header>
+          <mat-icon mat-card-avatar aria-hidden="true">emoji_events</mat-icon>
+          <mat-card-title id="total-achievements-title">Total Achievements</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="metric-value" role="text" [attr.aria-label]="'Total achievements: ' + analyticsSummary.totalAchievements">{{ analyticsSummary.totalAchievements }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card" role="region" aria-labelledby="avg-completion-title">
+        <mat-card-header>
+          <mat-icon mat-card-avatar aria-hidden="true">percent</mat-icon>
+          <mat-card-title id="avg-completion-title">Avg. Completion Rate</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="metric-value" role="text" [attr.aria-label]="'Average completion rate: ' + formatPercentage(analyticsSummary.averageCompletionRate)">{{ formatPercentage(analyticsSummary.averageCompletionRate) }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>psychology</mat-icon>
+          <mat-card-title>Avg. Difficulty Score</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="metric-value">{{ analyticsSummary.averageDifficultyScore.toFixed(1) }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>schedule</mat-icon>
+          <mat-card-title>Avg. Completion Time</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="metric-value">{{ analyticsSummary.averageCompletionTimeHours }}h</div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      
+      <!-- Completion Rate Distribution -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Completion Rate Distribution</mat-card-title>
+          <mat-card-subtitle>How achievements are performing completion-wise</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-placeholder" *ngIf="completionRateDistribution.length === 0">
+            <mat-icon>bar_chart</mat-icon>
+            <p>No completion rate data available</p>
+          </div>
+          <div class="simple-chart" *ngIf="completionRateDistribution.length > 0">
+            <div class="chart-item" *ngFor="let item of completionRateDistribution">
+              <div class="chart-label">{{ item.label }}</div>
+              <div class="chart-bar">
+                <div class="chart-fill" [style.width.%]="(item.value / completionRateDistribution[0].value) * 100"></div>
+              </div>
+              <div class="chart-value">{{ item.value }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Difficulty Distribution -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Difficulty Distribution</mat-card-title>
+          <mat-card-subtitle>Achievement difficulty breakdown</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-placeholder" *ngIf="difficultyDistribution.length === 0">
+            <mat-icon>donut_small</mat-icon>
+            <p>No difficulty data available</p>
+          </div>
+          <div class="simple-chart" *ngIf="difficultyDistribution.length > 0">
+            <div class="chart-item" *ngFor="let item of difficultyDistribution">
+              <div class="chart-label">{{ item.label }}</div>
+              <div class="chart-bar">
+                <div class="chart-fill difficulty-bar" [style.width.%]="(item.value / difficultyDistribution[0].value) * 100"></div>
+              </div>
+              <div class="chart-value">{{ item.value }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Achievements Needing Attention -->
+    <mat-card class="attention-card" *ngIf="achievementsNeedingAttention.length > 0">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="warning-icon">warning</mat-icon>
+        <mat-card-title>Achievements Needing Attention</mat-card-title>
+        <mat-card-subtitle>{{ achievementsNeedingAttention.length }} achievements require review</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="attention-list">
+          <div class="attention-item" *ngFor="let achievement of achievementsNeedingAttention; trackBy: trackByAchievementId">
+            <div class="attention-info">
+              <h4 class="achievement-name">{{ achievement.achievement?.name || 'Unknown Achievement' }}</h4>
+              <div class="attention-metrics">
+                <mat-chip-set>
+                  <mat-chip [color]="getDifficultyBadgeColor(achievement.calculatedDifficulty)" selected>
+                    {{ formatDifficultyLabel(achievement.calculatedDifficulty) }}
+                  </mat-chip>
+                  <mat-chip>{{ formatPercentage(achievement.completionRate) }} completion</mat-chip>
+                  <mat-chip [class]="getTrendColorClass(achievement.completionTrend)">
+                    <mat-icon>{{ getTrendIcon(achievement.completionTrend) }}</mat-icon>
+                    {{ achievement.completionTrend }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+            </div>
+            <div class="attention-stats">
+              <div class="stat">
+                <span class="stat-label">Completions:</span>
+                <span class="stat-value">{{ achievement.totalCompletions }}</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Last 7 days:</span>
+                <span class="stat-value">{{ achievement.completionsLast7Days }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- No Issues Message -->
+    <mat-card class="success-card" *ngIf="achievementsNeedingAttention.length === 0">
+      <mat-card-content>
+        <div class="success-message">
+          <mat-icon>check_circle</mat-icon>
+          <h3>All Achievements Performing Well</h3>
+          <p>No achievements currently need attention. Great job on the achievement balance!</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Refresh Progress -->
+  <div *ngIf="refreshingAnalytics" class="refresh-overlay">
+    <mat-card class="refresh-card">
+      <mat-card-content>
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Recalculating analytics...</p>
+        <small>This may take a few minutes</small>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

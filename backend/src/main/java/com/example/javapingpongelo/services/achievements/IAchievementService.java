@@ -6,6 +6,7 @@ import com.example.javapingpongelo.models.Player;
 import com.example.javapingpongelo.models.PlayerAchievement;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -73,4 +74,29 @@ public interface IAchievementService {
      * Recalculate all achievements for a player
      */
     void recalculatePlayerAchievements(UUID playerId);
+
+    /**
+     * Get all achievements (alias for findAllAchievements)
+     */
+    List<Achievement> getAllAchievements();
+
+    /**
+     * Evaluate all achievements for a specific player
+     */
+    void evaluateAllAchievementsForPlayer(UUID playerId);
+
+    /**
+     * Reset all player achievement progress (DANGEROUS - admin only)
+     */
+    void resetAllPlayerProgress();
+
+    /**
+     * Get recent achievement notifications for a player
+     */
+    List<Map<String, Object>> getRecentAchievementNotifications(UUID playerId, int days);
+
+    /**
+     * Acknowledge/mark achievement notifications as read for a player
+     */
+    void acknowledgeAchievementNotifications(UUID playerId);
 }

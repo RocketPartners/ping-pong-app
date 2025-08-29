@@ -1,11 +1,15 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {BehaviorSubject, Subscription} from 'rxjs';
+import {BehaviorSubject, Subscription, combineLatest} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {PlayerReviewService} from '../_services/player-review.service';
+import {AchievementService} from '../_services/achievement.service';
 import {AccountService} from '../_services/account.service';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {Router} from '@angular/router';
 import {PlayerReviewDialogComponent} from '../player-review-dialog/player-review-dialog.component';
 import {PlayerStyleReview} from '../_models/models';
+import {AchievementNotification} from '../_models/achievement';
 
 @Component({
   selector: 'app-review-notifications', // Changed to match what's used in app.component.html
@@ -15,40 +19,75 @@ import {PlayerStyleReview} from '../_models/models';
 })
 export class PlayerReviewNotificationsComponent implements OnInit, OnDestroy {
   loading = false;
-  // Observable for notifications
+  // Observable for review notifications
   private reviewNotifications = new BehaviorSubject<PlayerStyleReview[]>([]);
   public reviewNotifications$ = this.reviewNotifications.asObservable();
-  // Track if there are unseen notifications
-  private hasUnseenReviews = new BehaviorSubject<boolean>(false);
-  public hasUnseenReviews$ = this.hasUnseenReviews.asObservable();
+  
+  // Observable for achievement notifications 
+  private achievementNotifications = new BehaviorSubject<any[]>([]);
+  public achievementNotifications$ = this.achievementNotifications.asObservable();
+  
+  // Individual notification counts for badges
+  public reviewNotificationCount$ = this.reviewNotifications$.pipe(
+    map(reviews => reviews.length)
+  );
+  
+  public achievementNotificationCount$ = this.achievementNotifications$.pipe(
+    map(achievements => achievements.length)
+  );
+  
   private subscriptions: Subscription[] = [];
 
   constructor(
     private playerReviewService: PlayerReviewService,
+    private achievementService: AchievementService,
     private accountService: AccountService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {
   }
 
   ngOnInit(): void {
     // Load notifications on init
-    this.loadReviewNotifications();
+    this.loadNotifications();
 
     // Set up a refresh interval (every 5 minutes)
     const refreshInterval = setInterval(() => {
-      this.loadReviewNotifications(true);
+      this.loadNotifications(true);
     }, 5 * 60 * 1000);
 
     // Store the interval for cleanup
     this.subscriptions.push({
       unsubscribe: () => clearInterval(refreshInterval)
     } as Subscription);
+
+    // Listen for achievement acknowledgment events
+    const handleAchievementAcknowledgment = (event: any) => {
+      console.log('Achievement notifications acknowledged, clearing notifications');
+      // Clear achievement notifications immediately
+      this.achievementNotifications.next([]);
+    };
+
+    window.addEventListener('achievement-notifications-acknowledged', handleAchievementAcknowledgment);
+
+    // Store the event listener for cleanup
+    this.subscriptions.push({
+      unsubscribe: () => window.removeEventListener('achievement-notifications-acknowledged', handleAchievementAcknowledgment)
+    } as Subscription);
   }
 
   ngOnDestroy(): void {
     // Clean up subscriptions
     this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  /**
+   * Load both types of notifications
+   */
+  loadNotifications(silent: boolean = false): void {
+    this.loadReviewNotifications(silent);
+    this.loadAchievementNotifications(silent);
   }
 
   /**
@@ -65,12 +104,30 @@ export class PlayerReviewNotificationsComponent implements OnInit, OnDestroy {
         next: (reviews) => {
           const notificationReviews = reviews || [];
           this.reviewNotifications.next(notificationReviews);
-          this.hasUnseenReviews.next(notificationReviews.length > 0);
-          this.loading = false;
+          if (!silent) this.loading = false;
         },
         error: (err) => {
           console.error('Error loading review notifications:', err);
-          this.loading = false;
+          if (!silent) this.loading = false;
+        }
+      });
+  }
+
+  /**
+   * Load recent achievement notifications for the current player
+   */
+  loadAchievementNotifications(silent: boolean = false): void {
+    const currentPlayer = this.accountService.playerValue?.player;
+    if (!currentPlayer) return;
+
+    this.achievementService.getRecentAchievementNotifications(currentPlayer.playerId)
+      .subscribe({
+        next: (achievements) => {
+          const notificationAchievements = achievements || [];
+          this.achievementNotifications.next(notificationAchievements);
+        },
+        error: (err) => {
+          console.error('Error loading achievement notifications:', err);
         }
       });
   }
@@ -161,10 +218,43 @@ export class PlayerReviewNotificationsComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle clicking on an achievement notification (navigate to achievements page)
+   */
+  viewAchievement(achievement: any, event: Event): void {
+    event.stopPropagation();
+    
+    // Navigate to achievements page
+    this.router.navigate(['/achievements']).then(() => {
+      // Remove the achievement from notifications after navigation
+      this.dismissAchievementNotification(achievement.id);
+    });
+  }
+
+  /**
+   * Dismiss an achievement notification
+   */
+  dismissAchievementNotification(achievementId: string): void {
+    const currentAchievements = this.achievementNotifications.value;
+    const updatedAchievements = currentAchievements.filter(a => a.id !== achievementId);
+    this.achievementNotifications.next(updatedAchievements);
+  }
+
+
+  /**
    * Format player style names for display
    */
   formatStyleName(style: string): string {
     return style.replace('_', ' ').toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  /**
+   * Format achievement category for display
+   */
+  formatCategoryName(category: string): string {
+    return category.replace('_', ' ').toLowerCase()
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
@@ -178,6 +268,5 @@ export class PlayerReviewNotificationsComponent implements OnInit, OnDestroy {
     const currentReviews = this.reviewNotifications.value;
     const updatedReviews = currentReviews.filter(review => review.id !== reviewId);
     this.reviewNotifications.next(updatedReviews);
-    this.hasUnseenReviews.next(updatedReviews.length > 0);
   }
 }

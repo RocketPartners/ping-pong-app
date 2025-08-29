@@ -1,0 +1,104 @@
+<div *ngIf="isActive" 
+     class="celebration-overlay"
+     [ngClass]="getCelebrationClass()"
+     [@overlayAnimation]="overlayState"
+     (keydown)="onKeydown($event)"
+     tabindex="0">
+
+  <!-- Background particles -->
+  <div class="particles-container" *ngIf="particles.length > 0">
+    <div *ngFor="let particle of particles"
+         class="particle"
+         [@particleAnimation]="particle.id"
+         [style.left.%]="particle.x"
+         [style.top.%]="particle.y"
+         [style.animation-delay.ms]="particle.delay">
+    </div>
+  </div>
+
+  <!-- Celebration content -->
+  <div class="celebration-content" [@achievementAnimation]="achievementState">
+    
+    <!-- Close button -->
+    <button mat-icon-button 
+            class="close-button"
+            (click)="closeCelebration()"
+            [matTooltip]="'Close (Esc)'">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <!-- Achievement icon -->
+    <div class="achievement-icon-container">
+      <div class="achievement-icon" [style.background-color]="getCategoryColor()">
+        <mat-icon>{{ getCelebrationIcon() }}</mat-icon>
+      </div>
+      
+      <!-- Epic achievement glow effect -->
+      <div *ngIf="currentCelebration?.level === 'EPIC'" class="epic-glow"></div>
+    </div>
+
+    <!-- Celebration title -->
+    <h1 class="celebration-title" [@textAnimation]="textState">
+      {{ getCelebrationTitle() }}
+    </h1>
+
+    <!-- Achievement name -->
+    <h2 class="achievement-name" [@textAnimation]="textState">
+      {{ currentCelebration?.achievement?.name }}
+    </h2>
+
+    <!-- Achievement description -->
+    <p class="achievement-description" [@textAnimation]="textState">
+      {{ currentCelebration?.achievement?.description }}
+    </p>
+
+    <!-- Contextual message -->
+    <div *ngIf="currentCelebration?.contextualMessage" 
+         class="contextual-message"
+         [@textAnimation]="textState">
+      <mat-icon>auto_stories</mat-icon>
+      <span>{{ currentCelebration?.contextualMessage }}</span>
+    </div>
+
+    <!-- Achievement details -->
+    <div class="achievement-details" [@textAnimation]="textState">
+      <div class="detail-item">
+        <mat-icon>category</mat-icon>
+        <span>{{ currentCelebration?.achievement?.category }}</span>
+      </div>
+      <div class="detail-item">
+        <mat-icon>stars</mat-icon>
+        <span>{{ formatPoints() }}</span>
+      </div>
+    </div>
+
+    <!-- Epic achievement special effects -->
+    <div *ngIf="currentCelebration?.level === 'EPIC'" class="epic-effects">
+      <div class="epic-text">LEGENDARY STATUS ACHIEVED!</div>
+      <div class="epic-sparkles">
+        <mat-icon>auto_awesome</mat-icon>
+        <mat-icon>auto_awesome</mat-icon>
+        <mat-icon>auto_awesome</mat-icon>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="celebration-actions" [@textAnimation]="textState">
+      <button mat-raised-button 
+              color="primary" 
+              (click)="closeCelebration()">
+        <mat-icon>done</mat-icon>
+        Awesome!
+      </button>
+      
+      <button mat-stroked-button 
+              (click)="closeCelebration()">
+        <mat-icon>share</mat-icon>
+        Share Achievement
+      </button>
+    </div>
+  </div>
+
+  <!-- Background overlay -->
+  <div class="background-overlay" (click)="closeCelebration()"></div>
+</div>

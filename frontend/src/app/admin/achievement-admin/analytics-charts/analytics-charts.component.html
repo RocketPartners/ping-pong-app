@@ -1,0 +1,150 @@
+<div class="analytics-charts-container">
+  <div class="charts-header">
+    <h3 class="charts-title">
+      <mat-icon>analytics</mat-icon>
+      Achievement Analytics
+    </h3>
+    <div class="charts-controls">
+      <button mat-icon-button 
+              [matTooltip]="'Export charts'" 
+              (click)="exportCharts()"
+              [disabled]="loading">
+        <mat-icon>download</mat-icon>
+      </button>
+      <button mat-icon-button 
+              [matTooltip]="'Refresh data'" 
+              (click)="refresh()"
+              [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading analytics data...</p>
+  </div>
+
+  <!-- Charts Grid -->
+  <div *ngIf="!loading" class="charts-grid">
+    <!-- Completion Rate Distribution -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Completion Rate Distribution</mat-card-title>
+        <mat-card-subtitle>How players are performing across achievements</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div #completionChart class="chart-container"></div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Difficulty Distribution -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Difficulty Distribution</mat-card-title>
+        <mat-card-subtitle>Achievement difficulty analysis</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div #difficultyChart class="chart-container"></div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Recent Trends -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Recent Trends</mat-card-title>
+        <mat-card-subtitle>Achievement completion trends over time</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div #trendsChart class="chart-container"></div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Key Metrics -->
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Key Metrics</mat-card-title>
+        <mat-card-subtitle>Important system metrics at a glance</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div #performanceChart class="chart-container"></div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Summary Statistics -->
+  <div *ngIf="!loading && analyticsData" class="summary-section">
+    <mat-card class="summary-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>insights</mat-icon>
+          Summary Insights
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="insights-grid">
+          <div class="insight-item">
+            <div class="insight-icon">
+              <mat-icon color="primary">trending_up</mat-icon>
+            </div>
+            <div class="insight-content">
+              <h4>{{ analyticsData.totalAchievements || 0 }}</h4>
+              <p>Total Achievements</p>
+            </div>
+          </div>
+
+          <div class="insight-item">
+            <div class="insight-icon">
+              <mat-icon color="accent">people</mat-icon>
+            </div>
+            <div class="insight-content">
+              <h4>{{ analyticsData.totalPlayersWithProgress || 0 }}</h4>
+              <p>Active Players</p>
+            </div>
+          </div>
+
+          <div class="insight-item">
+            <div class="insight-icon">
+              <mat-icon color="warn">star</mat-icon>
+            </div>
+            <div class="insight-content">
+              <h4>{{ (analyticsData.averageCompletionRate || 0) | number:'1.1-1' }}%</h4>
+              <p>Average Completion Rate</p>
+            </div>
+          </div>
+
+          <div class="insight-item">
+            <div class="insight-icon">
+              <mat-icon style="color: #4caf50">speed</mat-icon>
+            </div>
+            <div class="insight-content">
+              <h4>{{ analyticsData.completionsToday || 0 }}</h4>
+              <p>Completions Today</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="insights-details" *ngIf="analyticsData.lastCalculated">
+          <p class="calculation-info">
+            <mat-icon>schedule</mat-icon>
+            Last calculated: {{ analyticsData.lastCalculated | date:'medium' }}
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !analyticsData" class="empty-state">
+    <mat-icon>assessment</mat-icon>
+    <h3>No Analytics Data</h3>
+    <p>No analytics data is currently available. Try refreshing or check back later.</p>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="refresh()">
+      <mat-icon>refresh</mat-icon>
+      Load Analytics
+    </button>
+  </div>
+</div>

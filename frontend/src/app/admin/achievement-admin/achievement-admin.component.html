@@ -1,0 +1,63 @@
+<div class="admin-container">
+  <div class="admin-header">
+    <h1 class="admin-title">
+      <mat-icon>admin_panel_settings</mat-icon>
+      Achievement Administration
+    </h1>
+    <p class="admin-subtitle">Manage achievement configurations, analytics, and performance monitoring</p>
+  </div>
+
+  <nav class="admin-navigation">
+    <mat-tab-group mat-align-tabs="start" animationDuration="300ms">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>dashboard</mat-icon>
+          Analytics Dashboard
+        </ng-template>
+        <div class="tab-content">
+          <app-analytics-dashboard></app-analytics-dashboard>
+        </div>
+      </mat-tab>
+      
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>settings</mat-icon>
+          Configuration Manager
+        </ng-template>
+        <div class="tab-content">
+          <app-config-manager></app-config-manager>
+        </div>
+      </mat-tab>
+      
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>monitor_heart</mat-icon>
+          Performance Monitor
+        </ng-template>
+        <div class="tab-content">
+          <app-performance-monitor></app-performance-monitor>
+        </div>
+      </mat-tab>
+      
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>analytics</mat-icon>
+          Interactive Charts
+        </ng-template>
+        <div class="tab-content">
+          <app-analytics-charts></app-analytics-charts>
+        </div>
+      </mat-tab>
+      
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>account_tree</mat-icon>
+          Dependency Tree
+        </ng-template>
+        <div class="tab-content">
+          <app-dependency-tree [playerId]="'sample-player-id'"></app-dependency-tree>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </nav>
+</div>

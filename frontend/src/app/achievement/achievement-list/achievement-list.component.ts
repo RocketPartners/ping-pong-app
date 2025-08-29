@@ -1,12 +1,12 @@
 import {Component, OnInit} from '@angular/core';
-import {Observable, of} from 'rxjs';
+import {Observable, of, combineLatest} from 'rxjs';
 import {MatTabChangeEvent} from '@angular/material/tabs';
 import {AchievementService} from '../../_services/achievement.service';
 import {AccountService} from '../../_services/account.service';
 import {AchievementCategory, AchievementDTO} from '../../_models/achievement';
 import {ActivatedRoute, Router} from '@angular/router';
 import {PlayerService} from "../../_services/player.service";
-import {map, startWith} from "rxjs/operators";
+import {map, startWith, catchError} from "rxjs/operators";
 import {FormControl} from "@angular/forms";
 
 @Component({
@@ -52,6 +52,9 @@ export class AchievementListComponent implements OnInit {
   // Loading state
   loading = true;
 
+  // Test mode: always highlight most recently earned achievement
+  private testModeHighlightRecent = false; // Set to false in production
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -75,6 +78,11 @@ export class AchievementListComponent implements OnInit {
       } else if (player) {
         this.playerId = player.playerId;
         this.loadAchievements();
+        
+        // Acknowledge recent achievement notifications after a short delay
+        setTimeout(() => {
+          this.acknowledgeRecentAchievements();
+        }, 2000);
       }
     });
     this.loadUsernames();
@@ -137,17 +145,77 @@ export class AchievementListComponent implements OnInit {
   loadAchievements(): void {
     this.loading = true;
 
-    // Get all player achievements
-    this.allAchievements$ = this.achievementService.getPlayerAchievements(this.playerId);
+    // Get all player achievements AND recent notifications
+    const allAchievements$ = this.achievementService.getPlayerAchievements(this.playerId).pipe(
+      catchError(error => {
+        console.error('Error loading player achievements:', error);
+        return of([]);
+      })
+    );
+
+    const recentNotifications$ = this.achievementService.getRecentAchievementNotifications(this.playerId).pipe(
+      catchError(error => {
+        console.error('Error loading recent achievement notifications:', error);
+        return of([]);
+      })
+    );
+
+    // Combine both sources to mark recently unlocked achievements
+    this.allAchievements$ = combineLatest([allAchievements$, recentNotifications$]).pipe(
+      map(([achievements, recentNotifications]) => {
+        // Create a set of recent achievement IDs for fast lookup
+        const recentIds = new Set(recentNotifications.map(r => {
+          return r.achievement?.id || r.id;
+        }));
+        
+        // Mark achievements as recently unlocked if they appear in notifications
+        let result = achievements.map(achievement => {
+          const achievementId = achievement.achievement?.id;
+          const isRecent = recentIds.has(achievementId);
+          
+          return {
+            ...achievement,
+            recentlyUnlocked: isRecent
+          };
+        });
+        
+        // Test mode: If enabled and no recent achievements, highlight the most recently earned one
+        if (this.testModeHighlightRecent && result.filter(a => a.recentlyUnlocked).length === 0) {
+          const earnedAchievements = result.filter(a => a.playerProgress?.achieved && a.playerProgress?.dateEarned);
+          if (earnedAchievements.length > 0) {
+            // Find the most recently earned achievement
+            const mostRecent = earnedAchievements.reduce((latest, current) => {
+              const latestDate = latest.playerProgress?.dateEarned ? new Date(latest.playerProgress.dateEarned) : new Date(0);
+              const currentDate = current.playerProgress?.dateEarned ? new Date(current.playerProgress.dateEarned) : new Date(0);
+              return currentDate > latestDate ? current : latest;
+            });
+            
+            // Mark it as recently unlocked for testing
+            result = result.map(achievement => {
+              if (achievement.achievement?.id === mostRecent.achievement?.id) {
+                return { ...achievement, recentlyUnlocked: true };
+              }
+              return achievement;
+            });
+            
+            console.log('Test mode: Highlighting most recent achievement:', mostRecent.achievement?.name);
+          }
+        }
+        
+        return result;
+      })
+    );
 
     // Get only earned achievements and ensure percentComplete is 100
-    this.earnedAchievements$ = this.achievementService.getPlayerEarnedAchievements(this.playerId)
-      .pipe(
-        map(achievements => achievements.map(achievement => ({
+    this.earnedAchievements$ = this.allAchievements$.pipe(
+      map(achievements => achievements
+        .filter(a => a.playerProgress?.achieved)
+        .map(achievement => ({
           ...achievement,
           percentComplete: 100 // Fix: ensure earned achievements show 100% progress
-        })))
-      );
+        }))
+      )
+    );
 
     this.loading = false;
   }
@@ -255,6 +323,42 @@ export class AchievementListComponent implements OnInit {
     return this.playerUsernames.filter(username =>
       username.toLowerCase().includes(filterValue)
     );
+  }
+
+  /**
+   * Acknowledge recent achievement notifications
+   * This should be called when the user visits the achievements page
+   */
+   acknowledgeRecentAchievements(): void {
+    console.log('Acknowledging recent achievement notifications for player:', this.playerId);
+    
+    // Call the backend service to acknowledge notifications
+    this.achievementService.acknowledgeRecentAchievements(this.playerId).subscribe({
+      next: () => {
+        console.log('Successfully acknowledged recent achievement notifications');
+        // Broadcast an event that can be picked up by the notifications component
+        window.dispatchEvent(new CustomEvent('achievement-notifications-acknowledged', {
+          detail: { playerId: this.playerId }
+        }));
+      },
+      error: (error) => {
+        console.error('Failed to acknowledge recent achievement notifications:', error);
+        // Still broadcast the event to clear UI notifications even if backend call fails
+        window.dispatchEvent(new CustomEvent('achievement-notifications-acknowledged', {
+          detail: { playerId: this.playerId }
+        }));
+      }
+    });
+  }
+
+  /**
+   * Toggle test mode for highlighting recent achievements
+   * Can be called from browser console: component.toggleTestMode()
+   */
+  toggleTestMode(): void {
+    this.testModeHighlightRecent = !this.testModeHighlightRecent;
+    console.log('Test mode highlighting:', this.testModeHighlightRecent ? 'ENABLED' : 'DISABLED');
+    this.loadAchievements(); // Reload to apply changes
   }
 
   /**
