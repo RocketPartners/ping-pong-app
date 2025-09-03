@@ -593,18 +593,23 @@ public class SlackService {
         if (methods == null) return;
         
         try {
-            // Check all 4 leaderboard types
-            checkLeadershipChange("Singles Ranked", Player::getSinglesRankedRating);
-            checkLeadershipChange("Singles Normal", Player::getSinglesNormalRating);
-            checkLeadershipChange("Doubles Ranked", Player::getDoublesRankedRating);
-            checkLeadershipChange("Doubles Normal", Player::getDoublesNormalRating);
+            // Only check the leaderboard for the game type that was actually played
+            if (game.isSinglesGame() && game.isRatedGame()) {
+                checkLeadershipChange("Singles Ranked", Player::getSinglesRankedRating, game);
+            } else if (game.isSinglesGame() && game.isNormalGame()) {
+                checkLeadershipChange("Singles Normal", Player::getSinglesNormalRating, game);
+            } else if (game.isDoublesGame() && game.isRatedGame()) {
+                checkLeadershipChange("Doubles Ranked", Player::getDoublesRankedRating, game);
+            } else if (game.isDoublesGame() && game.isNormalGame()) {
+                checkLeadershipChange("Doubles Normal", Player::getDoublesNormalRating, game);
+            }
             
         } catch (Exception e) {
             log.error("Error checking leadership changes", e);
         }
     }
     
-    private void checkLeadershipChange(String leaderboardName, Function<Player, Integer> ratingExtractor) {
+    private void checkLeadershipChange(String leaderboardName, Function<Player, Integer> ratingExtractor, Game game) {
         try {
             List<Player> topPlayers = playerService.findAllPlayers().stream()
                 .sorted((p1, p2) -> Integer.compare(ratingExtractor.apply(p2), ratingExtractor.apply(p1)))
@@ -616,15 +621,24 @@ public class SlackService {
             Player currentKing = topPlayers.get(0);
             Player previousKing = topPlayers.get(1);
             
-            // Check if there's been a leadership change in the last few minutes
-            // This is a simple implementation - in production you'd want to track this more precisely
-            int currentRating = ratingExtractor.apply(currentKing);
-            int previousRating = ratingExtractor.apply(previousKing);
+            // Get the players involved in this game
+            Player challenger = playerService.findPlayerById(game.getChallengerId());
+            Player opponent = playerService.findPlayerById(game.getOpponentId());
             
-            // If the difference is small, it might be a recent change
-            if (Math.abs(currentRating - previousRating) <= 50) {
-                // Could be a recent change, post notification
-                postLeadershipChange(leaderboardName, currentKing, previousKing, currentRating);
+            // Only post leadership change if one of the players in this game became the new #1
+            // and they weren't already #1 (meaning there was an actual leadership change)
+            boolean challengerBecameKing = challenger != null && challenger.getPlayerId().equals(currentKing.getPlayerId());
+            boolean opponentBecameKing = opponent != null && opponent.getPlayerId().equals(currentKing.getPlayerId());
+            
+            if (challengerBecameKing || opponentBecameKing) {
+                // Only post if there's a meaningful rating difference suggesting this was a real change
+                int currentRating = ratingExtractor.apply(currentKing);
+                int previousRating = ratingExtractor.apply(previousKing);
+                
+                // Post notification if the new king has a higher rating than the previous king
+                if (currentRating > previousRating) {
+                    postLeadershipChange(leaderboardName, currentKing, previousKing, currentRating);
+                }
             }
             
         } catch (Exception e) {
