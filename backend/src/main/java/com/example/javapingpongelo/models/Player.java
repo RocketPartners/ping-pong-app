@@ -114,15 +114,18 @@ public class Player {
     private int doublesNormalRating = 1000;
 
     // Easter egg hunting statistics
+    @Column(columnDefinition = "INTEGER DEFAULT 0")
     @Builder.Default
     private int easterEggPoints = 0;
 
+    @Column(columnDefinition = "INTEGER DEFAULT 0")
     @Builder.Default
     private int totalEggsFound = 0;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastEggFound;
 
+    @Column(columnDefinition = "BOOLEAN DEFAULT true")
     @Builder.Default
     private boolean easterEggHuntingEnabled = true;
 
