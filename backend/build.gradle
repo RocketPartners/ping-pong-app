@@ -36,6 +36,7 @@ dependencies {
     // Web & MVC
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework:spring-messaging'
     implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
     // Data access
