@@ -80,7 +80,8 @@ export class ProfileSettingsComponent implements OnInit {
       username: [this.player.username, [Validators.required, Validators.minLength(4), Validators.pattern('^[a-zA-Z0-9._-]*$')]],
       email: [this.player.email, [Validators.required, Validators.email]],
       birthday: [this.player.birthday ? new Date(this.player.birthday) : null, Validators.required],
-      useProfileColorAsTheme: [this.useColorAsTheme]
+      useProfileColorAsTheme: [this.useColorAsTheme],
+      easterEggHuntingEnabled: [this.player.easterEggHuntingEnabled ?? true]
     });
   }
 

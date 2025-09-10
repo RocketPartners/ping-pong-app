@@ -39,6 +39,12 @@ export interface Player {
   token?: string;
   isAnonymous?: boolean;
 
+  // Easter egg hunting fields
+  easterEggHuntingEnabled?: boolean;
+  easterEggPoints?: number;
+  totalEggsFound?: number;
+  lastEggFound?: Date;
+
   // Calculated properties
   fullName?: string;
   singlesRankedWinRate: number;

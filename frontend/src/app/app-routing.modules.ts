@@ -23,6 +23,8 @@ import {ProfileSettingsComponent} from "./profile-settings/profile-settings.comp
 import {LiveMatchesComponent} from "./live-matches/live-matches.component";
 // Import Slack integration component
 import {SlackIntegrationComponent} from "./slack-integration/slack-integration.component";
+// Import Easter Egg Hunter component
+import {EasterEggHunterComponent} from "./easter-egg-hunter/easter-egg-hunter.component";
 
 const routes: Routes = [
   {path: '', component: HomeComponent, canActivate: [AuthGuard]},
@@ -52,6 +54,9 @@ const routes: Routes = [
   // Achievement routes
   {path: 'achievements', component: AchievementListComponent, canActivate: [AuthGuard]},
   {path: 'achievements/:username', component: AchievementListComponent, canActivate: [AuthGuard]},
+
+  // Easter Egg Hunter route
+  {path: 'easter-egg-hunter', component: EasterEggHunterComponent, canActivate: [AuthGuard]},
 
   // Admin routes (lazy loaded)
   {

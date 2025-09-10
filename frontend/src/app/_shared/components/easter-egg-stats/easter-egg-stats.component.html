@@ -1,0 +1,140 @@
+<mat-card class="stats-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>egg_alt</mat-icon>
+      Easter Egg Hunter Stats
+    </mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div *ngIf="myStats; else noStats">
+      <!-- Main Stats -->
+      <div class="main-stats">
+        <div class="stat-item">
+          <div class="stat-value">{{ myStats.totalEggsFound }}</div>
+          <div class="stat-label">Eggs Found</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ myStats.totalPointsEarned || 0 }}</div>
+          <div class="stat-label">Total Points</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ myStats.currentStreak || 0 }}</div>
+          <div class="stat-label">Current Streak</div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Egg Type Breakdown -->
+      <div class="egg-breakdown">
+        <h4>Eggs by Rarity</h4>
+        <div class="egg-types">
+          <mat-chip-set>
+            <mat-chip *ngIf="myStats.commonEggsFound > 0" class="common-chip">
+              <mat-icon>egg</mat-icon>
+              Common: {{ myStats.commonEggsFound }}
+            </mat-chip>
+            <mat-chip *ngIf="myStats.uncommonEggsFound > 0" class="uncommon-chip">
+              <mat-icon>egg</mat-icon>
+              Uncommon: {{ myStats.uncommonEggsFound }}
+            </mat-chip>
+            <mat-chip *ngIf="myStats.rareEggsFound > 0" class="rare-chip">
+              <mat-icon>egg_alt</mat-icon>
+              Rare: {{ myStats.rareEggsFound }}
+            </mat-chip>
+            <mat-chip *ngIf="myStats.epicEggsFound > 0" class="epic-chip">
+              <mat-icon>star</mat-icon>
+              Epic: {{ myStats.epicEggsFound }}
+            </mat-chip>
+            <mat-chip *ngIf="myStats.legendaryEggsFound > 0" class="legendary-chip">
+              <mat-icon>diamond</mat-icon>
+              Legendary: {{ myStats.legendaryEggsFound }}
+            </mat-chip>
+            <mat-chip *ngIf="myStats.mythicalEggsFound > 0" class="mythical-chip">
+              <mat-icon>auto_awesome</mat-icon>
+              Mythical: {{ myStats.mythicalEggsFound }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Performance Stats -->
+      <div class="performance-stats">
+        <h4>Performance</h4>
+        <div class="perf-grid">
+          <div class="perf-item">
+            <mat-icon>trending_up</mat-icon>
+            <span>Best Streak: {{ myStats.longestStreak || 0 }}</span>
+          </div>
+          <div class="perf-item" *ngIf="myStats.averageTimeToFindMinutes > 0">
+            <mat-icon>schedule</mat-icon>
+            <span>Avg Time: {{ myStats.averageTimeToFindMinutes | number:'1.1-1' }}m</span>
+          </div>
+          <div class="perf-item" *ngIf="myStats.fastestFindSeconds > 0">
+            <mat-icon>flash_on</mat-icon>
+            <span>Fastest: {{ myStats.fastestFindSeconds }}s</span>
+          </div>
+          <div class="perf-item" *ngIf="myStats.lastEggFound">
+            <mat-icon>access_time</mat-icon>
+            <span>Last Found: {{ myStats.lastEggFound | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secret Leaderboard Access -->
+      <div class="leaderboard-section" *ngIf="canAccessSecretLeaderboard">
+        <mat-divider></mat-divider>
+        <div class="secret-access">
+          <mat-icon class="secret-icon">visibility</mat-icon>
+          <span>You have access to the Secret Hunter Leaderboard!</span>
+          <button mat-stroked-button (click)="toggleLeaderboard()" class="secret-button">
+            {{ showLeaderboard ? 'Hide' : 'View' }} Secret Leaderboard
+          </button>
+        </div>
+
+        <!-- Secret Leaderboard -->
+        <div *ngIf="showLeaderboard" class="leaderboard">
+          <h4>🏆 Secret Hunter Leaderboard</h4>
+          <div class="loading" *ngIf="loadingLeaderboard">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          </div>
+          <div *ngIf="leaderboard && !loadingLeaderboard" class="leaderboard-list">
+            <div *ngFor="let hunter of leaderboard; let i = index" 
+                 class="leaderboard-item"
+                 [class.current-player]="myStats && hunter.playerId === myStats.playerId">
+              <div class="rank">#{{ hunter.rank }}</div>
+              <div class="hunter-info">
+                <div class="hunter-name">{{ hunter.playerName }}</div>
+                <div class="hunter-stats">
+                  {{ hunter.totalEggsFound }} eggs • {{ hunter.totalPoints }} pts
+                </div>
+              </div>
+              <div class="hunter-badges" *ngIf="hunter.rareEggsFound > 0">
+                <mat-icon *ngIf="hunter.rareEggsFound >= 5" class="rare-badge">star</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noStats>
+      <div class="no-stats">
+        <mat-icon class="no-stats-icon">search</mat-icon>
+        <h3>Start Your Egg Hunt!</h3>
+        <p>Find your first easter egg to unlock hunting statistics and access to the secret leaderboard.</p>
+        <p class="hint">💡 Eggs appear randomly throughout the site. Keep your eyes peeled!</p>
+      </div>
+    </ng-template>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button mat-button (click)="refreshStats()">
+      <mat-icon>refresh</mat-icon>
+      Refresh Stats
+    </button>
+  </mat-card-actions>
+</mat-card>

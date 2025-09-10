@@ -103,6 +103,9 @@ import {MatBadgeModule} from "@angular/material/badge";
 import {MatPaginator} from "@angular/material/paginator";
 import {StyleRatingService} from "./_services/style-rating.service";
 import {ProfileSettingsComponent} from "./profile-settings/profile-settings.component";
+import {EasterEggDisplayComponent} from "./_shared/components/easter-egg-display/easter-egg-display.component";
+import {EasterEggHunterComponent} from "./easter-egg-hunter/easter-egg-hunter.component";
+import {EasterEggService} from "./_services/easter-egg.service";
 
 
 @NgModule({
@@ -207,6 +210,8 @@ import {ProfileSettingsComponent} from "./profile-settings/profile-settings.comp
     PlayerStatisticsModule,
     MatPaginator,
     ThemeToggleComponent,
+    EasterEggDisplayComponent,
+    EasterEggHunterComponent,
   ], providers: [
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
@@ -220,6 +225,7 @@ import {ProfileSettingsComponent} from "./profile-settings/profile-settings.comp
     PasswordResetService,
     EloHistoryService,
     StyleRatingService,
+    EasterEggService,
     ThemeService,
     provideHttpClient(withFetch()),
     provideAnimationsAsync(),

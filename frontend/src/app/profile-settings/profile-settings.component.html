@@ -165,6 +165,45 @@
             </button>
           </div>
 
+          <!-- Easter Egg Settings Section -->
+          <div class="section-heading">
+            <mat-icon>emoji_events</mat-icon>
+            <span>Easter Egg Hunting</span>
+          </div>
+
+          <div class="easter-egg-section">
+            <mat-checkbox formControlName="easterEggHuntingEnabled" class="easter-egg-toggle">
+              Enable Easter Egg Hunting
+            </mat-checkbox>
+            <p class="easter-egg-description">
+              When enabled, hidden easter eggs will appear throughout the site that you can find and collect for points. 
+              Join the secret leaderboard by finding your first egg!
+            </p>
+            
+            <div *ngIf="player && player.totalEggsFound && player.totalEggsFound > 0" class="easter-egg-stats">
+              <div class="easter-egg-stat">
+                <mat-icon class="stat-icon">emoji_events</mat-icon>
+                <span class="stat-label">Total Eggs Found:</span>
+                <span class="stat-value">{{ player.totalEggsFound }}</span>
+              </div>
+              <div class="easter-egg-stat">
+                <mat-icon class="stat-icon">stars</mat-icon>
+                <span class="stat-label">Easter Egg Points:</span>
+                <span class="stat-value">{{ player.easterEggPoints }}</span>
+              </div>
+              <div *ngIf="player && player.lastEggFound" class="easter-egg-stat">
+                <mat-icon class="stat-icon">schedule</mat-icon>
+                <span class="stat-label">Last Found:</span>
+                <span class="stat-value">{{ player.lastEggFound | date:'short' }}</span>
+              </div>
+              
+              <button mat-stroked-button color="accent" routerLink="/easter-egg-hunter" type="button" class="secret-leaderboard-btn">
+                <mat-icon>leaderboard</mat-icon>
+                View Secret Leaderboard
+              </button>
+            </div>
+          </div>
+
           <!-- Game Statistics Section (Read Only) -->
           <div class="section-heading">
             <mat-icon>sports_tennis</mat-icon>

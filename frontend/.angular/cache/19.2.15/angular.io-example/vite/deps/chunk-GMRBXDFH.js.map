@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../../../../node_modules/@angular/cdk/fesm2022/portal.mjs"],
-  "sourcesContent": ["export { a as BasePortalHost, B as BasePortalOutlet, d as CdkPortal, f as CdkPortalOutlet, C as ComponentPortal, D as DomPortal, c as DomPortalHost, b as DomPortalOutlet, P as Portal, g as PortalHostDirective, h as PortalModule, T as TemplatePortal, e as TemplatePortalDirective } from './portal-directives-Bw5woq8I.mjs';\nimport '@angular/core';\nimport '@angular/common';\n\n/**\n * Custom injector to be used when providing custom\n * injection tokens to components inside a portal.\n * @docs-private\n * @deprecated Use `Injector.create` instead.\n * @breaking-change 11.0.0\n */\nclass PortalInjector {\n  _parentInjector;\n  _customTokens;\n  constructor(_parentInjector, _customTokens) {\n    this._parentInjector = _parentInjector;\n    this._customTokens = _customTokens;\n  }\n  get(token, notFoundValue) {\n    const value = this._customTokens.get(token);\n    if (typeof value !== 'undefined') {\n      return value;\n    }\n    return this._parentInjector.get(token, notFoundValue);\n  }\n}\nexport { PortalInjector };\n"],
-  "mappings": ";AAWA,IAAM,iBAAN,MAAqB;AAAA,EACnB;AAAA,EACA;AAAA,EACA,YAAY,iBAAiB,eAAe;AAC1C,SAAK,kBAAkB;AACvB,SAAK,gBAAgB;AAAA,EACvB;AAAA,EACA,IAAI,OAAO,eAAe;AACxB,UAAM,QAAQ,KAAK,cAAc,IAAI,KAAK;AAC1C,QAAI,OAAO,UAAU,aAAa;AAChC,aAAO;AAAA,IACT;AACA,WAAO,KAAK,gBAAgB,IAAI,OAAO,aAAa;AAAA,EACtD;AACF;",
-  "names": []
-}

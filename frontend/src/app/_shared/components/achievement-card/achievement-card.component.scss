@@ -423,6 +423,47 @@ mat-card-actions button {
   }
 }
 
+// Mystery achievement styling
+.mystery-achievement {
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(158, 158, 158, 0.1) 0%, rgba(189, 189, 189, 0.1) 100%);
+  border: 1px dashed rgba(158, 158, 158, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  
+  .mystery-icon {
+    color: rgba(158, 158, 158, 0.6);
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+  
+  .mystery-text {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
+    flex: 1;
+  }
+  
+  // Dark mode
+  :host-context(.dark-theme) & {
+    background: linear-gradient(135deg, rgba(117, 117, 117, 0.2) 0%, rgba(158, 158, 158, 0.1) 100%);
+    border-color: rgba(158, 158, 158, 0.4);
+    
+    .mystery-icon {
+      color: rgba(158, 158, 158, 0.7);
+    }
+    
+    .mystery-text {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
 // Animations
 @keyframes shimmer {
   0% { background-position: -200% 0; }

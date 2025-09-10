@@ -68,9 +68,26 @@ export class AchievementCardComponent implements OnInit {
   }
 
   /**
+   * Check if this is an easter egg achievement
+   */
+  isEasterEggAchievement(): boolean {
+    if (!this.achievementData?.achievement?.criteria) {
+      return false;
+    }
+    
+    const criteriaType = this.achievementData.achievement.criteria.type || '';
+    return criteriaType.toString().startsWith('EASTER_EGG_');
+  }
+
+  /**
    * Get the appropriate icon based on achievement data
    */
   getIconName(): string {
+    // For easter egg achievements that aren't unlocked, show mystery icon
+    if (this.isEasterEggAchievement() && !this.isAchieved) {
+      return 'help_outline';
+    }
+
     if (!this.achievementData?.achievement?.icon) {
       // Default icons based on category if no specific icon is provided
       if (!this.isAchieved) {
@@ -93,6 +110,26 @@ export class AchievementCardComponent implements OnInit {
 
     // Use custom icon if provided
     return this.achievementData.achievement.icon;
+  }
+
+  /**
+   * Get the achievement name (hidden for unearned easter eggs)
+   */
+  getAchievementName(): string {
+    if (this.isEasterEggAchievement() && !this.isAchieved) {
+      return '??? Hidden Achievement';
+    }
+    return this.achievementData.achievement.name;
+  }
+
+  /**
+   * Get the achievement description (hidden for unearned easter eggs)
+   */
+  getAchievementDescription(): string {
+    if (this.isEasterEggAchievement() && !this.isAchieved) {
+      return 'Find easter eggs to unlock this mysterious achievement...';
+    }
+    return this.achievementData.achievement.description;
   }
 
   /**

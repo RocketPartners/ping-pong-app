@@ -16,8 +16,7 @@
   <!-- Theme Toggle - available to everyone -->
   <app-theme-toggle class="theme-toggle-icon"></app-theme-toggle>
 
-  <!-- Add achievement notifications -->
-  <app-achievement-notifications *ngIf="authenticatedPlayer"></app-achievement-notifications>
+  <!-- Add notifications (handles both reviews and achievements) -->
   <app-review-notifications *ngIf="authenticatedPlayer"></app-review-notifications>
 
   <button *ngIf="authenticatedPlayer" [matMenuTriggerFor]="userMenu" class="user-menu-trigger" mat-icon-button>
@@ -53,6 +52,7 @@
       <mat-icon>emoji_events</mat-icon>
       <span>Achievements</span>
     </button>
+
 
 
     <mat-divider></mat-divider>
@@ -94,6 +94,7 @@
         <span matListItemTitle>Achievements</span>
       </a>
 
+
       <a mat-list-item routerLink="/statistics" routerLinkActive="active-route">
         <mat-icon matListItemIcon>bar_chart</mat-icon>
         <span matListItemTitle>My Statistics</span>
@@ -118,6 +119,9 @@
     <div class="content-container">
       <alert></alert>
       <router-outlet></router-outlet>
+      
+      <!-- Easter Egg Display - shows on all pages when user is authenticated -->
+      <app-easter-egg-display *ngIf="authenticatedPlayer"></app-easter-egg-display>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

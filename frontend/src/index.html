@@ -83,6 +83,9 @@
 
 <!-- White screen error handling -->
 <script>
+  // Polyfill for sockjs-client global variable
+  window.global = window;
+  
   var WHITESCREEN_EMPTY_APP_ROOT_DELAY = 8000;
   var WHITESCREEN_ERROR_DELAY = 5000;
 

@@ -33,14 +33,14 @@
   </div>
 
   <mat-card-header>
-    <mat-card-title>{{ achievementData.achievement.name }}</mat-card-title>
+    <mat-card-title>{{ getAchievementName() }}</mat-card-title>
     <mat-card-subtitle *ngIf="showDetails">
       {{ formatPoints() }}
     </mat-card-subtitle>
   </mat-card-header>
 
   <mat-card-content *ngIf="showDetails">
-    <p class="achievement-description">{{ achievementData.achievement.description }}</p>
+    <p class="achievement-description">{{ getAchievementDescription() }}</p>
 
     <!-- Dependency information -->
     <div *ngIf="showDependencies && dependencyCount > 0" class="dependency-info">
@@ -48,7 +48,8 @@
       <span class="dependency-text">{{ getDependencyStatusText() }}</span>
     </div>
 
-    <div *ngIf="showProgress" class="achievement-progress">
+    <!-- Hide progress for unearned easter egg achievements -->
+    <div *ngIf="showProgress && !(isEasterEggAchievement() && !isAchieved)" class="achievement-progress">
       <app-achievement-progress
         [progress]="achievementData.percentComplete"
         [category]="achievementData.achievement.category"
@@ -58,6 +59,12 @@
         [showText]="true"
         [size]="size === 'small' ? 'small' : 'medium'">
       </app-achievement-progress>
+    </div>
+    
+    <!-- Show mystery message for unearned easter egg achievements -->
+    <div *ngIf="isEasterEggAchievement() && !isAchieved" class="mystery-achievement">
+      <mat-icon class="mystery-icon">search</mat-icon>
+      <span class="mystery-text">Hunt for easter eggs to reveal this achievement!</span>
     </div>
 
     <!-- Enhanced contextual information -->
