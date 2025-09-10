@@ -15,7 +15,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: getting_started
     name: "Getting Started"
@@ -32,7 +32,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: social_butterfly
     name: "Social Butterfly"
@@ -49,7 +49,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: singles_player
     name: "Singles Player"
@@ -66,7 +66,7 @@ achievements:
       gameType: SINGLES
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL"]
 
   - id: team_player
     name: "Team Player"
@@ -83,7 +83,7 @@ achievements:
       gameType: DOUBLES
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: ranked_rookie
     name: "Ranked Rookie"
@@ -117,7 +117,7 @@ achievements:
       gameType: NORMAL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_CASUAL", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_NORMAL", "DOUBLES_NORMAL"]
 
   - id: consistent_competitor
     name: "Consistent Competitor"
@@ -135,7 +135,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: shutout_victory
     name: "Shutout Victory"
@@ -153,7 +153,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: got_gilyed
     name: "Got Gilyed"
@@ -170,7 +170,7 @@ achievements:
       gameType: SINGLES
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL"]
 
   # MEDIUM ACHIEVEMENTS
   - id: win_streak
@@ -188,7 +188,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: gilyed_someone
     name: "Gilyed Someone"
@@ -205,7 +205,7 @@ achievements:
       gameType: SINGLES
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL"]
 
   - id: versatile_athlete
     name: "Versatile Athlete"
@@ -222,7 +222,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: rising_star
     name: "Rising Star"
@@ -256,7 +256,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: perfect_set
     name: "Perfect Set"
@@ -309,7 +309,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: doubles_domination
     name: "Doubles Domination"
@@ -326,7 +326,7 @@ achievements:
       gameType: DOUBLES
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: singles_specialist
     name: "Singles Specialist"
@@ -343,7 +343,7 @@ achievements:
       gameType: SINGLES
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL"]
 
   - id: tournament_contender
     name: "Tournament Contender"
@@ -378,7 +378,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: perfect_match
     name: "Perfect Match"
@@ -447,7 +447,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: tournament_champion
     name: "Tournament Champion"
@@ -482,7 +482,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: comeback_king_queen
     name: "Comeback King/Queen"
@@ -516,7 +516,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: unbeatable_duo
     name: "Unbeatable Duo"
@@ -534,7 +534,7 @@ achievements:
       gameType: DOUBLES
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   # LEGENDARY ACHIEVEMENTS
   - id: grandmaster
@@ -569,7 +569,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: the_legend
     name: "The Legend"
@@ -586,7 +586,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: tournament_dynasty
     name: "Tournament Dynasty"
@@ -639,7 +639,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: table_tennis_immortal
     name: "Table Tennis Immortal"
@@ -656,7 +656,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   - id: the_specialist
     name: "The Specialist"
@@ -674,7 +674,7 @@ achievements:
       gameType: SINGLES
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL"]
 
   - id: ultimate_rival
     name: "Ultimate Rival"
@@ -691,7 +691,7 @@ achievements:
       gameType: ALL
     triggers:
       - triggerType: GAME_COMPLETED
-        gameTypes: ["SINGLES_RANKED", "SINGLES_CASUAL", "DOUBLES_RANKED", "DOUBLES_CASUAL"]
+        gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
 
   # EXAMPLE DEPRECATED ACHIEVEMENT
   - id: old_achievement_example
