@@ -33,7 +33,8 @@ public class AchievementTrigger {
     private Achievement achievement;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "trigger_type", nullable = false)
+    @Column(name = "trigger_type", nullable = false, 
+            columnDefinition = "VARCHAR(255) CHECK (trigger_type IN ('GAME_COMPLETED', 'RATING_UPDATED', 'STREAK_CHANGED', 'MATCH_COMPLETED', 'TOURNAMENT_EVENT', 'EASTER_EGG_FOUND', 'MANUAL_TRIGGER', 'PERIODIC'))")
     private TriggerType triggerType;
 
     @ElementCollection
