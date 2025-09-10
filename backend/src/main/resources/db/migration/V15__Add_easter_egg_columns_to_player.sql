@@ -1,5 +1,5 @@
--- Flyway migration to add missing Easter Egg columns to player table
--- This is a one-time fix for production database schema mismatch
+-- Add Easter Egg columns to player table
+-- Required for Easter egg hunting functionality
 
 -- Add missing Easter Egg columns to player table if they don't exist
 DO $$
