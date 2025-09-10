@@ -8,7 +8,9 @@ import com.example.javapingpongelo.tournament.engine.DoubleEliminationMath;
 import com.example.javapingpongelo.tournament.engine.MatchBatch;
 import com.example.javapingpongelo.tournament.engine.TournamentRulesEngine;
 import com.example.javapingpongelo.tournament.engine.TournamentUpdateResult;
+import com.example.javapingpongelo.repositories.TournamentRoundRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -39,6 +41,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component("doubleEliminationRules")
 public class DoubleEliminationRules implements TournamentRulesEngine {
+    
+    @Autowired
+    private TournamentRoundRepository tournamentRoundRepository;
     
     @Override
     public Tournament.TournamentType getSupportedTournamentType() {
@@ -386,26 +391,127 @@ public class DoubleEliminationRules implements TournamentRulesEngine {
     
     @Override
     public List<TournamentMatch> handleParticipantDropout(Tournament tournament, UUID droppedParticipantId) {
-        // TODO: Implement dropout handling
         log.info("Handling participant dropout: {}", droppedParticipantId);
-        return new ArrayList<>();
+        
+        List<TournamentMatch> affectedMatches = new ArrayList<>();
+        
+        // Find all matches where the dropped participant is involved
+        List<TournamentRound> rounds = tournamentRoundRepository.findByTournamentOrderByRoundNumber(tournament);
+        for (TournamentRound round : rounds) {
+            for (TournamentMatch match : round.getMatches()) {
+                boolean isInvolved = false;
+                
+                // Check if participant is in team1 or team2
+                if (match.getTeam1Ids() != null && match.getTeam1Ids().contains(droppedParticipantId)) {
+                    isInvolved = true;
+                }
+                if (match.getTeam2Ids() != null && match.getTeam2Ids().contains(droppedParticipantId)) {
+                    isInvolved = true;
+                }
+                
+                if (isInvolved && !match.isCompleted()) {
+                    // Award win to the other team if match hasn't started
+                    if (match.getTeam1Ids() != null && match.getTeam1Ids().contains(droppedParticipantId)) {
+                        match.setWinnerIds(match.getTeam2Ids());
+                    } else {
+                        match.setWinnerIds(match.getTeam1Ids());
+                    }
+                    match.setCompleted(true);
+                    // Note: TournamentMatch doesn't have completedAt field, using completed boolean
+                    affectedMatches.add(match);
+                    log.info("Forfeit win awarded in match {} due to participant {} dropout", 
+                        match.getMatchId(), droppedParticipantId);
+                }
+            }
+        }
+        
+        return affectedMatches;
     }
     
     @Override
     public boolean isTournamentComplete(Tournament tournament) {
-        // TODO: Implement completion check
-        return false;
+        List<TournamentRound> rounds = tournamentRoundRepository.findByTournamentOrderByRoundNumber(tournament);
+        if (rounds == null || rounds.isEmpty()) {
+            return false;
+        }
+        
+        // Tournament is complete when we have a final winner
+        // This happens when either:
+        // 1. Winner bracket champion wins the grand final
+        // 2. Loser bracket champion beats winner bracket champion in grand final and reset
+        
+        // Find the grand final round
+        TournamentRound grandFinalRound = rounds.stream()
+            .filter(round -> "Grand Final".equalsIgnoreCase(round.getName()) ||
+                           round.getName().toLowerCase().contains("grand final"))
+            .findFirst()
+            .orElse(null);
+            
+        if (grandFinalRound == null) {
+            return false; // No grand final round found
+        }
+        
+        // Check if grand final has a completed match with a winner
+        return grandFinalRound.getMatches().stream()
+            .anyMatch(match -> match.isCompleted() && 
+                              match.getWinnerIds() != null && 
+                              !match.getWinnerIds().isEmpty());
     }
     
     @Override
     public List<UUID> getTournamentWinners(Tournament tournament) {
-        // TODO: Implement winner detection
+        if (!isTournamentComplete(tournament)) {
+            return new ArrayList<>();
+        }
+        
+        List<TournamentRound> rounds = tournamentRoundRepository.findByTournamentOrderByRoundNumber(tournament);
+        
+        // Find the grand final round and get the winner
+        TournamentRound grandFinalRound = rounds.stream()
+            .filter(round -> "Grand Final".equalsIgnoreCase(round.getName()) ||
+                           round.getName().toLowerCase().contains("grand final"))
+            .findFirst()
+            .orElse(null);
+            
+        if (grandFinalRound != null) {
+            for (TournamentMatch match : grandFinalRound.getMatches()) {
+                if (match.isCompleted() && match.getWinnerIds() != null && !match.getWinnerIds().isEmpty()) {
+                    return new ArrayList<>(match.getWinnerIds());
+                }
+            }
+        }
+        
         return new ArrayList<>();
     }
     
     @Override
     public List<UUID> getTournamentRunnersUp(Tournament tournament) {
-        // TODO: Implement runner-up detection
+        if (!isTournamentComplete(tournament)) {
+            return new ArrayList<>();
+        }
+        
+        List<TournamentRound> rounds = tournamentRoundRepository.findByTournamentOrderByRoundNumber(tournament);
+        
+        // Find the grand final round and get the loser (runner-up)
+        TournamentRound grandFinalRound = rounds.stream()
+            .filter(round -> "Grand Final".equalsIgnoreCase(round.getName()) ||
+                           round.getName().toLowerCase().contains("grand final"))
+            .findFirst()
+            .orElse(null);
+            
+        if (grandFinalRound != null) {
+            for (TournamentMatch match : grandFinalRound.getMatches()) {
+                if (match.isCompleted() && match.getWinnerIds() != null && !match.getWinnerIds().isEmpty()) {
+                    // Return the losing team's IDs
+                    if (match.getWinnerIds().equals(match.getTeam1Ids())) {
+                        return match.getTeam2Ids() != null ? new ArrayList<>(match.getTeam2Ids()) : new ArrayList<>();
+                    } else {
+                        return match.getTeam1Ids() != null ? new ArrayList<>(match.getTeam1Ids()) : new ArrayList<>();
+                    }
+                }
+            }
+        }
+        
         return new ArrayList<>();
     }
     

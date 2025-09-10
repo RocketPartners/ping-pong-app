@@ -261,16 +261,23 @@ public class PlayerController {
             recentlyUnlockedIds.add((UUID) notification.get("achievementId"));
         }
 
-        // Get player achievements
-        List<PlayerAchievement> achievements = achievementService.findPlayerAchievements(id);
+        // Get ALL visible achievements
+        List<Achievement> allAchievements = achievementService.findVisibleAchievements();
+        
+        // Get player achievements for progress data
+        List<PlayerAchievement> playerAchievements = achievementService.findPlayerAchievements(id);
+        Map<UUID, PlayerAchievement> playerAchievementMap = new HashMap<>();
+        for (PlayerAchievement pa : playerAchievements) {
+            playerAchievementMap.put(pa.getAchievementId(), pa);
+        }
 
-        // Fetch detailed achievement info for each
+        // Combine all achievements with player progress
         List<Map<String, Object>> detailedAchievements = new ArrayList<>();
-        for (PlayerAchievement pa : achievements) {
+        for (Achievement achievement : allAchievements) {
             Map<String, Object> detail = new HashMap<>();
 
-            // Get the achievement details
-            Achievement achievement = achievementService.findAchievementById(pa.getAchievementId());
+            // Get player progress if it exists
+            PlayerAchievement pa = playerAchievementMap.get(achievement.getId());
 
             // Combine achievement and player achievement data
             detail.put("id", achievement.getId());
@@ -280,9 +287,11 @@ public class PlayerController {
             detail.put("type", achievement.getType());
             detail.put("icon", achievement.getIcon());
             detail.put("points", achievement.getPoints());
-            detail.put("achieved", pa.getAchieved());
-            detail.put("progress", pa.getProgress());
-            detail.put("dateEarned", pa.getDateEarned());
+            
+            // Player progress data (default to 0 if no record exists)
+            detail.put("achieved", pa != null ? pa.getAchieved() : false);
+            detail.put("progress", pa != null ? pa.getProgress() : 0);
+            detail.put("dateEarned", pa != null ? pa.getDateEarned() : null);
             
             // Mark if this achievement was recently unlocked
             detail.put("recentlyUnlocked", recentlyUnlockedIds.contains(achievement.getId()));

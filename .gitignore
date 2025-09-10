@@ -8,6 +8,10 @@ build/
 target/
 .gradle/
 
+# Angular
+.angular/
+*/angular/cache/
+
 # Environment files
 .env
 .env.local

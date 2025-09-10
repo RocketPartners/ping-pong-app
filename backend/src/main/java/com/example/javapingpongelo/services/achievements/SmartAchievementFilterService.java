@@ -148,6 +148,13 @@ public class SmartAchievementFilterService {
     }
 
     /**
+     * Gets achievements for easter egg found events
+     */
+    public List<Achievement> getAchievementsForEasterEggFound() {
+        return getAchievementsForTrigger(AchievementTrigger.TriggerType.EASTER_EGG_FOUND);
+    }
+
+    /**
      * Populates trigger data for existing achievements (migration helper)
      * This creates appropriate triggers based on achievement criteria
      */
@@ -202,6 +209,8 @@ public class SmartAchievementFilterService {
                 triggerType = AchievementTrigger.TriggerType.STREAK_CHANGED;
             } else if (type.contains("TOURNAMENT")) {
                 triggerType = AchievementTrigger.TriggerType.TOURNAMENT_EVENT;
+            } else if (type.startsWith("EASTER_EGG_")) {
+                triggerType = AchievementTrigger.TriggerType.EASTER_EGG_FOUND;
             } else {
                 // Default to game completion trigger for GAME_COUNT, WIN_COUNT, etc.
                 triggerType = AchievementTrigger.TriggerType.GAME_COMPLETED;
@@ -275,6 +284,16 @@ public class SmartAchievementFilterService {
                 result.add(GameType.DOUBLES_RANKED);
                 break;
             case "DOUBLES_NORMAL":
+                result.add(GameType.DOUBLES_NORMAL);
+                break;
+            case "SINGLES_CASUAL":
+                // Legacy mapping for old database entries
+                log.warn("Found legacy gameType SINGLES_CASUAL, mapping to SINGLES_NORMAL");
+                result.add(GameType.SINGLES_NORMAL);
+                break;
+            case "DOUBLES_CASUAL":
+                // Legacy mapping for old database entries
+                log.warn("Found legacy gameType DOUBLES_CASUAL, mapping to DOUBLES_NORMAL");
                 result.add(GameType.DOUBLES_NORMAL);
                 break;
             case "":

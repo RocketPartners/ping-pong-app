@@ -55,6 +55,7 @@ public class AchievementTrigger {
         STREAK_CHANGED,    // When win/loss streaks change
         MATCH_COMPLETED,   // After match completion
         TOURNAMENT_EVENT,  // Tournament-related events
+        EASTER_EGG_FOUND,  // When player finds an easter egg
         MANUAL_TRIGGER,    // For admin-triggered evaluations
         PERIODIC           // For time-based achievements
     }

@@ -5,6 +5,7 @@ import com.example.javapingpongelo.models.Achievement;
 import com.example.javapingpongelo.models.AchievementNotification;
 import com.example.javapingpongelo.models.Player;
 import com.example.javapingpongelo.repositories.AchievementNotificationRepository;
+import com.example.javapingpongelo.repositories.PlayerRepository;
 import com.example.javapingpongelo.services.SlackService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +36,9 @@ public class AchievementNotificationService {
 
     @Autowired
     private SlackService slackService;
+
+    @Autowired
+    private PlayerRepository playerRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -321,9 +325,24 @@ public class AchievementNotificationService {
                         playerName, achievementName, achievementDescription, points, category);
             }
 
-            // TODO: Integrate with existing SlackService methods
-            // For now, the existing Slack integration handles achievement notifications
-            log.info("Would send Slack notification: {}", message);
+            // Use existing SlackService to post achievement notification
+            try {
+                // Get player object for SlackService
+                Optional<Player> playerOpt = playerRepository.findById(notification.getPlayerId());
+                if (playerOpt.isPresent()) {
+                    Player player = playerOpt.get();
+                    slackService.postPlayerAchievement(player, achievementName, achievementDescription);
+                    log.info("Posted Slack achievement notification for {}: {}", playerName, achievementName);
+                } else {
+                    log.warn("Player {} not found for Slack notification", notification.getPlayerId());
+                    // Log the formatted message as fallback
+                    log.info("Slack notification message: {}", message);
+                }
+            } catch (Exception slackError) {
+                log.error("Failed to send Slack notification via SlackService: {}", slackError.getMessage());
+                // Log the original message as fallback
+                log.info("Slack notification message: {}", message);
+            }
             
             notification.markAsSent();
             notificationRepository.save(notification);
@@ -341,11 +360,14 @@ public class AchievementNotificationService {
      * Processes Slack DM notification
      */
     private void processSlackDMNotification(AchievementNotification notification) {
-        // Placeholder for Slack DM functionality
-        // Would require Slack user mapping and DM capabilities
+        // Note: Slack DM functionality would require user mapping between app users and Slack users
+        // For now, we defer to the existing SlackService which handles channel notifications
+        // Future enhancement: Add Slack user mapping and direct message capabilities
+        
+        log.info("Slack DM notification requested but not implemented - deferring to channel notification");
         notification.markAsSent();
         notificationRepository.save(notification);
-        log.debug("Processed Slack DM notification (placeholder)");
+        log.debug("Processed Slack DM notification (deferred to channel)");
     }
 
     /**

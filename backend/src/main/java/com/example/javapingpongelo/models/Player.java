@@ -113,6 +113,19 @@ public class Player {
     @Builder.Default
     private int doublesNormalRating = 1000;
 
+    // Easter egg hunting statistics
+    @Builder.Default
+    private int easterEggPoints = 0;
+
+    @Builder.Default
+    private int totalEggsFound = 0;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastEggFound;
+
+    @Builder.Default
+    private boolean easterEggHuntingEnabled = true;
+
     // Game statistics
     @Builder.Default
     private int singlesRankedWins = 0;

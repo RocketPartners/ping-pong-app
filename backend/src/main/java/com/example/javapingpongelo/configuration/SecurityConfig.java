@@ -54,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/invitations/validate").permitAll()
                         .requestMatchers("/api/invitations/**").hasRole("ADMIN")
                         .requestMatchers("/api/players/bootstrap/**").permitAll()
+                        // WebSocket endpoints - allow unauthenticated connections
+                        .requestMatchers("/easter-eggs-ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

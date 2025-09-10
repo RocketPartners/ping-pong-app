@@ -40,26 +40,26 @@ public class AchievementInitializer {
     public CommandLineRunner initializeAchievements() {
         return args -> {
             try {
-                log.info("Loading achievements from YAML configuration...");
+                log.debug("Loading achievements from YAML configuration...");
                 
                 // Load achievements from YAML file
                 configurationService.loadConfigurationsFromFile("achievements-config.yaml");
                 
                 if (achievementRepository.count() == 0) {
-                    log.info("No achievements found in database. Creating achievements from YAML...");
+                    log.debug("No achievements found in database. Creating achievements from YAML...");
                 } else {
-                    log.info("Achievements exist in database. Comparing with YAML and updating as needed...");
+                    log.debug("Achievements exist in database. Comparing with YAML and updating as needed...");
                 }
                 
                 // Apply configurations - this handles both creation and safe updates
                 configurationService.applyConfigurations();
-                log.info("Achievement sync complete.");
+                log.debug("Achievement sync complete.");
                 
                 // Handle deprecation - remove triggers for deprecated achievements
                 handleDeprecatedAchievements();
                 
                 // Always repopulate triggers to ensure they're up to date
-                log.info("Repopulating achievement triggers to ensure they're current...");
+                log.debug("Repopulating achievement triggers to ensure they're current...");
                 smartAchievementFilterService.clearAndRepopulateAllTriggers();
                 
             } catch (Exception e) {
@@ -94,7 +94,7 @@ public class AchievementInitializer {
             }
             
             if (deprecatedCount > 0) {
-                log.info("Found {} deprecated achievements. These will be excluded from trigger evaluation.", deprecatedCount);
+                log.debug("Found {} deprecated achievements. These will be excluded from trigger evaluation.", deprecatedCount);
             }
             
         } catch (Exception e) {
@@ -107,7 +107,7 @@ public class AchievementInitializer {
      */
     private void createFallbackAchievements() {
         try {
-            log.info("Creating fallback achievements...");
+            log.debug("Creating fallback achievements...");
             
             // Create a minimal "First Steps" achievement as fallback
             if (achievementRepository.findByName("First Steps").isEmpty()) {
@@ -124,7 +124,7 @@ public class AchievementInitializer {
                     .build();
                 
                 achievementRepository.save(firstSteps);
-                log.info("Created fallback achievement: {}", firstSteps.getName());
+                log.debug("Created fallback achievement: {}", firstSteps.getName());
             }
             
         } catch (Exception e) {
@@ -598,10 +598,10 @@ public class AchievementInitializer {
                     1500
             );
 
-            log.info("Successfully initialized {} achievements", achievementRepository.count());
+            log.debug("Successfully initialized {} achievements", achievementRepository.count());
             
             // Populate triggers for the newly created achievements
-            log.info("Populating achievement triggers...");
+            log.debug("Populating achievement triggers...");
             smartAchievementFilterService.clearAndRepopulateAllTriggers();
         }
         catch (Exception e) {

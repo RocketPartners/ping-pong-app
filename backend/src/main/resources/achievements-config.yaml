@@ -708,3 +708,154 @@ achievements:
       threshold: 1
       gameType: ALL
     triggers: []
+
+  # EASTER EGG HUNTING ACHIEVEMENTS
+  - id: first_egg_hunter
+    name: "First Egg Hunter"
+    description: "Find your first easter egg"
+    category: EASY
+    type: ONE_TIME
+    icon: "explore"
+    points: 20
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_TOTAL
+      threshold: 1
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: egg_collector
+    name: "Egg Collector"
+    description: "Find 5 easter eggs"
+    category: EASY
+    type: PROGRESSIVE
+    icon: "inventory"
+    points: 50
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_TOTAL
+      threshold: 5
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: dedicated_hunter
+    name: "Dedicated Hunter"
+    description: "Find 15 easter eggs"
+    category: MEDIUM
+    type: PROGRESSIVE
+    icon: "search"
+    points: 100
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_TOTAL
+      threshold: 15
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: egg_master
+    name: "Egg Master"
+    description: "Find 50 easter eggs"
+    category: HARD
+    type: PROGRESSIVE
+    icon: "military_tech"
+    points: 250
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_TOTAL
+      threshold: 50
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: rare_egg_finder
+    name: "Rare Egg Finder"
+    description: "Find your first rare (or better) easter egg"
+    category: MEDIUM
+    type: ONE_TIME
+    icon: "diamond"
+    points: 75
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_RARE
+      threshold: 1
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: epic_hunter
+    name: "Epic Hunter"
+    description: "Find an epic (or better) easter egg"
+    category: HARD
+    type: ONE_TIME
+    icon: "bolt"
+    points: 150
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_EPIC
+      threshold: 1
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: legendary_seeker
+    name: "Legendary Seeker"
+    description: "Find a legendary (or mythical) easter egg"
+    category: LEGENDARY
+    type: ONE_TIME
+    icon: "auto_awesome"
+    points: 300
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_LEGENDARY
+      threshold: 1
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: mythical_discoverer
+    name: "Mythical Discoverer"
+    description: "Find the incredibly rare mythical easter egg"
+    category: LEGENDARY
+    type: ONE_TIME
+    icon: "psychology"
+    points: 500
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_MYTHICAL
+      threshold: 1
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: point_accumulator
+    name: "Point Accumulator"
+    description: "Earn 500 points from easter eggs"
+    category: MEDIUM
+    type: PROGRESSIVE
+    icon: "payments"
+    points: 100
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_POINTS
+      threshold: 500
+    triggers:
+      - triggerType: EASTER_EGG_FOUND
+
+  - id: treasure_hunter
+    name: "Treasure Hunter"
+    description: "Earn 2000 points from easter eggs"
+    category: HARD
+    type: PROGRESSIVE
+    icon: "workspace_premium"
+    points: 300
+    visible: true
+    deprecated: false
+    criteria:
+      type: EASTER_EGG_POINTS
+      threshold: 2000
+    triggers:
+      - triggerType: EASTER_EGG_FOUND

@@ -175,7 +175,7 @@ public class AchievementConfigurationService {
                 List<GameType> gameTypes = null;
                 if (triggerConfig.getGameTypes() != null && !triggerConfig.getGameTypes().isEmpty()) {
                     gameTypes = triggerConfig.getGameTypes().stream()
-                            .map(gt -> GameType.valueOf(gt.toUpperCase()))
+                            .map(this::mapToGameType)
                             .collect(Collectors.toList());
                 }
 
@@ -192,6 +192,9 @@ public class AchievementConfigurationService {
 
             } catch (Exception e) {
                 log.error("Error creating trigger for achievement {}: {}", achievementId, e.getMessage());
+                log.debug("Trigger config causing error: triggerType={}, gameTypes={}", 
+                         triggerConfig.getTriggerType(), triggerConfig.getGameTypes());
+                // Continue processing other triggers even if one fails
             }
         }
     }
@@ -362,6 +365,28 @@ public class AchievementConfigurationService {
         }
         
         return validationResults;
+    }
+
+    /**
+     * Maps legacy GameType values to current enum values
+     */
+    private GameType mapToGameType(String gameTypeString) {
+        String upperCase = gameTypeString.toUpperCase();
+        switch (upperCase) {
+            case "SINGLES_CASUAL":
+                log.warn("Found legacy gameType SINGLES_CASUAL in YAML, mapping to SINGLES_NORMAL");
+                return GameType.SINGLES_NORMAL;
+            case "DOUBLES_CASUAL":
+                log.warn("Found legacy gameType DOUBLES_CASUAL in YAML, mapping to DOUBLES_NORMAL");
+                return GameType.DOUBLES_NORMAL;
+            default:
+                try {
+                    return GameType.valueOf(upperCase);
+                } catch (IllegalArgumentException e) {
+                    log.error("Unknown GameType '{}', mapping to SINGLES_NORMAL as fallback", gameTypeString);
+                    return GameType.SINGLES_NORMAL;
+                }
+        }
     }
 
     /**

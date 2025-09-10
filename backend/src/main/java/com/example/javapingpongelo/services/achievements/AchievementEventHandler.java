@@ -141,6 +141,34 @@ public class AchievementEventHandler {
     }
 
     /**
+     * Handles easter egg found events
+     */
+    @EventListener
+    @Async
+    public void handleEasterEggFound(EasterEggFoundEvent event) {
+        log.info("Processing achievements for easter egg found by player {}", event.getPlayer().getPlayerId());
+        
+        try {
+            Player player = event.getPlayer();
+            
+            // Get only easter egg related achievements
+            List<Achievement> eggAchievements = filterService.getAchievementsForEasterEggFound();
+            
+            // Create easter egg specific context
+            AchievementEvaluator.EvaluationContext context = createEasterEggContext(event);
+            
+            // Evaluate easter egg achievements for the player
+            evaluateAchievementsForPlayer(player, eggAchievements, context);
+            
+            log.info("Completed easter egg achievement evaluation for player {}, {} achievements", 
+                    player.getPlayerId(), eggAchievements.size());
+            
+        } catch (Exception e) {
+            log.error("Error processing achievements for easter egg found", e);
+        }
+    }
+
+    /**
      * Handles tournament events
      */
     @EventListener
@@ -269,6 +297,23 @@ public class AchievementEventHandler {
         context.cache("previousWinStreak", event.getPreviousWinStreak());
         context.cache("previousLossStreak", event.getPreviousLossStreak());
         context.cache("isNewWinStreakRecord", event.isNewWinStreakRecord());
+        
+        return context;
+    }
+
+    /**
+     * Creates context for easter egg events
+     */
+    private AchievementEvaluator.EvaluationContext createEasterEggContext(EasterEggFoundEvent event) {
+        AchievementEvaluator.EvaluationContext context = new AchievementEvaluator.EvaluationContext();
+        context.setTriggerType(AchievementTrigger.TriggerType.EASTER_EGG_FOUND);
+        
+        // Cache easter egg information for evaluators
+        context.cache("eggType", event.getEasterEgg().getType().toString());
+        context.cache("eggPoints", event.getPointsEarned());
+        context.cache("totalEggsFound", event.getTotalEggsFound());
+        context.cache("totalPointsEarned", event.getTotalPointsEarned());
+        context.cache("eggPageLocation", event.getEasterEgg().getPageLocation());
         
         return context;
     }
