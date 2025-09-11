@@ -12,7 +12,7 @@ achievements:
     criteria:
       type: WIN_COUNT
       threshold: 1
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -29,7 +29,7 @@ achievements:
     criteria:
       type: GAME_COUNT
       threshold: 5
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -46,7 +46,7 @@ achievements:
     criteria:
       type: UNIQUE_OPPONENTS
       threshold: 5
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -132,7 +132,7 @@ achievements:
       type: WIN_RATE
       threshold: 50
       secondaryValue: 10
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -150,7 +150,7 @@ achievements:
       type: OPPONENT_SCORE_BELOW
       threshold: 5
       secondaryValue: 1
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -185,7 +185,7 @@ achievements:
     criteria:
       type: WIN_STREAK
       threshold: 5
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -219,7 +219,7 @@ achievements:
     criteria:
       type: ALL_GAME_TYPES
       threshold: 4
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -236,7 +236,7 @@ achievements:
     criteria:
       type: RATING_THRESHOLD
       threshold: 1200
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: RATING_UPDATED
         gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
@@ -253,7 +253,7 @@ achievements:
     criteria:
       type: POINTS_SCORED
       threshold: 100
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -270,7 +270,7 @@ achievements:
     criteria:
       type: PERFECT_MATCH
       threshold: 3
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: MATCH_COMPLETED
         gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
@@ -306,7 +306,7 @@ achievements:
       type: CLOSE_GAME_WIN
       threshold: 2
       secondaryValue: 1
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -352,15 +352,13 @@ achievements:
     type: ONE_TIME
     icon: "emoji_events"
     points: 90
-    visible: true
-    deprecated: false
+    visible: false
+    deprecated: true
     criteria:
       type: TOURNAMENT_ROUND
       threshold: 2
-      gameType: ALL
-    triggers:
-      - triggerType: TOURNAMENT_EVENT
-        gameTypes: ["TOURNAMENT"]
+      gameType: ""
+    triggers: []
 
   # HARD ACHIEVEMENTS
   - id: unstoppable
@@ -375,7 +373,7 @@ achievements:
     criteria:
       type: WIN_STREAK
       threshold: 10
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -392,7 +390,7 @@ achievements:
     criteria:
       type: PERFECT_MATCH
       threshold: 7
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: MATCH_COMPLETED
         gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
@@ -409,7 +407,7 @@ achievements:
     criteria:
       type: RATING_THRESHOLD
       threshold: 1500
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: RATING_UPDATED
         gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
@@ -427,7 +425,7 @@ achievements:
       type: ALL_RATINGS_THRESHOLD
       threshold: 1300
       secondaryValue: 4
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: RATING_UPDATED
         gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
@@ -444,7 +442,7 @@ achievements:
     criteria:
       type: WIN_COUNT
       threshold: 100
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -456,15 +454,13 @@ achievements:
     type: ONE_TIME
     icon: "trophy"
     points: 350
-    visible: true
-    deprecated: false
+    visible: false
+    deprecated: true
     criteria:
       type: TOURNAMENT_WIN
       threshold: 1
-      gameType: ALL
-    triggers:
-      - triggerType: TOURNAMENT_EVENT
-        gameTypes: ["TOURNAMENT"]
+      gameType: ""
+    triggers: []
 
   - id: season_dominator
     name: "Season Dominator"
@@ -479,7 +475,7 @@ achievements:
       type: WIN_RATE
       threshold: 75
       secondaryValue: 50
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -496,7 +492,7 @@ achievements:
     criteria:
       type: COMEBACK_WIN
       threshold: 5
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: MATCH_COMPLETED
         gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
@@ -513,7 +509,7 @@ achievements:
     criteria:
       type: SAME_OPPONENT_WINS
       threshold: 10
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -549,7 +545,7 @@ achievements:
     criteria:
       type: RATING_THRESHOLD
       threshold: 1800
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: RATING_UPDATED
         gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
@@ -566,7 +562,7 @@ achievements:
     criteria:
       type: PERFECT_SEASON
       threshold: 25
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -583,7 +579,7 @@ achievements:
     criteria:
       type: WIN_COUNT
       threshold: 500
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -595,15 +591,13 @@ achievements:
     type: PROGRESSIVE
     icon: "emoji_events"
     points: 1500
-    visible: true
-    deprecated: false
+    visible: false
+    deprecated: true
     criteria:
       type: TOURNAMENT_WIN
       threshold: 5
-      gameType: ALL
-    triggers:
-      - triggerType: TOURNAMENT_EVENT
-        gameTypes: ["TOURNAMENT"]
+      gameType: ""
+    triggers: []
 
   # ADDITIONAL ACHIEVEMENTS FROM DATABASE
   - id: against_all_odds
@@ -619,7 +613,7 @@ achievements:
       type: RATING_DIFFERENCE_WIN
       threshold: 300
       secondaryValue: 1
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "DOUBLES_RANKED"]
@@ -636,7 +630,7 @@ achievements:
     criteria:
       type: PERFECT_GAME
       threshold: 1
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -653,7 +647,7 @@ achievements:
     criteria:
       type: WIN_COUNT
       threshold: 1000
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -688,7 +682,7 @@ achievements:
     criteria:
       type: SAME_OPPONENT_GAMES
       threshold: 25
-      gameType: ALL
+      gameType: ""
     triggers:
       - triggerType: GAME_COMPLETED
         gameTypes: ["SINGLES_RANKED", "SINGLES_NORMAL", "DOUBLES_RANKED", "DOUBLES_NORMAL"]
@@ -706,7 +700,7 @@ achievements:
     criteria:
       type: WIN_COUNT
       threshold: 1
-      gameType: ALL
+      gameType: ""
     triggers: []
 
   # EASTER EGG HUNTING ACHIEVEMENTS
