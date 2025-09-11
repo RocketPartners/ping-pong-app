@@ -57,7 +57,7 @@ public class EasterEggService {
     // Page locations where eggs can spawn
     private static final String[] PAGE_LOCATIONS = {
         "home", "leaderboard", "achievements", "statistics", "match-builder", 
-        "profile-settings", "player-profile", "game-details"
+        "profile-settings"
     };
     
     // Testing mode - predictable egg spawning for debugging

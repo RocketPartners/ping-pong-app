@@ -32,8 +32,8 @@ public class EasterEggSpawningService {
 
     // Page locations where eggs can spawn
     private static final List<String> SPAWN_LOCATIONS = Arrays.asList(
-        "home", "leaderboard", "achievements", "profile", "game-details",
-        "player-statistics", "any"  // "any" means universal placement
+        "home", "leaderboard", "achievements", "profile",
+        "player-statistics"
     );
 
     // CSS selectors for egg placement zones
