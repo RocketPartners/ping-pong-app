@@ -39,6 +39,21 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // Enable CORS
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Kiosk token/code minting must be admin-only; listed before /api/auth/** permitAll.
+                        // Redeem endpoint stays public — security is the 5-minute single-use pairing code.
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/kiosk-pairing-codes/redeem").permitAll()
+                        .requestMatchers("/api/auth/kiosk-token").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/kiosk-pairing-codes").hasRole("ADMIN")
+                        // Request-based pairing: kiosk can create + poll its own request; admins manage them.
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/kiosk-pair-requests").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/kiosk-pair-requests/*").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/kiosk-pair-requests").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/kiosk-pair-requests/*/approve").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/kiosk-pair-requests/*/deny").hasRole("ADMIN")
+                        // Heartbeat is any authenticated kiosk; list/delete are admin-only.
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/kiosk-devices/heartbeat").authenticated()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/kiosk-devices").hasRole("ADMIN")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/auth/kiosk-devices/*").hasRole("ADMIN")
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/password-reset/**").permitAll()
                         .requestMatchers("/api/verify-email/**").permitAll()

@@ -38,6 +38,7 @@ export interface Player {
   profileImage: string;
   token?: string;
   isAnonymous?: boolean;
+  role?: string;
 
   // Easter egg hunting fields
   easterEggHuntingEnabled?: boolean;

@@ -1,0 +1,70 @@
+<div class="kiosk-pairings">
+  <header class="kiosk-pairings__header">
+    <h1>Kiosks</h1>
+    <p>Approve pairing requests and manage devices already paired with the ping-pong app.</p>
+  </header>
+
+  <!-- Pending requests -->
+  <section class="section" *ngIf="pending.length > 0">
+    <h2 class="section__title">
+      <mat-icon>hourglass_top</mat-icon>
+      Pending Requests
+      <span class="section__count">{{ pending.length }}</span>
+    </h2>
+
+    <div class="request" *ngFor="let req of pending">
+      <div class="request__info">
+        <div class="request__device">{{ req.deviceName }}</div>
+        <div class="request__meta">
+          {{ parseUA(req.userAgent) }} · Requested {{ req.createdAt | date:'shortTime' }}
+        </div>
+        <div class="request__expires">Expires {{ req.expiresAt | date:'shortTime' }}</div>
+      </div>
+      <div class="request__actions">
+        <button mat-stroked-button color="warn"
+                [disabled]="busyId === req.id"
+                (click)="deny(req)">Deny</button>
+        <button mat-flat-button color="primary"
+                [disabled]="busyId === req.id"
+                (click)="approve(req)">
+          <mat-icon>check</mat-icon>Approve
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Paired devices -->
+  <section class="section">
+    <h2 class="section__title">
+      <mat-icon>devices</mat-icon>
+      Paired Kiosks
+      <span class="section__count">{{ devices.length }}</span>
+    </h2>
+
+    <div class="section__empty" *ngIf="devices.length === 0">
+      <mat-icon>devices_other</mat-icon>
+      <h3>No paired kiosks yet</h3>
+      <p>When a kiosk taps "Request Pairing" and you approve it, it appears here.</p>
+    </div>
+
+    <div class="device" *ngFor="let d of devices">
+      <div class="device__status-dot"
+           [class.device__status-dot--online]="isOnline(d)"
+           [matTooltip]="isOnline(d) ? 'Online' : 'Offline'"></div>
+      <div class="device__info">
+        <div class="device__name">{{ d.deviceName }}</div>
+        <div class="device__meta">
+          {{ parseUA(d.userAgent) }} · Paired by {{ d.approvedBy }} on {{ d.approvedAt | date:'mediumDate' }}
+        </div>
+        <div class="device__last-seen">Last seen {{ sinceLastSeen(d) }}</div>
+      </div>
+      <div class="device__actions">
+        <button mat-stroked-button color="warn"
+                [disabled]="busyId === d.id"
+                (click)="revoke(d)">
+          <mat-icon>logout</mat-icon>Revoke
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

@@ -65,6 +65,12 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
 
+  // Kiosk routes (lazy loaded; own auth model via kiosk token)
+  {
+    path: 'kiosk',
+    loadChildren: () => import('./kiosk/kiosk.module').then(m => m.KioskModule)
+  },
+
   // otherwise redirect to home
   {path: '**', redirectTo: ''}
 ];

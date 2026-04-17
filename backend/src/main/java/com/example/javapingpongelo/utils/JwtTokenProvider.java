@@ -23,6 +23,9 @@ public class JwtTokenProvider {
     @Value("${app.jwt.expiration:86400000}")
     private long jwtExpiration;
 
+    @Value("${app.jwt.kiosk-expiration:31536000000}")
+    private long kioskExpiration;
+
     public String generateToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 
@@ -35,6 +38,36 @@ public class JwtTokenProvider {
                    .expiration(expiryDate)
                    .signWith(getSigningKey())
                    .compact();
+    }
+
+    public String generateLongLivedToken(String username) {
+        return generateLongLivedToken(username, java.util.UUID.randomUUID().toString());
+    }
+
+    public String generateLongLivedToken(String username, String jti) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + kioskExpiration);
+
+        return Jwts.builder()
+                   .subject(username)
+                   .id(jti)
+                   .issuedAt(now)
+                   .expiration(expiryDate)
+                   .signWith(getSigningKey())
+                   .compact();
+    }
+
+    public String getJtiFromToken(String token) {
+        io.jsonwebtoken.Claims claims = Jwts.parser()
+                                            .verifyWith(getSigningKey())
+                                            .build()
+                                            .parseSignedClaims(token)
+                                            .getPayload();
+        return claims.getId();
+    }
+
+    public long getKioskExpirationMillis() {
+        return kioskExpiration;
     }
 
     private SecretKey getSigningKey() {

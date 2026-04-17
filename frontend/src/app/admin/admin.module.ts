@@ -29,6 +29,7 @@ import { AnalyticsDashboardComponent } from './achievement-admin/analytics-dashb
 import { PerformanceMonitorComponent } from './achievement-admin/performance-monitor/performance-monitor.component';
 import { DependencyTreeComponent } from './achievement-admin/dependency-tree/dependency-tree.component';
 import { AnalyticsChartsComponent } from './achievement-admin/analytics-charts/analytics-charts.component';
+import { KioskPairingsComponent } from './kiosk-pairings/kiosk-pairings.component';
 
 // Shared Components
 import { SharedComponentsModule } from '../_shared/shared-components.module';
@@ -40,13 +41,15 @@ import { SharedComponentsModule } from '../_shared/shared-components.module';
     AnalyticsDashboardComponent,
     PerformanceMonitorComponent,
     DependencyTreeComponent,
-    AnalyticsChartsComponent
+    AnalyticsChartsComponent,
+    KioskPairingsComponent
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
     RouterModule.forChild([
+      { path: 'kiosk-pairings', component: KioskPairingsComponent },
       {
         path: '',
         component: AchievementAdminComponent,

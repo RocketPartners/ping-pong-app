@@ -15,6 +15,7 @@ import {PlayerStyle} from "../_models/player-style";
 import {PlayerReviewService} from "../_services/player-review.service";
 import {PlayerReviewDialogComponent} from "../player-review-dialog/player-review-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
+import {buildGameDtos} from "../_shared/utils/game-conversion.util";
 
 interface MatchGame {
   id: number;
@@ -1057,53 +1058,23 @@ export class MatchBuilderComponent implements OnInit, OnDestroy {
 
   // Convert the games to the backend format
   private convertGamesToSave(): void {
-    const matchType = this.matchConfigForm.get('matchType')?.value;
+    const matchType = this.matchConfigForm.get('matchType')?.value as 'singles' | 'doubles';
     const isRanked = this.matchConfigForm.get('matchMode')?.value === 'Ranked';
 
-    this.gamesToSave = this.games.map(game => {
-      const team1Wins = game.team1Score > game.team2Score;
+    const team1: Player[] = matchType === 'singles'
+      ? [this.currentPlayer]
+      : [this.currentPlayer, this.selectedPlayers.player1].filter(Boolean) as Player[];
 
-      if (matchType === 'singles') {
-        return {
-          challengerId: this.currentPlayer.playerId,
-          challengerTeam: [],
-          challengerTeamScore: game.team1Score,
-          challengerTeamWin: false,
-          challengerWin: team1Wins,
-          doublesGame: false,
-          normalGame: !isRanked,
-          ratedGame: isRanked,
-          singlesGame: true,
-          opponentId: this.selectedPlayers.player1?.playerId || '',
-          opponentTeam: [],
-          opponentTeamScore: game.team2Score,
-          opponentTeamWin: false,
-          opponentWin: !team1Wins
-        } as Game;
-      } else { // doubles
-        return {
-          challengerId: '',
-          challengerTeam: [
-            this.currentPlayer.playerId,
-            this.selectedPlayers.player1?.playerId || ''
-          ].filter(Boolean) as string[],
-          challengerTeamScore: game.team1Score,
-          challengerTeamWin: team1Wins,
-          challengerWin: false,
-          doublesGame: true,
-          normalGame: !isRanked,
-          ratedGame: isRanked,
-          singlesGame: false,
-          opponentId: '',
-          opponentTeam: [
-            this.selectedPlayers.player2?.playerId || '',
-            this.selectedPlayers.player3?.playerId || ''
-          ].filter(Boolean) as string[],
-          opponentTeamScore: game.team2Score,
-          opponentTeamWin: !team1Wins,
-          opponentWin: false
-        } as Game;
-      }
+    const team2: Player[] = matchType === 'singles'
+      ? [this.selectedPlayers.player1].filter(Boolean) as Player[]
+      : [this.selectedPlayers.player2, this.selectedPlayers.player3].filter(Boolean) as Player[];
+
+    this.gamesToSave = buildGameDtos({
+      matchType,
+      isRanked,
+      team1,
+      team2,
+      games: this.games.map(g => ({team1Score: g.team1Score, team2Score: g.team2Score}))
     });
   }
 

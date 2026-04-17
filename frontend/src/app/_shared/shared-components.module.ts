@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterModule} from '@angular/router';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ReactiveFormsModule, FormsModule} from '@angular/forms';
 
 // Components
@@ -59,7 +58,6 @@ import {ProfileAvatarComponent} from "./components/profile-avatar/profile-avatar
   imports: [
     CommonModule,
     RouterModule,
-    BrowserAnimationsModule,
     ReactiveFormsModule,
     FormsModule,
     MatCardModule,

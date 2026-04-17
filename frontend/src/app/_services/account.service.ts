@@ -38,6 +38,19 @@ export class AccountService extends BaseHttpService {
   }
 
   /**
+   * Set the current authenticated player directly. Used by the kiosk pairing flow
+   * which authenticates via its own endpoints rather than /api/auth/login.
+   */
+  public setAuthenticatedPlayer(player: AuthenticatedPlayer | null): void {
+    if (player) {
+      sessionStorage.setItem('player', JSON.stringify(player));
+    } else {
+      sessionStorage.removeItem('player');
+    }
+    this.authenticatedPlayerSubject.next(player);
+  }
+
+  /**
    * Log in with username and password
    * @param username User's username
    * @param password User's password

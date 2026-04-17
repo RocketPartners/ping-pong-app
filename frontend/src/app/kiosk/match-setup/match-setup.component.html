@@ -1,0 +1,55 @@
+<div class="setup">
+  <header class="setup__header">
+    <button class="setup__back" (click)="cancel()">&larr; Cancel</button>
+    <h1 class="setup__title">New Match</h1>
+    <div class="setup__spacer"></div>
+  </header>
+
+  <section class="setup__row">
+    <h2 class="setup__label">Match Type</h2>
+    <div class="setup__options">
+      <button class="option" [class.option--selected]="matchType === 'singles'" (click)="matchType = 'singles'">
+        <div class="option__icon">👤</div>
+        <div class="option__label">Singles</div>
+      </button>
+      <button class="option" [class.option--selected]="matchType === 'doubles'" (click)="matchType = 'doubles'">
+        <div class="option__icon">👥</div>
+        <div class="option__label">Doubles</div>
+      </button>
+    </div>
+  </section>
+
+  <section class="setup__row">
+    <h2 class="setup__label">Mode</h2>
+    <div class="setup__options">
+      <button class="option" [class.option--selected]="isRanked === true" (click)="isRanked = true">
+        <div class="option__icon">🏆</div>
+        <div class="option__label">Ranked</div>
+        <div class="option__hint">Affects Elo rating</div>
+      </button>
+      <button class="option" [class.option--selected]="isRanked === false" (click)="isRanked = false">
+        <div class="option__icon">🎯</div>
+        <div class="option__label">Normal</div>
+        <div class="option__hint">Casual play</div>
+      </button>
+    </div>
+  </section>
+
+  <section class="setup__row">
+    <h2 class="setup__label">Best Of</h2>
+    <div class="setup__options setup__options--compact">
+      <button *ngFor="let n of bestOfOptions"
+              class="option option--compact"
+              [class.option--selected]="bestOf === n"
+              (click)="bestOf = n">
+        {{ n }}
+      </button>
+    </div>
+  </section>
+
+  <footer class="setup__footer">
+    <button class="btn btn--primary" [disabled]="!canContinue" (click)="continue()">
+      Continue &rarr;
+    </button>
+  </footer>
+</div>

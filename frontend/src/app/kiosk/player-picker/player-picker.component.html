@@ -1,0 +1,68 @@
+<div class="picker">
+  <header class="picker__header">
+    <button class="picker__back" (click)="back()">&larr; Back</button>
+    <h1 class="picker__title">Choose Players</h1>
+    <div class="picker__mode">
+      {{ config?.matchType | titlecase }} · {{ config?.isRanked ? 'Ranked' : 'Normal' }} · Best of {{ config?.bestOf }}
+    </div>
+  </header>
+
+  <div class="picker__slots" [class.picker__slots--doubles]="config?.matchType === 'doubles'">
+    <button *ngFor="let slot of slots; let i = index"
+            class="slot"
+            [class.slot--filled]="slot"
+            (click)="openPicker(i)">
+      <div class="slot__label">{{ slotLabels[i] }}</div>
+      <div class="slot__value" *ngIf="slot">{{ slot.firstName }} {{ slot.lastName }}</div>
+      <div class="slot__username" *ngIf="slot">&#64;{{ slot.username }}</div>
+      <div class="slot__empty" *ngIf="!slot">Tap to choose</div>
+      <button *ngIf="slot" class="slot__clear" (click)="$event.stopPropagation(); removeSlot(i)">&times;</button>
+    </button>
+  </div>
+
+  <footer class="picker__footer">
+    <button class="btn btn--primary" [disabled]="!canSubmit" (click)="startMatch()">
+      Start Scoring &rarr;
+    </button>
+  </footer>
+
+  <!-- Picker modal -->
+  <div class="modal" *ngIf="pickingSlot !== null">
+    <div class="modal__backdrop" (click)="closePicker()"></div>
+    <div class="modal__body">
+      <header class="modal__header">
+        <h2>{{ slotLabels[pickingSlot!] }}</h2>
+        <button class="modal__close" (click)="closePicker()">&times;</button>
+      </header>
+
+      <input class="modal__search"
+             type="text"
+             placeholder="Search by name or username"
+             [(ngModel)]="searchTerm"
+             autofocus />
+
+      <div class="modal__results">
+        <button *ngFor="let p of filteredPlayers"
+                class="result"
+                (click)="pickPlayer(p)">
+          <div class="result__name">{{ p.firstName }} {{ p.lastName }}</div>
+          <div class="result__username">&#64;{{ p.username }}</div>
+        </button>
+        <div class="modal__empty" *ngIf="filteredPlayers.length === 0">
+          No players match "{{ searchTerm }}".
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn btn--ghost"
+                [disabled]="!allowGuests || loading || !searchTerm.trim()"
+                (click)="createGuest()">
+          <span *ngIf="!loading">+ Add "{{ searchTerm || '…' }}" as Guest</span>
+          <span *ngIf="loading">Creating…</span>
+        </button>
+        <div class="modal__hint" *ngIf="!allowGuests">Guests aren't allowed in ranked matches.</div>
+        <div class="modal__error" *ngIf="error">{{ error }}</div>
+      </div>
+    </div>
+  </div>
+</div>

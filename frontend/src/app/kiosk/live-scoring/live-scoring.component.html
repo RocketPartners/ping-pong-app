@@ -1,0 +1,37 @@
+<div class="scoring" *ngIf="state && state.config">
+  <button class="team team--left"
+          [disabled]="currentGame?.concluded"
+          (click)="score(1)">
+    <div class="team__label">{{ teamLabel(state.team1) }}</div>
+    <div class="team__score">{{ currentGame?.team1Score ?? 0 }}</div>
+    <div class="team__wins">{{ team1Wins }} wins</div>
+    <div class="team__tap">Tap for +1</div>
+  </button>
+
+  <button class="team team--right"
+          [disabled]="currentGame?.concluded"
+          (click)="score(2)">
+    <div class="team__label">{{ teamLabel(state.team2) }}</div>
+    <div class="team__score">{{ currentGame?.team2Score ?? 0 }}</div>
+    <div class="team__wins">{{ team2Wins }} wins</div>
+    <div class="team__tap">Tap for +1</div>
+  </button>
+
+  <div class="scoring__bar">
+    <div class="scoring__meta">
+      Game {{ state.currentGameIndex + 1 }} · Best of {{ state.config.bestOf }}
+      · {{ state.config.isRanked ? 'Ranked' : 'Normal' }}
+    </div>
+    <div class="scoring__actions">
+      <button class="action" (click)="undo()">Undo</button>
+      <button class="action action--danger" (click)="discard()">Discard Match</button>
+    </div>
+  </div>
+
+  <div class="celebration" *ngIf="showGameCelebration">
+    <div class="celebration__card">
+      <div class="celebration__title">Game to {{ celebrationWinner === 1 ? teamLabel(state.team1) : teamLabel(state.team2) }}</div>
+      <div class="celebration__score">{{ celebrationScore.team1 }} – {{ celebrationScore.team2 }}</div>
+    </div>
+  </div>
+</div>
