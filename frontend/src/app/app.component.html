@@ -1,3 +1,8 @@
+<ng-container *ngIf="isKioskRoute; else appShell">
+  <router-outlet></router-outlet>
+</ng-container>
+
+<ng-template #appShell>
 <mat-toolbar
   [style.background-color]="playerColor || '#3f51b5'"
   [style.color]="playerColor ? '#ffffff' : null"
@@ -15,6 +20,16 @@
 
   <!-- Theme Toggle - available to everyone -->
   <app-theme-toggle class="theme-toggle-icon"></app-theme-toggle>
+
+  <!-- Pending kiosk pairing badge (admins only) -->
+  <button *ngIf="pendingKioskPairings.length > 0"
+          class="kiosk-pairing-badge"
+          mat-button
+          type="button"
+          (click)="goToKioskPairings()">
+    <mat-icon>devices_other</mat-icon>
+    <span>{{ pendingKioskPairings.length }} pending kiosk</span>
+  </button>
 
   <!-- Add notifications (handles both reviews and achievements) -->
   <app-review-notifications *ngIf="authenticatedPlayer"></app-review-notifications>
@@ -53,7 +68,13 @@
       <span>Achievements</span>
     </button>
 
-
+    <ng-container *ngIf="isAdmin">
+      <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/admin/kiosk-pairings">
+        <mat-icon>devices</mat-icon>
+        <span>Kiosks</span>
+      </button>
+    </ng-container>
 
     <mat-divider></mat-divider>
     <button (click)="logout()" mat-menu-item>
@@ -99,6 +120,15 @@
         <mat-icon matListItemIcon>bar_chart</mat-icon>
         <span matListItemTitle>My Statistics</span>
       </a>
+
+      <ng-container *ngIf="isAdmin">
+        <mat-divider></mat-divider>
+        <div class="sidenav-section-header">Admin</div>
+        <a mat-list-item routerLink="/admin/kiosk-pairings" routerLinkActive="active-route">
+          <mat-icon matListItemIcon>devices</mat-icon>
+          <span matListItemTitle>Kiosks</span>
+        </a>
+      </ng-container>
     </mat-nav-list>
 
     <div class="sidenav-footer">
@@ -107,7 +137,7 @@
         <mat-icon>{{ currentTheme === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
         <span>{{ currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
       </button>
-      
+
       <button (click)="logout()" class="logout-button" mat-button>
         <mat-icon>exit_to_app</mat-icon>
         <span>Logout</span>
@@ -119,9 +149,10 @@
     <div class="content-container">
       <alert></alert>
       <router-outlet></router-outlet>
-      
+
       <!-- Easter Egg Display - shows on all pages when user is authenticated -->
       <app-easter-egg-display *ngIf="authenticatedPlayer"></app-easter-egg-display>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
+</ng-template>

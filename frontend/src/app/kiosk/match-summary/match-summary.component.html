@@ -1,0 +1,53 @@
+<div class="summary" *ngIf="state && state.config">
+  <header class="summary__header">
+    <h1 class="summary__title">Match Summary</h1>
+    <div class="summary__mode">
+      {{ state.config.matchType | titlecase }} · {{ state.config.isRanked ? 'Ranked' : 'Normal' }} · Best of {{ state.config.bestOf }}
+    </div>
+  </header>
+
+  <div class="summary__winner" *ngIf="matchWinner">
+    <div class="summary__trophy">🏆</div>
+    <div class="summary__winner-name">{{ teamLabel(matchWinner) }}</div>
+    <div class="summary__winner-score">{{ team1Wins }} – {{ team2Wins }}</div>
+  </div>
+
+  <div class="summary__games">
+    <div class="game-row game-row--head">
+      <div class="game-row__col">Game</div>
+      <div class="game-row__col">{{ teamLabel(state.team1) }}</div>
+      <div class="game-row__col">{{ teamLabel(state.team2) }}</div>
+    </div>
+    <div *ngFor="let g of concludedGames; let i = index"
+         class="game-row"
+         [class.game-row--winner-left]="g.winner === 1"
+         [class.game-row--winner-right]="g.winner === 2">
+      <div class="game-row__col">Game {{ i + 1 }}</div>
+      <div class="game-row__col">{{ g.team1Score }}</div>
+      <div class="game-row__col">{{ g.team2Score }}</div>
+    </div>
+  </div>
+
+  <footer class="summary__footer">
+    <div class="summary__status" [ngSwitch]="status">
+      <span *ngSwitchCase="'submitting'">Submitting…</span>
+      <span *ngSwitchCase="'success'" class="summary__status--ok">Saved. Returning to home…</span>
+      <span *ngSwitchCase="'error'" class="summary__status--err">{{ errorMessage }}</span>
+    </div>
+
+    <div class="summary__actions" *ngIf="status !== 'success'">
+      <button class="btn btn--ghost" [disabled]="status === 'submitting'" (click)="discard()">
+        Discard
+      </button>
+      <button class="btn btn--primary"
+              *ngIf="status !== 'error'"
+              [disabled]="status === 'submitting'"
+              (click)="submit()">
+        Submit Match
+      </button>
+      <button class="btn btn--primary" *ngIf="status === 'error'" (click)="retry()">
+        Retry Submit
+      </button>
+    </div>
+  </footer>
+</div>

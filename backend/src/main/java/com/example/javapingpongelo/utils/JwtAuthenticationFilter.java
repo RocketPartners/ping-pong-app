@@ -27,6 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private com.example.javapingpongelo.services.KioskDeviceService kioskDeviceService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -35,6 +38,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String username = tokenProvider.getUsernameFromToken(jwt);
+
+                // Enforce revocation for kiosk tokens: once an admin revokes a device,
+                // any request carrying that token is denied here regardless of JWT signature validity.
+                try {
+                    String jti = tokenProvider.getJtiFromToken(jwt);
+                    if (jti != null && kioskDeviceService.isJtiRevoked(jti)) {
+                        log.info("Rejecting revoked kiosk token jti={}", jti);
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                } catch (Exception ignore) {
+                    // jti missing — regular user token, nothing to enforce
+                }
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

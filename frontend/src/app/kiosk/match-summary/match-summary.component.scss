@@ -1,0 +1,154 @@
+.summary {
+  width: 100%;
+  height: 100%;
+  padding: clamp(20px, 4vmin, 40px) clamp(24px, 5vmin, 60px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.5vmin, 24px);
+  overflow-y: auto;
+}
+
+.summary__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.summary__title {
+  font-size: clamp(30px, 5.5vmin, 52px);
+  font-weight: 700;
+  margin: 0;
+}
+
+.summary__mode {
+  font-size: clamp(14px, 2.4vmin, 24px);
+  color: #9aa5bd;
+}
+
+.summary__winner {
+  background: linear-gradient(135deg, #1e2d4f 0%, #0b0f1a 100%);
+  border: 3px solid #3f7bff;
+  border-radius: clamp(18px, 3vmin, 28px);
+  padding: clamp(20px, 3.5vmin, 32px) clamp(24px, 5vmin, 48px);
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vmin, 32px);
+  flex-wrap: wrap;
+}
+
+.summary__trophy {
+  font-size: clamp(56px, 10vmin, 96px);
+  line-height: 1;
+}
+
+.summary__winner-name {
+  font-size: clamp(28px, 5.5vmin, 52px);
+  font-weight: 700;
+  flex: 1 1 200px;
+}
+
+.summary__winner-score {
+  font-size: clamp(40px, 8vmin, 72px);
+  font-weight: 800;
+  color: #3f7bff;
+}
+
+.summary__games {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.game-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: clamp(12px, 2vmin, 20px) clamp(18px, 3vmin, 28px);
+  border-radius: clamp(12px, 1.8vmin, 16px);
+  background: #16213d;
+  font-size: clamp(20px, 3.4vmin, 32px);
+}
+
+.game-row--head {
+  background: transparent;
+  font-size: clamp(14px, 2.2vmin, 22px);
+  color: #9aa5bd;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: clamp(6px, 1vmin, 10px) clamp(18px, 3vmin, 28px);
+}
+
+.game-row--winner-left .game-row__col:nth-child(2) {
+  color: #3f7bff;
+  font-weight: 700;
+}
+
+.game-row--winner-right .game-row__col:nth-child(3) {
+  color: #ff70a8;
+  font-weight: 700;
+}
+
+.game-row__col {
+  display: flex;
+  align-items: center;
+}
+
+.game-row__col:not(:first-child) {
+  justify-content: center;
+}
+
+.summary__footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(14px, 2.5vmin, 24px);
+  flex-wrap: wrap;
+  padding-top: clamp(12px, 2vmin, 20px);
+}
+
+.summary__status {
+  font-size: clamp(18px, 3vmin, 28px);
+  color: #9aa5bd;
+}
+
+.summary__status--ok {
+  color: #4ade80;
+}
+
+.summary__status--err {
+  color: #ff9aa8;
+}
+
+.summary__actions {
+  display: flex;
+  gap: clamp(10px, 1.8vmin, 16px);
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-size: clamp(20px, 3.2vmin, 32px);
+  font-weight: 700;
+  border: none;
+  border-radius: clamp(14px, 2vmin, 20px);
+  padding: clamp(16px, 2.6vmin, 24px) clamp(24px, 4vmin, 40px);
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, #3f7bff 0%, #2952cc 100%);
+  color: white;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: #f5f7fb;
+  border: 2px solid #2d3a5c;
+}
+
+.btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

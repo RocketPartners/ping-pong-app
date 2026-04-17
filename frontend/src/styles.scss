@@ -758,3 +758,56 @@ body {
     color: rgba(255, 255, 255, 0.6) !important;
   }
 }
+
+// Kiosk mode: full-viewport touch surface on the Raspberry Pi.
+body.kiosk-mode,
+html:has(body.kiosk-mode) {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  background: #0b0f1a;
+  color: #f5f7fb;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+// app-root, the kiosk layout, and every routed kiosk page component default to
+// display:inline or have implicit widths — force them block-level and full-size
+// so nothing inside gets clipped by an anonymous inline box.
+body.kiosk-mode app-root,
+body.kiosk-mode app-kiosk-layout {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body.kiosk-mode app-kiosk-attract,
+body.kiosk-mode app-kiosk-match-setup,
+body.kiosk-mode app-kiosk-player-picker,
+body.kiosk-mode app-kiosk-live-scoring,
+body.kiosk-mode app-kiosk-match-summary,
+body.kiosk-mode app-kiosk-pairing {
+  display: block;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body.kiosk-mode {
+  // Hide mouse cursor on the deployed Pi; remove this rule during dev if annoying.
+  cursor: none;
+}
+
+body.kiosk-mode button,
+body.kiosk-mode input,
+body.kiosk-mode textarea {
+  -webkit-tap-highlight-color: transparent;
+}

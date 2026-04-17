@@ -1,0 +1,14 @@
+# Tells @angular/cli which browsers to support. Adding older iOS/Safari here
+# forces Angular to downlevel-compile syntax the iPad Mini 4 (iOS 15.8) needs.
+# The Raspberry Pi 5 kiosk runs current Chromium so this only costs a bit of
+# bundle size, not correctness.
+
+last 2 Chrome version
+last 1 Firefox version
+last 2 Edge major versions
+last 2 Safari major versions
+last 2 iOS major versions
+Firefox ESR
+iOS >= 15
+Safari >= 15
+not dead

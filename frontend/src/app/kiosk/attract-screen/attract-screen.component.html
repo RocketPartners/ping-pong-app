@@ -1,0 +1,54 @@
+<div class="attract">
+  <div class="attract__warning" *ngIf="daysUntilExpiry !== null">
+    Kiosk token expires in {{ daysUntilExpiry }} {{ daysUntilExpiry === 1 ? 'day' : 'days' }}. Ask an admin to re-pair soon.
+  </div>
+
+  <button class="attract__gear"
+          (pointerdown)="beginLongPress()"
+          (pointerup)="cancelLongPress()"
+          (pointerleave)="cancelLongPress()"
+          (pointercancel)="cancelLongPress()"
+          [style.--progress]="longPressProgress"
+          aria-label="Kiosk settings (hold)">
+    ⚙
+  </button>
+
+  <div class="attract__hero">
+    <div class="attract__paddle">🏓</div>
+    <h1 class="attract__title">Ping Pong Live</h1>
+  </div>
+
+  <div class="attract__actions">
+    <button *ngIf="hasActiveMatch" class="btn btn--secondary" (click)="resumeMatch()">
+      Resume Match
+    </button>
+    <button class="btn btn--primary" (click)="startNewMatch()">
+      Start New Match
+    </button>
+  </div>
+
+  <div class="settings" *ngIf="settingsOpen">
+    <div class="settings__backdrop" (click)="closeSettings()"></div>
+    <div class="settings__panel">
+      <header class="settings__header">
+        <h2>Kiosk Settings</h2>
+        <button class="settings__close" (click)="closeSettings()">&times;</button>
+      </header>
+
+      <div class="settings__row">
+        <div class="settings__label">Paired as</div>
+        <div class="settings__value">{{ pairedUsername || '—' }}</div>
+      </div>
+
+      <div class="settings__row">
+        <div class="settings__label">Token expires</div>
+        <div class="settings__value">{{ expiryDate ? (expiryDate | date:'mediumDate') : 'never / unknown' }}</div>
+      </div>
+
+      <div class="settings__actions">
+        <button class="btn btn--secondary" (click)="closeSettings()">Cancel</button>
+        <button class="btn btn--danger" (click)="unpair()">Unpair Kiosk</button>
+      </div>
+    </div>
+  </div>
+</div>

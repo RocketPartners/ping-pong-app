@@ -1,0 +1,92 @@
+<div class="pair">
+  <!-- Primary flow: request pairing -->
+  <div class="pair__card" *ngIf="mode === 'request'">
+    <h1 class="pair__title">Pair Kiosk</h1>
+    <p class="pair__sub">Request approval from an admin to connect this kiosk.</p>
+
+    <label class="pair__label">Device Name (optional)</label>
+    <input class="pair__input pair__input--text"
+           type="text"
+           placeholder="e.g. Main Table"
+           [(ngModel)]="deviceName" />
+
+    <div class="pair__error" *ngIf="error">{{ error }}</div>
+
+    <button class="btn btn--primary btn--large"
+            [disabled]="busy"
+            (click)="requestPairing()">
+      {{ busy ? 'Requesting…' : 'Request Pairing' }}
+    </button>
+
+    <div class="pair__footer">
+      <button class="link" (click)="switchToCodeMode()">Have a 6-digit code? Enter it instead</button>
+    </div>
+  </div>
+
+  <!-- Waiting for admin approval -->
+  <div class="pair__card" *ngIf="mode === 'waiting'">
+    <div class="pair__spinner"></div>
+    <h1 class="pair__title">Waiting for Approval</h1>
+    <p class="pair__sub">
+      An admin needs to approve <strong>{{ deviceName || 'this kiosk' }}</strong> in the Ping Pong app.
+    </p>
+
+    <div class="pair__error" *ngIf="error">{{ error }}</div>
+
+    <button class="btn btn--ghost" (click)="cancelPairing()">Cancel</button>
+  </div>
+
+  <!-- Fallback: 6-digit code keypad -->
+  <div class="pair__card" *ngIf="mode === 'code'">
+    <h1 class="pair__title">Enter Pairing Code</h1>
+    <p class="pair__sub">Ask an admin for a 6-digit code.</p>
+
+    <div class="pair__slots">
+      <div *ngFor="let slot of digitSlots; let i = index"
+           class="pair__slot"
+           [class.pair__slot--active]="i === code.length"
+           [class.pair__slot--filled]="i < code.length">
+        {{ code[i] || '' }}
+      </div>
+    </div>
+
+    <div class="pair__error" *ngIf="error">{{ error }}</div>
+
+    <div class="keypad">
+      <button class="key" *ngFor="let d of [1,2,3,4,5,6,7,8,9]"
+              [disabled]="busy"
+              (click)="tapDigit(d)">{{ d }}</button>
+      <button class="key key--secondary" [disabled]="busy" (click)="clearCode()">C</button>
+      <button class="key" [disabled]="busy" (click)="tapDigit(0)">0</button>
+      <button class="key key--secondary" [disabled]="busy" (click)="backspace()">⌫</button>
+    </div>
+
+    <div class="pair__status" *ngIf="busy">Validating…</div>
+
+    <div class="pair__footer">
+      <button class="link" (click)="switchToRequestMode()">Back to admin approval</button>
+      <span class="link-separator">·</span>
+      <button class="link" (click)="switchToTokenMode()">Paste full token</button>
+    </div>
+  </div>
+
+  <!-- Fallback: paste full JWT -->
+  <div class="pair__card pair__card--token" *ngIf="mode === 'token'">
+    <h1 class="pair__title">Paste Kiosk Token</h1>
+    <p class="pair__sub">Fallback — paste a long-lived JWT from <code>/api/auth/kiosk-token</code>.</p>
+
+    <textarea class="pair__input"
+              rows="6"
+              placeholder="Paste JWT here…"
+              [(ngModel)]="token"></textarea>
+
+    <div class="pair__error" *ngIf="error">{{ error }}</div>
+
+    <div class="pair__actions">
+      <button class="btn btn--ghost" (click)="switchToRequestMode()">Back</button>
+      <button class="btn btn--primary" [disabled]="busy" (click)="submitToken()">
+        {{ busy ? 'Validating…' : 'Pair Kiosk' }}
+      </button>
+    </div>
+  </div>
+</div>

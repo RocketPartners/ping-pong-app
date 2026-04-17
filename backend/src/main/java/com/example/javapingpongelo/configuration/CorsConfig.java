@@ -25,6 +25,19 @@ public class CorsConfig {
             config.addAllowedOrigin("http://localhost:4200");
         }
 
+        // Dev-friendly: allow any LAN origin on the Angular dev-server port so a
+        // phone/tablet on the same WiFi can hit the Mac's IP without us hard-coding
+        // that IP in env vars every time. Uses allowedOriginPatterns so wildcards work.
+        config.addAllowedOriginPattern("http://192.168.*.*:4200");
+        config.addAllowedOriginPattern("http://10.*.*.*:4200");
+        config.addAllowedOriginPattern("http://172.16.*.*:4200");
+        config.addAllowedOriginPattern("http://172.17.*.*:4200");
+        config.addAllowedOriginPattern("http://172.18.*.*:4200");
+        config.addAllowedOriginPattern("http://172.19.*.*:4200");
+        config.addAllowedOriginPattern("http://172.2*.*.*:4200");
+        config.addAllowedOriginPattern("http://172.30.*.*:4200");
+        config.addAllowedOriginPattern("http://172.31.*.*:4200");
+
         // Allow common HTTP methods
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
