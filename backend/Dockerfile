@@ -1,6 +1,6 @@
 # Multi-stage build for Java Ping Pong Elo Backend
 # Stage 1: Build the application
-FROM openjdk:21-jdk-slim AS builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN chmod +x ./gradlew
 RUN ./gradlew clean bootJar -x test
 
 # Stage 2: Runtime image
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-jammy
 
 WORKDIR /app
 
