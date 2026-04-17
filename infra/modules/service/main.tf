@@ -76,6 +76,10 @@ resource "aws_ecs_task_definition" "main" {
         {
           name  = "SLACK_RESULTS_CHANNEL"
           value = "#ping-pong-results"
+        },
+        {
+          name  = "SPRING_JPA_HIBERNATE_DDL_AUTO"
+          value = "update"
         }
       ]
       portMappings = [
