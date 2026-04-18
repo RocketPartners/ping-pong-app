@@ -79,7 +79,7 @@ export class ProfileSettingsComponent implements OnInit {
       lastName: [this.player.lastName, [Validators.required, Validators.minLength(2)]],
       username: [this.player.username, [Validators.required, Validators.minLength(4), Validators.pattern('^[a-zA-Z0-9._-]*$')]],
       email: [this.player.email, [Validators.required, Validators.email]],
-      birthday: [this.player.birthday ? new Date(this.player.birthday) : null, Validators.required],
+      birthday: [this.parseBirthdayAsLocal(this.player.birthday), Validators.required],
       useProfileColorAsTheme: [this.useColorAsTheme],
       easterEggHuntingEnabled: [this.player.easterEggHuntingEnabled ?? true]
     });
@@ -171,11 +171,14 @@ export class ProfileSettingsComponent implements OnInit {
       ? `${this.selectedIcon}:${this.selectedColor}`
       : null;
 
-    // Create updated player object (excluding the theme preference field)
-    const {useProfileColorAsTheme, ...formValues} = this.form.value;
-    const updatedPlayer = {
+    // Create updated player object (excluding the theme preference field).
+    // Strip timezone from birthday so the backend stores the calendar date the
+    // user picked, not the UTC shift that a JS Date would serialize to.
+    const {useProfileColorAsTheme, birthday, ...formValues} = this.form.value;
+    const updatedPlayer: any = {
       ...this.player,
       ...formValues,
+      birthday: this.toLocalDateString(birthday),
       profileImage
     };
 
@@ -188,6 +191,35 @@ export class ProfileSettingsComponent implements OnInit {
 
     // Update the profile
     this.updateProfile(updatedPlayer);
+  }
+
+  /**
+   * Parses the backend's birthday value (ISO-ish string or Date) as a local-timezone
+   * Date so the datepicker displays the calendar day the user actually picked,
+   * not yesterday in their timezone.
+   */
+  private parseBirthdayAsLocal(input: any): Date | null {
+    if (!input) return null;
+    if (input instanceof Date) return input;
+    const match = String(input).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return new Date(+match[1], +match[2] - 1, +match[3]);
+    }
+    return new Date(input);
+  }
+
+  /**
+   * Serializes a Date to a local-timezone YYYY-MM-DD string. JSON.stringify on a
+   * Date emits UTC, which shifts the calendar day for anyone west of UTC.
+   */
+  private toLocalDateString(d: any): string | null {
+    if (!d) return null;
+    const date = d instanceof Date ? d : new Date(d);
+    if (isNaN(date.getTime())) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   private updateProfile(updatedPlayer: Player) {
