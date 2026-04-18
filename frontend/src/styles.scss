@@ -811,3 +811,15 @@ body.kiosk-mode input,
 body.kiosk-mode textarea {
   -webkit-tap-highlight-color: transparent;
 }
+
+// Inputs must be selectable/editable so iOS PWA raises the on-screen keyboard.
+// The body-level user-select:none that kills accidental text highlights in the
+// scoring UI also suppresses the keyboard on <input>/<textarea> in standalone
+// mode unless we explicitly opt them back in.
+body.kiosk-mode input,
+body.kiosk-mode textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -webkit-touch-callout: default;
+  touch-action: auto;
+}
