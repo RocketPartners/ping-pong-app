@@ -59,9 +59,25 @@ export class MatchBuilderComponent implements OnInit, OnDestroy {
   games: MatchGame[] = [];
   concludedGames: MatchGame[] = [];
   
-  // Score buttons for quick selection
-  scoreButtons: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   nextId: number = 1;
+
+  /**
+   * Dynamic quick-pick scores — runs 0..winningScore+2 so the list always
+   * includes the most common deuce-win score (13-11 singles, 23-21 doubles).
+   */
+  get scoreButtons(): number[] {
+    const max = this.winningScore() + 2;
+    return Array.from({length: max + 1}, (_, i) => i);
+  }
+
+  get winByTwoLabel(): string {
+    const w = this.winningScore();
+    return `${w + 2}-${w}`;
+  }
+
+  get winByTwoTooltip(): string {
+    return `Win by 2 (${this.winByTwoLabel})`;
+  }
   gamesToSave: Game[] = [];
 
   // State
@@ -278,29 +294,35 @@ export class MatchBuilderComponent implements OnInit, OnDestroy {
     this.checkAutoConclusion(game);
   }
 
-  // Simplified "Win by 2" function - sets winning score to 13 and losing to 11
+  // "Win by 2" quick-fill: singles sets 13-11, doubles sets 23-21.
   openWinByTwoDialog(game: MatchGame, team: 'team1' | 'team2'): void {
     if (game.concluded) return;
-    
+
+    const winningScore = this.winningScore();
+    const tieBreakerScore = winningScore + 2;
+    const loserScore = winningScore;
+
     if (team === 'team1') {
-      // Set team1 as winner with score 13
-      game.team1Score = 13;
-      // Set team2 as loser with score 11
-      game.team2Score = 11;
+      game.team1Score = tieBreakerScore;
+      game.team2Score = loserScore;
     } else {
-      // Set team2 as winner with score 13
-      game.team2Score = 13;
-      // Set team1 as loser with score 11
-      game.team1Score = 11;
+      game.team2Score = tieBreakerScore;
+      game.team1Score = loserScore;
     }
-    
-    // Check if game can be automatically concluded
+
     this.checkAutoConclusion(game);
-    
-    // Show a brief confirmation message
-    this.snackBar.open('Score set to 13-11 (win by 2)', '', {
+
+    this.snackBar.open(`Score set to ${tieBreakerScore}-${loserScore} (win by 2)`, '', {
       duration: 1500
     });
+  }
+
+  /**
+   * Office rule: singles plays to 11, doubles plays to 21 (both win-by-2).
+   * Shared by canConcludeGame and the win-by-2 quick button.
+   */
+  winningScore(): number {
+    return this.matchConfigForm?.get('matchType')?.value === 'doubles' ? 21 : 11;
   }
   
   // For backward compatibility
@@ -394,8 +416,8 @@ export class MatchBuilderComponent implements OnInit, OnDestroy {
   canConcludeGame(game: MatchGame): boolean {
     if (game.concluded) return false;
 
-    // A game can be concluded when one team has at least 11 points
-    // and is at least 2 points ahead of the opponent
+    // A game can be concluded when one team has at least the winning score
+    // (11 singles, 21 doubles) and is at least 2 points ahead.
     const team1Score = game.team1Score;
     const team2Score = game.team2Score;
 
@@ -404,7 +426,7 @@ export class MatchBuilderComponent implements OnInit, OnDestroy {
     const leader = team1Score > team2Score ? team1Score : team2Score;
     const trailer = team1Score > team2Score ? team2Score : team1Score;
 
-    return leader >= 11 && (leader - trailer) >= 2;
+    return leader >= this.winningScore() && (leader - trailer) >= 2;
   }
 
   // Check if all games are concluded

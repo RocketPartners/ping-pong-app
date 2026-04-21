@@ -28,7 +28,14 @@ export interface KioskMatchState {
 }
 
 const STORAGE_KEY = 'kiosk.activeMatch';
-const MAX_POINTS_PER_GAME = 30;
+const MAX_POINTS_PER_GAME = 40;
+
+/**
+ * Office rule: singles plays to 11, doubles plays to 21 (both win-by-2).
+ */
+function winningScoreFor(matchType: KioskMatchType): number {
+  return matchType === 'doubles' ? 21 : 11;
+}
 
 function emptyState(): KioskMatchState {
   return {
@@ -67,11 +74,11 @@ export class LiveGameStateService {
   incrementScore(team: 1 | 2): void {
     const state = structuredClone(this.snapshot) as KioskMatchState;
     const game = state.games[state.currentGameIndex];
-    if (!game || game.concluded) return;
+    if (!game || game.concluded || !state.config) return;
     if (team === 1) game.team1Score += 1;
     else game.team2Score += 1;
     state.pointLog.push(team);
-    if (this.gameIsOver(game)) {
+    if (this.gameIsOver(game, state.config.matchType)) {
       game.concluded = true;
       game.winner = game.team1Score > game.team2Score ? 1 : 2;
     }
@@ -127,10 +134,10 @@ export class LiveGameStateService {
     this.emit(state);
   }
 
-  private gameIsOver(game: KioskGame): boolean {
+  private gameIsOver(game: KioskGame, matchType: KioskMatchType): boolean {
     const leader = Math.max(game.team1Score, game.team2Score);
     const trailer = Math.min(game.team1Score, game.team2Score);
-    return leader >= 11 && leader - trailer >= 2;
+    return leader >= winningScoreFor(matchType) && leader - trailer >= 2;
   }
 
   private emit(state: KioskMatchState): void {
