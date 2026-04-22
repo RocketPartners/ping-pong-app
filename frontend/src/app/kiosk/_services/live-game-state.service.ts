@@ -28,7 +28,6 @@ export interface KioskMatchState {
 }
 
 const STORAGE_KEY = 'kiosk.activeMatch';
-const MAX_POINTS_PER_GAME = 40;
 
 /**
  * Office rule: singles plays to 11, doubles plays to 21 (both win-by-2).
@@ -81,10 +80,6 @@ export class LiveGameStateService {
     if (this.gameIsOver(game, state.config.matchType)) {
       game.concluded = true;
       game.winner = game.team1Score > game.team2Score ? 1 : 2;
-    }
-    if (game.team1Score + game.team2Score > MAX_POINTS_PER_GAME) {
-      // Safety valve: never allow runaway scores
-      return;
     }
     this.emit(state);
   }
