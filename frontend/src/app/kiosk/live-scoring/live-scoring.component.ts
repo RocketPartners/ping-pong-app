@@ -37,6 +37,36 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
     return this.state?.games[this.state.currentGameIndex];
   }
 
+  get sidesSwapped(): boolean {
+    return ((this.state?.currentGameIndex ?? 0) % 2) === 1;
+  }
+
+  get leftTeam(): Player[] {
+    return this.sidesSwapped ? (this.state?.team2 ?? []) : (this.state?.team1 ?? []);
+  }
+
+  get rightTeam(): Player[] {
+    return this.sidesSwapped ? (this.state?.team1 ?? []) : (this.state?.team2 ?? []);
+  }
+
+  get leftScore(): number {
+    return this.sidesSwapped ? (this.currentGame?.team2Score ?? 0) : (this.currentGame?.team1Score ?? 0);
+  }
+
+  get rightScore(): number {
+    return this.sidesSwapped ? (this.currentGame?.team1Score ?? 0) : (this.currentGame?.team2Score ?? 0);
+  }
+
+  get leftWins(): number {
+    const team = this.sidesSwapped ? 2 : 1;
+    return this.state?.games.filter(g => g.concluded && g.winner === team).length ?? 0;
+  }
+
+  get rightWins(): number {
+    const team = this.sidesSwapped ? 1 : 2;
+    return this.state?.games.filter(g => g.concluded && g.winner === team).length ?? 0;
+  }
+
   get team1Wins(): number {
     return this.state?.games.filter(g => g.concluded && g.winner === 1).length ?? 0;
   }
@@ -47,6 +77,14 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
 
   teamLabel(players: Player[]): string {
     return players.map(p => p.firstName).join(' & ');
+  }
+
+  scoreLeft(): void {
+    this.score(this.sidesSwapped ? 2 : 1);
+  }
+
+  scoreRight(): void {
+    this.score(this.sidesSwapped ? 1 : 2);
   }
 
   score(team: 1 | 2): void {

@@ -87,6 +87,20 @@
   font-size: clamp(14px, 2.4vmin, 24px);
   color: #9aa5bd;
   letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.5vmin, 16px);
+  flex-wrap: wrap;
+}
+
+.scoring__swap-badge {
+  background: #1e2d4f;
+  border: 1px solid #3f7bff;
+  border-radius: 999px;
+  color: #7fb0ff;
+  font-size: clamp(11px, 1.8vmin, 18px);
+  padding: 2px clamp(8px, 1.2vmin, 12px);
+  letter-spacing: 1px;
 }
 
 .scoring__actions {
