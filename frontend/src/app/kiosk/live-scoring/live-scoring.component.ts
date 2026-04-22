@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {Player} from '../../_models/models';
@@ -77,6 +77,14 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
 
   teamLabel(players: Player[]): string {
     return players.map(p => p.firstName).join(' & ');
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(e: KeyboardEvent): void {
+    const game = this.currentGame;
+    if (!game || game.concluded || this.showGameCelebration) return;
+    if (e.key === 'q') { e.preventDefault(); this.scoreLeft(); }
+    if (e.key === 'p') { e.preventDefault(); this.scoreRight(); }
   }
 
   scoreLeft(): void {
