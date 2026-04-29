@@ -1,20 +1,24 @@
 <div class="scoring" *ngIf="state && state.config">
   <button class="team team--left"
+          [class.team--serving]="leftIsServing"
           [disabled]="currentGame?.concluded"
           (click)="scoreLeft()">
     <div class="team__label">{{ teamLabel(leftTeam) }}</div>
     <div class="team__score">{{ leftScore }}</div>
     <div class="team__wins">{{ leftWins }} wins</div>
-    <div class="team__tap">Tap for +1</div>
+    <div class="team__serve-badge" *ngIf="leftIsServing">🏓 Serving</div>
+    <div class="team__tap" *ngIf="!leftIsServing">Tap for +1</div>
   </button>
 
   <button class="team team--right"
+          [class.team--serving]="rightIsServing"
           [disabled]="currentGame?.concluded"
           (click)="scoreRight()">
     <div class="team__label">{{ teamLabel(rightTeam) }}</div>
     <div class="team__score">{{ rightScore }}</div>
     <div class="team__wins">{{ rightWins }} wins</div>
-    <div class="team__tap">Tap for +1</div>
+    <div class="team__serve-badge" *ngIf="rightIsServing">🏓 Serving</div>
+    <div class="team__tap" *ngIf="!rightIsServing">Tap for +1</div>
   </button>
 
   <div class="scoring__bar">
@@ -27,6 +31,16 @@
     <div class="scoring__actions">
       <button class="action" (click)="undo()">Undo</button>
       <button class="action action--danger" (click)="discard()">Discard Match</button>
+    </div>
+  </div>
+
+  <div class="server-prompt" *ngIf="showServerPrompt">
+    <div class="server-prompt__card">
+      <div class="server-prompt__title">Who serves first?</div>
+      <div class="server-prompt__actions">
+        <button class="server-prompt__btn" (click)="setFirstServer('left')">{{ teamLabel(leftTeam) }}</button>
+        <button class="server-prompt__btn" (click)="setFirstServer('right')">{{ teamLabel(rightTeam) }}</button>
+      </div>
     </div>
   </div>
 
