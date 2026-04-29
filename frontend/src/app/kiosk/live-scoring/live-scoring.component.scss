@@ -71,6 +71,94 @@
   letter-spacing: 3px;
 }
 
+.team__serve-badge {
+  position: absolute;
+  bottom: clamp(16px, 3vmin, 40px);
+  font-size: clamp(14px, 2.2vmin, 24px);
+  color: rgba(255, 220, 80, 0.9);
+  letter-spacing: 2px;
+  animation: serve-pulse 1.4s ease-in-out infinite;
+}
+
+.team--serving {
+  animation: serve-glow 1.4s ease-in-out infinite;
+}
+
+.team--left.team--serving {
+  background: radial-gradient(circle at 30% 40%, #2a4fa0 0%, #0f2050 80%);
+}
+
+.team--right.team--serving {
+  background: radial-gradient(circle at 70% 40%, #a0315e 0%, #4a0e32 80%);
+}
+
+@keyframes serve-glow {
+  0%, 100% { box-shadow: inset 0 0 0 3px rgba(255, 220, 80, 0.3); }
+  50%       { box-shadow: inset 0 0 0 3px rgba(255, 220, 80, 0.75); }
+}
+
+@keyframes serve-pulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+
+.server-prompt {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 16, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: clamp(24px, 5vmin, 60px);
+  box-sizing: border-box;
+  animation: fade-in 0.25s ease;
+}
+
+.server-prompt__card {
+  background: linear-gradient(135deg, #1e2d4f 0%, #0b0f1a 100%);
+  border: 3px solid #3f7bff;
+  border-radius: clamp(20px, 3.5vmin, 32px);
+  padding: clamp(36px, 6vmin, 64px) clamp(40px, 8vmin, 80px);
+  text-align: center;
+  box-shadow: 0 40px 100px rgba(63, 123, 255, 0.35);
+  animation: pop 0.35s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(24px, 4vmin, 40px);
+}
+
+.server-prompt__title {
+  font-size: clamp(28px, 5vmin, 48px);
+  font-weight: 700;
+}
+
+.server-prompt__actions {
+  display: flex;
+  gap: clamp(16px, 3vmin, 28px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.server-prompt__btn {
+  background: #16213d;
+  border: 2px solid #3f7bff;
+  border-radius: clamp(14px, 2vmin, 20px);
+  color: #f5f7fb;
+  font-size: clamp(20px, 3.2vmin, 32px);
+  font-weight: 700;
+  padding: clamp(16px, 2.6vmin, 26px) clamp(28px, 4.5vmin, 48px);
+  cursor: pointer;
+  min-width: clamp(140px, 20vmin, 200px);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.server-prompt__btn:active {
+  background: #1e2d4f;
+  border-color: #7fb0ff;
+}
+
 .scoring__bar {
   grid-column: span 2;
   display: flex;

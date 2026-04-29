@@ -76,6 +76,35 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
     return this.state?.games.filter(g => g.concluded && g.winner === 2).length ?? 0;
   }
 
+  get currentServer(): 1 | 2 | null {
+    if (this.state?.config?.matchType !== 'singles') return null;
+    const game = this.currentGame;
+    if (!game || game.firstServer === undefined) return null;
+    const total = game.team1Score + game.team2Score;
+    const isDeuce = game.team1Score >= 10 && game.team2Score >= 10;
+    const serveIndex = isDeuce ? (total - 20) : Math.floor(total / 2);
+    const serverIs1 = (serveIndex % 2 === 0) === (game.firstServer === 1);
+    return serverIs1 ? 1 : 2;
+  }
+
+  get leftIsServing(): boolean {
+    const s = this.currentServer;
+    return s !== null && s === (this.sidesSwapped ? 2 : 1);
+  }
+
+  get rightIsServing(): boolean {
+    const s = this.currentServer;
+    return s !== null && s === (this.sidesSwapped ? 1 : 2);
+  }
+
+  get showServerPrompt(): boolean {
+    return this.state?.config?.matchType === 'singles'
+      && this.currentGame?.firstServer === undefined
+      && !(this.currentGame?.concluded ?? true)
+      && !this.showGameCelebration
+      && !this.showPostGameOptions;
+  }
+
   teamLabel(players: Player[]): string {
     return players.map(p => p.firstName).join(' & ');
   }
@@ -83,9 +112,18 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown', ['$event'])
   onKeydown(e: KeyboardEvent): void {
     const game = this.currentGame;
-    if (!game || game.concluded || this.showGameCelebration || this.showPostGameOptions) return;
+    if (!game || game.concluded || this.showGameCelebration || this.showPostGameOptions || this.showServerPrompt) return;
     if (e.key === 'q') { e.preventDefault(); this.scoreLeft(); }
     if (e.key === 'p') { e.preventDefault(); this.scoreRight(); }
+    if (e.key === 'u') { e.preventDefault(); this.undoLeft(); }
+    if (e.key === 'n') { e.preventDefault(); this.undoRight(); }
+  }
+
+  setFirstServer(side: 'left' | 'right'): void {
+    const team: 1 | 2 = side === 'left'
+      ? (this.sidesSwapped ? 2 : 1)
+      : (this.sidesSwapped ? 1 : 2);
+    this.stateService.setFirstServer(team);
   }
 
   scoreLeft(): void {
@@ -96,9 +134,18 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
     this.score(this.sidesSwapped ? 1 : 2);
   }
 
+  undoLeft(): void {
+    this.stateService.undoLastPointForTeam(this.sidesSwapped ? 2 : 1);
+  }
+
+  undoRight(): void {
+    this.stateService.undoLastPointForTeam(this.sidesSwapped ? 1 : 2);
+  }
+
   score(team: 1 | 2): void {
     const game = this.currentGame;
     if (!game || game.concluded) return;
+    if (this.state?.config?.matchType === 'singles' && game.firstServer === undefined) return;
     this.stateService.incrementScore(team);
 
     const updated = this.stateService.snapshot.games[this.stateService.snapshot.currentGameIndex];

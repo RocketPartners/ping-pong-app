@@ -15,6 +15,7 @@ export interface KioskGame {
   team2Score: number;
   concluded: boolean;
   winner?: 1 | 2;
+  firstServer?: 1 | 2; // singles only; undefined = not yet chosen
 }
 
 export interface KioskMatchState {
@@ -103,10 +104,38 @@ export class LiveGameStateService {
     const state = structuredClone(this.snapshot) as KioskMatchState;
     if (!state.config) return false;
     if (this.matchIsOver(state)) return false;
-    state.games.push({team1Score: 0, team2Score: 0, concluded: false});
+    const prevGame = state.games[state.currentGameIndex];
+    // In singles the loser of the previous game serves first next game.
+    const loser = prevGame?.winner === 1 ? 2 : prevGame?.winner === 2 ? 1 : undefined;
+    const firstServer = state.config.matchType === 'singles' ? loser : undefined;
+    state.games.push({team1Score: 0, team2Score: 0, concluded: false, firstServer});
     state.currentGameIndex = state.games.length - 1;
     this.emit(state);
     return true;
+  }
+
+  setFirstServer(server: 1 | 2): void {
+    const state = structuredClone(this.snapshot) as KioskMatchState;
+    const game = state.games[state.currentGameIndex];
+    if (!game) return;
+    game.firstServer = server;
+    this.emit(state);
+  }
+
+  undoLastPointForTeam(team: 1 | 2): void {
+    const state = structuredClone(this.snapshot) as KioskMatchState;
+    const idx = state.pointLog.lastIndexOf(team);
+    if (idx === -1) return;
+    state.pointLog.splice(idx, 1);
+    const game = state.games[state.currentGameIndex];
+    if (!game) return;
+    if (team === 1 && game.team1Score > 0) game.team1Score -= 1;
+    else if (team === 2 && game.team2Score > 0) game.team2Score -= 1;
+    if (game.concluded) {
+      game.concluded = false;
+      game.winner = undefined;
+    }
+    this.emit(state);
   }
 
   /**
