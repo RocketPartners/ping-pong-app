@@ -19,7 +19,8 @@
 
   <div class="scoring__bar">
     <div class="scoring__meta">
-      Game {{ state.currentGameIndex + 1 }} · Best of {{ state.config.bestOf }}
+      Game {{ state.currentGameIndex + 1 }}
+      · {{ state.config.bestOf === 0 ? 'Free Play' : 'Best of ' + state.config.bestOf }}
       · {{ state.config.isRanked ? 'Ranked' : 'Normal' }}
       <span class="scoring__swap-badge" *ngIf="sidesSwapped">↔ Sides switched</span>
     </div>
@@ -33,6 +34,17 @@
     <div class="celebration__card">
       <div class="celebration__title">Game to {{ celebrationWinner === 1 ? teamLabel(state.team1) : teamLabel(state.team2) }}</div>
       <div class="celebration__score">{{ celebrationScore.team1 }} – {{ celebrationScore.team2 }}</div>
+    </div>
+  </div>
+
+  <div class="post-game" *ngIf="showPostGameOptions">
+    <div class="post-game__card">
+      <div class="post-game__title">{{ celebrationWinner === 1 ? teamLabel(state.team1) : teamLabel(state.team2) }} wins!</div>
+      <div class="post-game__score">{{ celebrationScore.team1 }} – {{ celebrationScore.team2 }}</div>
+      <div class="post-game__actions">
+        <button class="post-game__btn post-game__btn--primary" (click)="continueMatch()">Play Again</button>
+        <button class="post-game__btn post-game__btn--ghost" (click)="endMatch()">End Session</button>
+      </div>
     </div>
   </div>
 </div>

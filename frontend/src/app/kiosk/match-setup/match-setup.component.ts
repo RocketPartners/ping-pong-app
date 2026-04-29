@@ -13,7 +13,7 @@ export class MatchSetupComponent {
   isRanked: boolean | null = null;
   bestOf: number | null = null;
 
-  readonly bestOfOptions = [1, 3, 5, 7];
+  readonly bestOfOptions = [1, 3, 5, 7, 0]; // 0 = infinite / free play
 
   constructor(private router: Router, private state: LiveGameStateService) {}
 

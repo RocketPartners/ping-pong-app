@@ -13,6 +13,7 @@ import {KioskMatchState, LiveGameStateService} from '../_services/live-game-stat
 export class LiveScoringComponent implements OnInit, OnDestroy {
   state: KioskMatchState | null = null;
   showGameCelebration = false;
+  showPostGameOptions = false;
   celebrationWinner: 1 | 2 | null = null;
   celebrationScore = {team1: 0, team2: 0};
 
@@ -82,7 +83,7 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown', ['$event'])
   onKeydown(e: KeyboardEvent): void {
     const game = this.currentGame;
-    if (!game || game.concluded || this.showGameCelebration) return;
+    if (!game || game.concluded || this.showGameCelebration || this.showPostGameOptions) return;
     if (e.key === 'q') { e.preventDefault(); this.scoreLeft(); }
     if (e.key === 'p') { e.preventDefault(); this.scoreRight(); }
   }
@@ -116,6 +117,16 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
     this.router.navigate(['/kiosk']);
   }
 
+  continueMatch(): void {
+    this.showPostGameOptions = false;
+    this.stateService.advanceToNextGame();
+  }
+
+  endMatch(): void {
+    this.showPostGameOptions = false;
+    this.router.navigate(['/kiosk/summary']);
+  }
+
   private celebrateGame(winner: 1 | 2, team1Score: number, team2Score: number): void {
     this.celebrationWinner = winner;
     this.celebrationScore = {team1: team1Score, team2: team2Score};
@@ -125,6 +136,8 @@ export class LiveScoringComponent implements OnInit, OnDestroy {
       this.showGameCelebration = false;
       if (this.stateService.matchIsOver()) {
         this.router.navigate(['/kiosk/summary']);
+      } else if (this.state?.config?.bestOf === 0) {
+        this.showPostGameOptions = true;
       } else {
         this.stateService.advanceToNextGame();
       }
