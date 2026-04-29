@@ -2,7 +2,8 @@
   <header class="summary__header">
     <h1 class="summary__title">Match Summary</h1>
     <div class="summary__mode">
-      {{ state.config.matchType | titlecase }} · {{ state.config.isRanked ? 'Ranked' : 'Normal' }} · Best of {{ state.config.bestOf }}
+      {{ state.config.matchType | titlecase }} · {{ state.config.isRanked ? 'Ranked' : 'Normal' }}
+      · {{ state.config.bestOf === 0 ? 'Free Play' : 'Best of ' + state.config.bestOf }}
     </div>
   </header>
 

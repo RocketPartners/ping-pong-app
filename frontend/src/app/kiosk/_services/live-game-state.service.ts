@@ -111,9 +111,11 @@ export class LiveGameStateService {
 
   /**
    * True when a team has reached the best-of win threshold (e.g. 2 wins in best-of-3).
+   * Returns false for infinite mode (bestOf === 0) — the user ends the session manually.
    */
   matchIsOver(state: KioskMatchState = this.snapshot): boolean {
     if (!state.config) return false;
+    if (state.config.bestOf === 0) return false;
     const threshold = Math.ceil(state.config.bestOf / 2);
     const team1Wins = state.games.filter(g => g.concluded && g.winner === 1).length;
     const team2Wins = state.games.filter(g => g.concluded && g.winner === 2).length;

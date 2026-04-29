@@ -42,7 +42,7 @@
               class="option option--compact"
               [class.option--selected]="bestOf === n"
               (click)="bestOf = n">
-        {{ n }}
+        {{ n === 0 ? '∞' : n }}
       </button>
     </div>
   </section>

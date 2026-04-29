@@ -162,6 +162,75 @@
   color: #3f7bff;
 }
 
+.post-game {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 16, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: clamp(24px, 5vmin, 60px);
+  box-sizing: border-box;
+  animation: fade-in 0.3s ease;
+}
+
+.post-game__card {
+  background: linear-gradient(135deg, #1e2d4f 0%, #0b0f1a 100%);
+  border: 3px solid #3f7bff;
+  border-radius: clamp(20px, 3.5vmin, 32px);
+  padding: clamp(40px, 7vmin, 72px) clamp(48px, 10vmin, 100px);
+  text-align: center;
+  box-shadow: 0 40px 100px rgba(63, 123, 255, 0.4);
+  animation: pop 0.4s ease;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(20px, 3.5vmin, 36px);
+}
+
+.post-game__title {
+  font-size: clamp(28px, 5.5vmin, 52px);
+  font-weight: 700;
+}
+
+.post-game__score {
+  font-size: clamp(56px, 12vmin, 110px);
+  font-weight: 800;
+  color: #3f7bff;
+  line-height: 1;
+}
+
+.post-game__actions {
+  display: flex;
+  gap: clamp(16px, 3vmin, 28px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.post-game__btn {
+  border: none;
+  border-radius: clamp(14px, 2vmin, 20px);
+  font-size: clamp(20px, 3.2vmin, 32px);
+  font-weight: 700;
+  padding: clamp(16px, 2.6vmin, 26px) clamp(32px, 5vmin, 56px);
+  cursor: pointer;
+  min-width: clamp(160px, 24vmin, 240px);
+}
+
+.post-game__btn--primary {
+  background: linear-gradient(135deg, #3f7bff 0%, #2952cc 100%);
+  color: #fff;
+}
+
+.post-game__btn--ghost {
+  background: #16213d;
+  border: 2px solid #2d3a5c;
+  color: #9aa5bd;
+}
+
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
